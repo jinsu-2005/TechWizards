@@ -1,0 +1,24 @@
+:root {
+  --bg: #0b0f14;
+  --surface: #121821;
+  --border: #1e2733;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --normal: #2ea97d;
+  --suspect: #d29922;
+  --affected: #f0883e;
+  --origin: #f85149;
+  --accent: #4c8dff;
+  --radius: 8px;
+  --space: 8px;
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-slow: 0ms;
+  }
+}
