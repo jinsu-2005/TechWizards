@@ -84,5 +84,8 @@ export function createLiveClient(opts: LiveClientOptions): () => void {
 }
 
 export function liveUrl(loc: Pick<Location, "protocol" | "host">): string {
+  if (loc.host.endsWith(".vercel.app")) {
+    return "wss://techwizards.onrender.com/ws/live";
+  }
   return `${loc.protocol === "https:" ? "wss" : "ws"}://${loc.host}/ws/live`;
 }

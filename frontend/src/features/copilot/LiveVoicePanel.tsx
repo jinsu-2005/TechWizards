@@ -223,7 +223,8 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
       micAnalyser.current = micAnalysis;
 
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const ws = new WebSocket(`${protocol}//${window.location.host}/ws/voice`);
+      const host = window.location.host.endsWith(".vercel.app") ? "techwizards.onrender.com" : window.location.host;
+      const ws = new WebSocket(`${protocol}//${host}/ws/voice`);
       socket.current = ws;
       ws.binaryType = "arraybuffer";
       ws.onopen = () => {

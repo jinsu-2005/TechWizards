@@ -3,7 +3,10 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/((?!api(?:/|$)|ws(?:/|$)).*)", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://techwizards.onrender.com/api/$1" },
+    { "source": "/((?!api(?:/|$)|ws(?:/|$)).*)", "destination": "/index.html" }
+  ],
   "headers": [
     { "source": "/(.*)", "headers": [
       { "key": "X-Content-Type-Options", "value": "nosniff" },
