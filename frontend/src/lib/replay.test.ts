@@ -7,6 +7,7 @@ import {
   seriesPath,
   stepCursor,
   timelineRows,
+  timelineAxis,
   xToIndex,
 } from "./replay";
 import type { Incident, LiveMessage } from "./types";
@@ -59,6 +60,15 @@ describe("incidentStartIndex", () => {
 });
 
 describe("timeline axis", () => {
+  it("labels actual retained timestamps rather than a fixed sixty-second window", () => {
+    expect(timelineAxis([msg(10), msg(30), msg(80), msg(100), msg(310)])).toEqual([
+      { position: 0, label: "−5m 0s" }, { position: 25, label: "−4m 40s" },
+      { position: 50, label: "−3m 50s" }, { position: 75, label: "−3m 30s" },
+      { position: 100, label: "Latest" },
+    ]);
+    expect(timelineAxis([])).toEqual([]);
+    expect(timelineAxis([msg(10)])).toEqual([{ position: 0, label: "Latest" }]);
+  });
   it("pins the oldest sample to the left edge and round-trips", () => {
     const cap = 600;
     expect(indexToX(0, 100, cap, 599)).toBeCloseTo(0);

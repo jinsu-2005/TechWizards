@@ -1,3 +1,4 @@
+import { useFreshness } from "../../app/useFreshness";
 import { History, Pause, Play, Radio, RotateCcw } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { incidentStartIndex } from "../../lib/replay";
@@ -35,7 +36,9 @@ function Btn({
 
 /** Replay incident, play, pause, back to live. */
 export function ReplayControls() {
+  const { stale } = useFreshness();
   const playing = useLive((s) => s.playing);
+  const hai = useLive((s) => s.latest?.mode === "hai");
   const cursor = useLive((s) => s.cursor);
   const hasIncident = useLive((s) => incidentStartIndex(s.buffer) !== null);
   const { play, pause, goLive, replayIncident } = useLive.getState();
@@ -56,12 +59,12 @@ export function ReplayControls() {
         type="button"
         onClick={goLive}
         disabled={live}
-        className={`flex h-6 items-center gap-1 rounded-full border px-2 font-mono text-xs transition-colors duration-150 ${
-          live ? "border-normal text-normal" : "border-border text-muted hover:text-text"
+        className={`flex h-6 whitespace-nowrap items-center gap-1 rounded-full border px-2 font-mono text-xs transition-colors duration-150 ${
+          live && !stale ? "border-normal text-normal" : "border-border text-muted hover:text-text"
         }`}
       >
         {live ? <Radio size={12} aria-hidden /> : <History size={12} aria-hidden />}
-        {live ? "Live" : "Replay"}
+        {live ? (stale ? "Last received" : hai ? "Latest" : "Live") : "Replay"}
       </button>
     </div>
   );

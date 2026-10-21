@@ -31,6 +31,21 @@ export function xToIndex(x: number, len: number, cap: number, width: number): nu
   return clampIndex(Math.round((x / width) * (cap - 1)), len);
 }
 
+/** Label actual buffered samples, including irregular delivery intervals. Positions share the
+ * sample-index scale used by paths, markers and the scrubber; offsets end at the newest receipt. */
+export function timelineAxis(buffer: readonly LiveMessage[]): { position: number; label: string }[] {
+  const last = buffer.at(-1);
+  if (!last) return [];
+  const newest = last.t;
+  const indices = [...new Set([0, .25, .5, .75, 1].map((p) => Math.round(p * (buffer.length - 1))))];
+  return indices.map((index) => {
+    const seconds = Math.max(0, Math.round(newest - (buffer[index]?.t ?? newest)));
+    const label = index === buffer.length - 1 ? "Latest" : seconds >= 60
+      ? `−${Math.floor(seconds / 60)}m ${seconds % 60}s` : `−${seconds}s`;
+    return { position: indexToX(index, buffer.length, Math.max(2, buffer.length), 100), label };
+  });
+}
+
 /** SVG path for a series, scaled into [0,w]x[0,h] (y grows downward). */
 export function seriesPath(
   values: readonly number[],
