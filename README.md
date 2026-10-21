@@ -25,6 +25,28 @@ AttackTrace is deployed and operational across three coordinated cloud tiers:
 
 ---
 
+## 🛠 Technology Stack
+
+| Domain | Technologies & Libraries | Key Application & Role |
+| :--- | :--- | :--- |
+| **Frontend Framework** | **React 18 / 19**, **TypeScript 5.9**, **Vite 8** | High-performance reactive UI, strict typing, sub-second HMR builds |
+| **State & Flow** | **Zustand 5**, **@xyflow/react 12** | Centralized telemetry buffer, dynamic 2D directed causal graph layout |
+| **Visuals & Charts** | **Apache ECharts 6**, **Framer Motion 14**, **Tailwind CSS 4** | Real-time multi-sensor timeline sparklines, fluid liquid physics, micro-animations |
+| **Audio Synthesis** | **Web Audio API** (Browser-Native) | Zero-dependency 800/600 Hz warble sirens and major-chord containment chimes |
+| **Backend Framework** | **Python 3.11+**, **FastAPI 0.115+**, **Uvicorn**, **Starlette** | High-throughput asynchronous REST endpoints and 2 Hz telemetry WebSocket hub |
+| **Data Validation** | **Pydantic v2.8+** | Strict request/response schemas, fail-closed runtime settings validation |
+| **GenAI & Voice** | **Google Gemini API** (`google-genai 2.25+`) | `gemini-3.8-live` (bidirectional audio), `gemini-3.8-flash` & `gemini-3.5-flash-lite` |
+| **Graph Neural Network** | **PyTorch 2.3+** (CPU-Optimized) | Graph Deviation Network (GDN) forecaster with graph attention mechanisms |
+| **Machine Learning** | **scikit-learn 1.5+**, **NumPy 1.26+**, **SciPy 1.13+**, **NetworkX 3.3+** | Isolation Forest baseline, EWMA filtering, causal graph topological traversal |
+| **Industrial Protocol** | **PyModbus 3.15+**, **PyYAML 6.0** | Non-blocking Modbus TCP polling (sub-2ms), software PLC register emulator |
+| **Databases** | **SQLite (WAL Mode)** | Persistent forensic audit logs, immutable incident captures, case investigations |
+| **Cloud Hosting** | **Vercel** (Edge CDN) + **Render** (Docker Web Service) | Serverless frontend hosting paired with auto-healing containerized backend |
+| **Edge Gateway** | **Cloudflare Workers** (Wrangler) | Single-origin reverse proxy unifying domains with enterprise CSP & HSTS |
+| **Testing & Quality** | **Vitest 5**, **Playwright 1.63**, **Pytest 8.2**, **Ruff**, **Mypy** | End-to-end browser tests, paired-evidence checks, strict static type validation |
+| **Architecture Graph** | **Graphify** | Persistent 2,879-node knowledge graph with automated AST symbol extraction |
+
+---
+
 ## 🏛 5-Layer System Architecture (Graphify Mapped)
 
 *Architectural map extracted by **Graphify** across 2,879 nodes, 9,036 edges, and 128 community clusters.*
