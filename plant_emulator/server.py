@@ -9,12 +9,16 @@ registers themselves, so it cannot be claimed by an attacker, only caused.
 
 import asyncio
 import contextlib
+import hashlib
 import json
+import math
 import time
 from collections import deque
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
+from uuid import uuid4
 
 from pymodbus.server import ModbusTcpServer
 from pymodbus.simulator import DataType, SimData, SimDevice
@@ -58,10 +62,22 @@ class PlantEmulator:
         hz: float = 10.0,
         realtime: bool = True,
         clock: Callable[[], float] = time.time,
+        manifest_path: Path | None = None,
     ) -> None:
         self.tagmap, self.seed, self.host, self.port = tagmap, seed, host, port
         self.health_port, self.hz, self.realtime, self._clock = health_port, hz, realtime, clock
         self.overlay = RegisterOverlay()
+        self.instance_id = uuid4().hex
+        self.manifest_path = manifest_path
+        self.manifest_error: str | None = None
+        self.manifest_config = {"version": 1, "PLC1_setpoint_delta": 0, "PLC2_setpoint_delta": 0}
+        self.factory_hash = self._manifest_hash(self.manifest_config)
+        if manifest_path is not None:
+            manifest_path.parent.mkdir(parents=True, exist_ok=True)
+            if not manifest_path.exists():
+                manifest_path.write_text(
+                    json.dumps(self.manifest_config, sort_keys=True), encoding="utf-8"
+                )
         self.plant = Plant(seed=seed, overlay=self.overlay, track_impact=False)
         self.ticks = 0
         self.truth: list[TruthEvent] = []
@@ -143,6 +159,47 @@ class PlantEmulator:
             c.force[tag.node_id] = await self._get(HOLDING_FC, tag)
         for tag in self.tagmap.by_role("setpoint_delta"):
             c.delta[tag.node_id] = await self._get(HOLDING_FC, tag)
+        self._read_manifest()
+        if self.manifest_path is not None:
+            for controller in ("PLC1", "PLC2"):
+                c.delta[controller] += float(self.manifest_config[f"{controller}_setpoint_delta"])
+
+    @staticmethod
+    def _manifest_hash(config: dict[str, Any]) -> str:
+        return hashlib.sha256(
+            json.dumps(config, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+
+    def _read_manifest(self) -> None:
+        if self.manifest_path is None:
+            return
+        try:
+            config = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+            if (
+                set(config) != {"version", "PLC1_setpoint_delta", "PLC2_setpoint_delta"}
+                or config["version"] != 1
+            ):
+                raise ValueError("Invalid manifest schema")
+            for name in ("PLC1_setpoint_delta", "PLC2_setpoint_delta"):
+                if not math.isfinite(float(config[name])) or not -40 <= float(config[name]) <= 40:
+                    raise ValueError("Setpoint delta outside local lab bounds")
+            self.manifest_config = config
+            self.manifest_error = None
+        except (OSError, ValueError, TypeError) as exc:
+            self.manifest_error = str(exc)
+
+    def integrity(self) -> dict[str, object]:
+        return {
+            "emulator": "AttackTrace-local",
+            "enabled": self.manifest_path is not None,
+            "instance_id": self.instance_id,
+            "manifest_path": str(self.manifest_path.resolve()) if self.manifest_path else None,
+            "config": self.manifest_config,
+            "factory_hash": self.factory_hash,
+            "observed_hash": self._manifest_hash(self.manifest_config),
+            "error": self.manifest_error,
+            "scope": "Emulated configuration, not hardware firmware",
+        }
 
     # ------------------------------------------------------------------ physics tick
     async def tick(self) -> None:
@@ -230,6 +287,8 @@ class PlantEmulator:
                 body = self.health()
             elif path == "/truth":
                 body = [asdict(e) for e in self.truth]
+            elif path == "/integrity":
+                body = self.integrity()
             status = "200 OK" if body is not None else "404 Not Found"
             data = json.dumps(body if body is not None else {"error": "not found"}).encode()
             writer.write(

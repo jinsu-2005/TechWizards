@@ -7,6 +7,7 @@ import logging
 import os
 import signal
 import sys
+from pathlib import Path
 
 from app.live.tagmap import TagMapError, load_tagmap
 from plant_emulator.server import PlantEmulator
@@ -27,6 +28,12 @@ async def main() -> int:
         port=int(os.environ.get("EMU_PORT", "5020")),
         health_port=int(os.environ.get("EMU_HEALTH_PORT", "8081")),
         hz=float(os.environ.get("EMU_HZ", "10")),
+        manifest_path=Path(
+            os.environ.get(
+                "EMU_MANIFEST",
+                str(Path(__file__).resolve().parents[1] / "data" / "emulator_manifest.json"),
+            )
+        ),
     )
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
