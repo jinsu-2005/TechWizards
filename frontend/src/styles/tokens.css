@@ -1,23 +1,277 @@
-:root {
+:root,
+[data-theme="obsidian"] {
   --bg: #0b0f14;
+  --bg-rgb: 11 15 20;
   --surface: #121821;
+  --surface-rgb: 18 24 33;
   --border: #1e2733;
+  --border-rgb: 30 39 51;
   --text: #e6edf3;
-  --muted: #7d8590;
+  --text-rgb: 230 237 243;
+  --muted: #9aa6b5;
+  --muted-rgb: 154 166 181;
   --normal: #2ea97d;
+  --normal-rgb: 46 169 125;
   --suspect: #d29922;
+  --suspect-rgb: 210 153 34;
   --affected: #f0883e;
+  --affected-rgb: 240 136 62;
   --origin: #f85149;
+  --origin-rgb: 248 81 73;
   --accent: #4c8dff;
+  --accent-rgb: 76 141 255;
   --radius: 8px;
   --space: 8px;
   --motion-fast: 150ms;
   --motion-slow: 300ms;
+  --on-accent: #0b0f14;
+  --on-accent-rgb: 11 15 20;
   color-scheme: dark;
 }
 
+[data-theme="cyber-neon"] {
+  --bg: #080410;
+  --bg-rgb: 8 4 16;
+  --surface: #120922;
+  --surface-rgb: 18 9 34;
+  --border: #281347;
+  --border-rgb: 40 19 71;
+  --text: #f5f3ff;
+  --text-rgb: 245 243 255;
+  --muted: #a1a8b7;
+  --muted-rgb: 161 168 183;
+  --normal: #2ea97d;
+  --normal-rgb: 46 169 125;
+  --suspect: #d29922;
+  --suspect-rgb: 210 153 34;
+  --affected: #f0883e;
+  --affected-rgb: 240 136 62;
+  --origin: #f85149;
+  --origin-rgb: 248 81 73;
+  --accent: #e879f9;
+  --accent-rgb: 232 121 249;
+  --radius: 8px;
+  --space: 8px;
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  --on-accent: #0b0f14;
+  --on-accent-rgb: 11 15 20;
+  color-scheme: dark;
+}
+
+[data-theme="scada-emerald"] {
+  --bg: #040f0c;
+  --bg-rgb: 4 15 12;
+  --surface: #0a1c17;
+  --surface-rgb: 10 28 23;
+  --border: #13382e;
+  --border-rgb: 19 56 46;
+  --text: #ecfdf5;
+  --text-rgb: 236 253 245;
+  --muted: #a1a8b7;
+  --muted-rgb: 161 168 183;
+  --normal: #2ea97d;
+  --normal-rgb: 46 169 125;
+  --suspect: #d29922;
+  --suspect-rgb: 210 153 34;
+  --affected: #f0883e;
+  --affected-rgb: 240 136 62;
+  --origin: #f85149;
+  --origin-rgb: 248 81 73;
+  --accent: #34d399;
+  --accent-rgb: 52 211 153;
+  --radius: 8px;
+  --space: 8px;
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  --on-accent: #0b0f14;
+  --on-accent-rgb: 11 15 20;
+  color-scheme: dark;
+}
+
+[data-theme="solar-flare"] {
+  --bg: #100a04;
+  --bg-rgb: 16 10 4;
+  --surface: #1c1208;
+  --surface-rgb: 28 18 8;
+  --border: #38230f;
+  --border-rgb: 56 35 15;
+  --text: #fef3c7;
+  --text-rgb: 254 243 199;
+  --muted: #a1a8b7;
+  --muted-rgb: 161 168 183;
+  --normal: #2ea97d;
+  --normal-rgb: 46 169 125;
+  --suspect: #d29922;
+  --suspect-rgb: 210 153 34;
+  --affected: #f0883e;
+  --affected-rgb: 240 136 62;
+  --origin: #f85149;
+  --origin-rgb: 248 81 73;
+  --accent: #f59e0b;
+  --accent-rgb: 245 158 11;
+  --radius: 8px;
+  --space: 8px;
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  --on-accent: #0b0f14;
+  --on-accent-rgb: 11 15 20;
+  color-scheme: dark;
+}
+
+[data-theme="abyssal-blue"] {
+  --bg: #030914;
+  --bg-rgb: 3 9 20;
+  --surface: #07152b;
+  --surface-rgb: 7 21 43;
+  --border: #0f2952;
+  --border-rgb: 15 41 82;
+  --text: #e0f2fe;
+  --text-rgb: 224 242 254;
+  --muted: #a1a8b7;
+  --muted-rgb: 161 168 183;
+  --normal: #2ea97d;
+  --normal-rgb: 46 169 125;
+  --suspect: #d29922;
+  --suspect-rgb: 210 153 34;
+  --affected: #f0883e;
+  --affected-rgb: 240 136 62;
+  --origin: #f85149;
+  --origin-rgb: 248 81 73;
+  --accent: #0ea5e9;
+  --accent-rgb: 14 165 233;
+  --radius: 8px;
+  --space: 8px;
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  --on-accent: #0b0f14;
+  --on-accent-rgb: 11 15 20;
+  color-scheme: dark;
+}
+
+[data-theme="crimson-protocol"] {
+  --bg: #120508;
+  --bg-rgb: 18 5 8;
+  --surface: #1f0a10;
+  --surface-rgb: 31 10 16;
+  --border: #3b141f;
+  --border-rgb: 59 20 31;
+  --text: #ffe4e6;
+  --text-rgb: 255 228 230;
+  --muted: #a1a8b7;
+  --muted-rgb: 161 168 183;
+  --normal: #2ea97d;
+  --normal-rgb: 46 169 125;
+  --suspect: #d29922;
+  --suspect-rgb: 210 153 34;
+  --affected: #f0883e;
+  --affected-rgb: 240 136 62;
+  --origin: #f85149;
+  --origin-rgb: 248 81 73;
+  --accent: #fb7185;
+  --accent-rgb: 251 113 133;
+  --radius: 8px;
+  --space: 8px;
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  --on-accent: #0b0f14;
+  --on-accent-rgb: 11 15 20;
+  color-scheme: dark;
+}
+
+[data-theme="quantum-violet"] {
+  --bg: #080714;
+  --bg-rgb: 8 7 20;
+  --surface: #110f29;
+  --surface-rgb: 17 15 41;
+  --border: #231f50;
+  --border-rgb: 35 31 80;
+  --text: #f3e8ff;
+  --text-rgb: 243 232 255;
+  --muted: #a1a8b7;
+  --muted-rgb: 161 168 183;
+  --normal: #2ea97d;
+  --normal-rgb: 46 169 125;
+  --suspect: #d29922;
+  --suspect-rgb: 210 153 34;
+  --affected: #f0883e;
+  --affected-rgb: 240 136 62;
+  --origin: #f85149;
+  --origin-rgb: 248 81 73;
+  --accent: #a855f7;
+  --accent-rgb: 168 85 247;
+  --radius: 8px;
+  --space: 8px;
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  --on-accent: #0b0f14;
+  --on-accent-rgb: 11 15 20;
+  color-scheme: dark;
+}
+
+[data-theme="monochrome-stealth"] {
+  --bg: #0f0f11;
+  --bg-rgb: 15 15 17;
+  --surface: #18181b;
+  --surface-rgb: 24 24 27;
+  --border: #27272a;
+  --border-rgb: 39 39 42;
+  --text: #f4f4f5;
+  --text-rgb: 244 244 245;
+  --muted: #a1a8b7;
+  --muted-rgb: 161 168 183;
+  --normal: #2ea97d;
+  --normal-rgb: 46 169 125;
+  --suspect: #d29922;
+  --suspect-rgb: 210 153 34;
+  --affected: #f0883e;
+  --affected-rgb: 240 136 62;
+  --origin: #f85149;
+  --origin-rgb: 248 81 73;
+  --accent: #e4e4e7;
+  --accent-rgb: 228 228 231;
+  --radius: 8px;
+  --space: 8px;
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  --on-accent: #0b0f14;
+  --on-accent-rgb: 11 15 20;
+  color-scheme: dark;
+}
+
+[data-theme="titanium-clean"] {
+  --bg: #f1f5f9;
+  --bg-rgb: 241 245 249;
+  --surface: #ffffff;
+  --surface-rgb: 255 255 255;
+  --border: #cbd5e1;
+  --border-rgb: 203 213 225;
+  --text: #0f172a;
+  --text-rgb: 15 23 42;
+  --muted: #526175;
+  --muted-rgb: 82 97 117;
+  --normal: #15803d;
+  --normal-rgb: 21 128 61;
+  --suspect: #925907;
+  --suspect-rgb: 146 89 7;
+  --affected: #c2410c;
+  --affected-rgb: 194 65 12;
+  --origin: #b91c1c;
+  --origin-rgb: 185 28 28;
+  --accent: #2563eb;
+  --accent-rgb: 37 99 235;
+  --radius: 8px;
+  --space: 8px;
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  --on-accent: #ffffff;
+  --on-accent-rgb: 255 255 255;
+  color-scheme: light;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  :root,
+  [data-theme] {
     --motion-fast: 0ms;
     --motion-slow: 0ms;
   }

@@ -1,7 +1,20 @@
+@import "tailwindcss";
 @import "./tokens.css";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "./workspace.css";
+@config "../../tailwind.config.js";
+
+@theme {
+  --text-xs: .8125rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: .9375rem;
+  --text-sm--line-height: 1.55;
+}
+
+.process-canvas { display: grid; grid-template-columns: minmax(0, 1fr); overflow: auto; }
+.process-canvas.has-inspector { grid-template-columns: minmax(0, 1fr) 280px; }
+.asset-inspector { overflow: auto; min-height: 0; }
+.workspace-expanded { position: fixed; inset: 12px; z-index: 35; height: auto; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 20px 80px #0008; }
+@media (max-width: 1100px) { .process-canvas.has-inspector { grid-template-columns: minmax(0, 1fr); } .asset-inspector { border-left: 0; border-top: 1px solid var(--border); max-height: 280px; } }
 
 html,
 body,
@@ -12,6 +25,15 @@ body,
 body {
   @apply bg-bg font-sans text-text antialiased;
   margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+@layer base {
+  :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  button, select { touch-action: manipulation; }
 }
 
 /* ---- twin motion: purposeful only (flow, rotation, origin pulse, attack pulse) */
@@ -90,14 +112,57 @@ body {
 }
 @keyframes halo {
   from {
-    box-shadow: 0 0 0 0 rgb(248 81 73 / 0.7);
+    box-shadow: 0 0 0 0 rgb(var(--origin-rgb) / 0.7);
   }
   to {
-    box-shadow: 0 0 0 10px rgb(248 81 73 / 0);
+    box-shadow: 0 0 0 10px rgb(var(--origin-rgb) / 0);
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .origin-halo {
     animation: none;
   }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Process graph: a staggered cycle illustrates inferred order, followed by a quiet interval. */
+.graph-trace { stroke-dasharray: .09 1; opacity: 0; pointer-events: none; animation: graph-travel 7s linear infinite backwards; }
+@keyframes graph-travel {
+  0% { stroke-dashoffset: .1; opacity: 0; }
+  3% { opacity: .9; }
+  28% { stroke-dashoffset: -1; opacity: .9; }
+  32%, 100% { stroke-dashoffset: -1; opacity: 0; }
+}
+.graph-origin { animation: graph-halo var(--graph-cycle, 7s) ease-out infinite; }
+@keyframes graph-halo { 0%, 38%, 100% { box-shadow: 0 0 0 3px rgb(var(--origin-rgb) / .12); } 15% { box-shadow: 0 0 0 7px rgb(var(--origin-rgb) / .2); } }
+.graph-paused .graph-trace, .graph-paused .graph-origin,
+.stale-telemetry .graph-trace, .stale-telemetry .graph-origin, .stale-telemetry .origin-halo { animation-play-state: paused; }
+.process-graph .react-flow__node-stage { pointer-events: none !important; }
+.process-graph .react-flow__minimap { max-width: 140px; max-height: 90px; border: 1px solid var(--border); border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) { .graph-trace, .graph-origin { animation: none !important; } .graph-trace { opacity: 0; } }
+
+.hai-progress { appearance: none; border: 0; border-radius: 999px; overflow: hidden; background: var(--border); color: var(--accent); }
+.hai-progress::-webkit-progress-bar { background: var(--border); }
+.hai-progress::-webkit-progress-value { background: var(--accent); border-radius: 999px; transition: width 400ms linear; }
+.hai-progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+
+/* Screenshot review: retain a useful canvas on short windows and at browser zoom. */
+.process-canvas { overflow: hidden; }
+.process-primary { height: 100%; overflow: hidden; }
+.graph-toolbar { max-height: 42%; overflow-y: auto; }
+.graph-options summary::marker { color: var(--accent); }
+.process-graph input::placeholder { color: var(--muted); opacity: 1; }
+.copilot-message { overflow-wrap: anywhere; }
+.copilot-drawer { overscroll-behavior: contain; }
+.copilot-icon-button { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; border-radius: 8px; color: var(--muted); }
+.copilot-icon-button:hover { background: var(--bg); color: var(--text); }
+.copilot-drawer :is(button,a,summary,textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.workspace-nav > summary::-webkit-details-marker { display: none; }
+@media (max-width: 639px) {
+  .workspace-nav nav a, .workspace-nav nav button { justify-content: flex-start; }
 }

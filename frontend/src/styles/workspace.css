@@ -1,0 +1,175 @@
+.workspace-header { flex-shrink: 0; border: 1px solid var(--border); background: var(--surface); border-radius: 12px; }
+.workspace-brand-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .5rem .625rem; }
+.workspace-brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--text); text-decoration: none; }
+.workspace-brand strong { display: block; font-size: .9375rem; letter-spacing: -.025em; }
+.brand-caption { display: none; color: var(--muted); font-size: .75rem; }
+.brand-glyph { display: none; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: .625rem; background: rgb(var(--accent-rgb) / .1); color: var(--accent); }
+.workspace-utilities { display: flex; align-items: center; gap: 8px; }
+.theme-menu { max-height: min(440px, calc(100dvh - 100px)); overflow-y: auto; }
+.utility-icon { display: none; align-items: center; justify-content: center; min-height: 2.75rem; min-width: 2.75rem; border-radius: .5rem; color: var(--muted); }
+.utility-icon:hover { background: var(--bg); color: var(--text); }
+.copilot-trigger { display: inline-flex; gap: .5rem; align-items: center; min-height: 2.75rem; border: 1px solid var(--border); padding: 0 .625rem; border-radius: .5rem; color: var(--text); font-size: .8125rem; font-weight: 600; }
+.copilot-trigger:hover, .copilot-trigger.is-selected { color: var(--accent); border-color: var(--accent); background: rgb(var(--accent-rgb) / .06); }
+.workspace-links { display: none; flex-wrap: wrap; gap: .25rem; padding: 0 .75rem; border-top: 1px solid var(--border); }
+.workspace-links a { display: flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: 0 .875rem; color: var(--muted); font-size: .875rem; border-bottom: 2px solid transparent; }
+.workspace-links a:hover { color: var(--text); background: rgb(var(--accent-rgb) / .04); }
+.workspace-links a[aria-current="page"] { border-bottom-color: var(--accent); color: var(--accent); font-weight: 600; }
+.mobile-navigation { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .5rem .75rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .8125rem; }
+.skip-link { position: fixed; top: -80px; left: 16px; z-index: 100; border-radius: 8px; padding: 12px 20px; background: var(--accent); color: var(--on-accent); }
+.skip-link:focus { top: 12px; }
+.monitoring-header { flex-shrink: 0; }
+.monitoring-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 6px 12px; }
+.monitoring-heading h1 { font-size: 21px; font-weight: 600; letter-spacing: -.5px; }
+.monitoring-heading p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.source-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; background: var(--surface); }
+.source-selector, .source-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.source-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+.toolbar-action { display: flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 8px; color: var(--muted); border-radius: 6px; font-size: 12px; }
+.toolbar-action:hover, .toolbar-action[aria-pressed="true"] { color: var(--accent); background: rgb(var(--accent-rgb) / .08); }
+.detector-label { color: var(--muted); font-size: 11px; }
+.detector-label strong { margin-left: 5px; color: var(--text); font-family: var(--font-mono, monospace); }
+:root { --page-gutter: clamp(.75rem, 1.5vw, 2rem); --page-max: 120rem; }
+.content-page { min-height: 100dvh; min-width: 0; padding: var(--page-gutter); }
+.page-container { width: 100%; max-width: var(--page-max); min-width: 0; margin-inline: auto; }
+.page-heading { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-block: .25rem; }
+.page-heading h1 { font-size: clamp(1.35rem, 1rem + .65vw, 1.875rem); font-weight: 600; letter-spacing: -.025em; line-height: 1.3; }
+.page-heading p { max-width: 75ch; margin-top: .375rem; color: var(--muted); font-size: .875rem; line-height: 1.6; }
+.page-heading > div { flex: 1 1 14rem; min-width: 0; }
+.source-context { display: flex; align-items: center; flex-wrap: wrap; gap: .625rem; color: var(--muted); font-size: .8125rem; }
+.source-context strong { border: 1px solid var(--border); border-radius: .375rem; padding: .25rem .5rem; color: var(--text); background: var(--surface); font-family: monospace; }
+.source-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1rem; }
+.lab-grid { display: grid; align-items: start; grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); gap: 1rem; }
+.lab-grid > section { min-width: 0; padding: clamp(1rem, 1.5vw, 1.5rem); }
+.lab-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 1rem; margin-top: 1.25rem; }
+.lab-fields label { min-width: 0; }
+.lab-fields :is(input[type="number"],select) { width: 100%; min-width: 0; min-height: 2.75rem; }
+.lab-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+.lab-actions button { min-height: 2.75rem; flex: 1 1 auto; }
+.collection-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+.collection-toolbar input { grid-column: 1 / -1; width: 100%; }
+.mobile-hypotheses { display: grid; gap: .75rem; }
+.mobile-hypotheses > article { border: 1px solid var(--border); border-radius: .5rem; padding: .875rem; }
+.mobile-hypotheses dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin-top: 1rem; }
+.mobile-hypotheses dt { font-size: .75rem; color: var(--muted); }
+.mobile-hypotheses dd { font-size: .8125rem; font-family: monospace; margin-top: .25rem; }
+.dashboard-shell { display: flex; width: 100%; min-height: 100dvh; flex-direction: column; gap: .625rem; padding: var(--page-gutter); max-width: var(--page-max); margin: 0 auto; }
+.dashboard-main { display: flex; min-width: 0; min-height: 0; flex-direction: column; gap: .625rem; }
+.timeline-panel { grid-column: 1 / -1; }
+.monitoring-panel-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .25rem; padding: .25rem; border: 1px solid var(--border); border-radius: .625rem; background: var(--surface); }
+.split-comparison { resize: vertical; min-height: 120px; max-height: 55%; }
+.split-active { height: 42%; }
+.split-empty { height: 150px; }
+.metrics-page { min-height: 100dvh; }
+.metrics-page main { flex-shrink: 0; }
+.stale-telemetry .spin, .stale-telemetry .flow, .stale-telemetry .attack-pulse, .stale-telemetry .pulse-ring { animation-play-state: paused; }
+.react-flow__controls { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgb(0 0 0 / .08); }
+.react-flow__controls-button { background: var(--surface); border-color: var(--border); fill: var(--text); width: 36px; height: 36px; }
+.react-flow__controls-button:hover { background: var(--bg); }
+.graph-options[open] { flex-basis: 100%; }
+.graph-options summary { min-height: 2.25rem; display: flex; align-items: center; gap: .25rem; }
+.graph-options summary::before { content: "+"; color: var(--accent); margin-right: .25rem; font-size: 1rem; }
+.graph-options[open] summary::before { content: "−"; }
+.copilot-context { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 12px; background: var(--bg); }
+.copilot-context-source { border: 1px solid var(--border); border-radius: 5px; padding: 3px 7px; color: var(--accent); background: var(--surface); font-family: monospace; font-weight: 600; }
+.copilot-context > span:last-child { margin-left: auto; }
+.copilot-start { padding: 12px 4px; }
+.copilot-start-icon { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 24px; color: var(--accent); border: 1px solid var(--border); border-radius: 16px; background: var(--bg); }
+.copilot-start h2 { font-size: 24px; font-weight: 600; letter-spacing: -.6px; margin-top: 8px; line-height: 1.3; }
+.copilot-start-description { color: var(--muted); font-size: 14px; line-height: 1.7; margin-top: 12px; max-width: 46ch; }
+.copilot-start-tasks { display: grid; gap: 10px; margin-top: 28px; }
+.copilot-start-tasks button { display: flex; align-items: center; gap: 14px; padding: 15px; border: 1px solid var(--border); border-radius: 10px; text-align: left; }
+.copilot-start-tasks button:hover { border-color: var(--accent); background: rgb(var(--accent-rgb) / .04); }
+.copilot-start-tasks button > svg { flex-shrink: 0; color: var(--accent); }
+.copilot-start-tasks button > svg:last-child { margin-left: auto; color: var(--muted); }
+.copilot-start-tasks strong { display: block; font-size: 13px; font-weight: 600; }
+.copilot-start-tasks small { display: block; font-size: 12px; margin-top: 4px; color: var(--muted); line-height: 1.5; }
+.copilot-checklist { display: flex; align-items: center; gap: 8px; margin-top: 24px; font-size: 12px; color: var(--muted); min-height: 44px; }
+.copilot-checklist:hover { color: var(--accent); }
+.copilot-composer { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+.mobile-incident-list, .mobile-asset-list { display: grid; gap: .75rem; }
+
+/* Phone-first layouts. Wider breakpoints progressively reveal the full workspace. */
+.mobile-navigation select { min-height: 2.75rem; width: 68%; min-width: 0; padding: 0 .625rem; background: var(--bg); border: 1px solid var(--border); border-radius: .5rem; color: var(--text); font-size: 1rem; }
+.monitoring-panel-switch button { min-height: 2.75rem; padding: 0 .25rem; border-radius: .375rem; color: var(--muted); font-size: .8125rem; }
+.monitoring-panel-switch button[aria-pressed="true"] { color: var(--accent); background: rgb(var(--accent-rgb) / .1); font-weight: 600; }
+.center-panel { height: clamp(26rem, 58dvh, 36rem); }
+.dashboard-main > section[aria-label="Attack console"], .dashboard-main > section[aria-label="Replay"] { min-height: 27.5rem; }
+.dashboard-main > section[aria-label="Incident"] { min-height: 26.25rem; }
+.timeline-panel { height: 12rem; }
+.incident-list-card { display: block; padding: 1rem; border: 1px solid var(--border); border-radius: .625rem; }
+.incident-list-card:hover { border-color: var(--accent); background: rgb(var(--accent-rgb) / .04); }
+.incident-list-heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.incident-list-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; color: var(--muted); font-size: .75rem; }
+.incident-list-meta span { border-radius: .3125rem; background: var(--bg); padding: .25rem .375rem; }
+.soc-summary > section { padding: .875rem .75rem; }
+.soc-summary > section > p:last-child { font-size: clamp(1.125rem, 1rem + .6vw, 1.75rem); overflow-wrap: anywhere; }
+.soc-summary p { overflow-wrap: anywhere; }
+.content-page :is(input,select,textarea) { min-width: 0; }
+.content-page button { min-height: 2.75rem; }
+@media (max-width: 47.99rem) {
+  .dashboard-main[data-mobile-panel="process"] > section:not(.center-panel),
+  .dashboard-main[data-mobile-panel="scenario"] > .center-panel,
+  .dashboard-main[data-mobile-panel="scenario"] > section[aria-label="Incident"],
+  .dashboard-main[data-mobile-panel="incident"] > section:not([aria-label="Incident"]),
+  .dashboard-main:not([data-mobile-panel="process"]) > .timeline-panel { display: none; }
+  .center-panel .panel-heading > span { display: none; }
+  .theme-menu { position: fixed; left: .5rem; right: .5rem; width: auto; max-width: 22.5rem; }
+  .monitoring-heading { padding: .625rem .125rem; align-items: flex-start; }
+  .monitoring-heading h1 { font-size: 1.1875rem; }
+  .monitoring-heading p { max-width: 13.75rem; line-height: 1.6; }
+  .source-toolbar { gap: .25rem; padding: .5rem; }
+  .source-selector, .source-actions { width: 100%; justify-content: space-between; gap: .25rem; }
+  .detector-label { display: none; }
+  .toolbar-action { min-height: 2.75rem; }
+  .dashboard-shell :is(select,input[type="number"]), .content-page :is(input,select,textarea), .copilot-drawer textarea { font-size: 1rem; }
+  .workspace-utilities button, .dashboard-shell :is(.source-selector button,.process-workspace select) { min-height: 2.75rem; }
+  .process-workspace button, .center-panel > .panel-heading button { min-height: 2.75rem; min-width: 2.75rem; }
+  .react-flow__controls-button { height: 2.75rem; width: 2.75rem; }
+  .copilot-drawer button { min-height: 2.75rem; }
+  .copilot-icon-button { min-width: 2.75rem; min-height: 2.75rem; }
+  .copilot-start h2 { font-size: 1.375rem; }
+  .copilot-start-tasks button { padding: .875rem; gap: .75rem; }
+}
+@media (min-width: 48rem) {
+  .workspace-brand-row { padding: .625rem 1rem; }
+  .workspace-brand strong { font-size: 1rem; }
+  .brand-caption { display: block; margin-top: .125rem; }
+  .brand-glyph { display: grid; }
+  .utility-icon { display: inline-flex; }
+  .monitoring-panel-switch, .mobile-incident-list, .mobile-asset-list, .mobile-hypotheses { display: none; }
+  .collection-toolbar { display: flex; flex-wrap: wrap; }
+  .collection-toolbar input { flex: 1; width: auto; }
+  .dashboard-main { display: grid; flex: none; grid-template-columns: minmax(0, 1fr) minmax(14rem, 26%); grid-template-rows: minmax(29rem, auto) 22rem 12rem; }
+  .center-panel { grid-column: 1; grid-row: 1; height: auto; min-height: 0; }
+  .dashboard-main > section[aria-label="Attack console"], .dashboard-main > section[aria-label="Replay"] { grid-column: 2; grid-row: 1; min-height: 0; }
+  .dashboard-main > section[aria-label="Incident"] { grid-column: 1 / -1; grid-row: 2; min-height: 0; }
+  .timeline-panel { grid-row: 3; height: auto; }
+}
+@media (min-width: 64rem) { .workspace-links { display: flex; } .mobile-navigation { display: none; } }
+@media (max-width: 22.5rem) {
+  .workspace-utilities [aria-label="Switch UI Theme"] > .font-medium { display: none; }
+  .workspace-brand-row { gap: .375rem; }
+  .workspace-utilities { gap: .375rem; }
+}
+@media (min-width: 75rem) {
+  .dashboard-shell { height: 100dvh; min-height: 0; }
+  .dashboard-main { flex: 1; grid-template-columns: minmax(12rem, 15%) minmax(0, 1fr) minmax(16rem, 20%); grid-template-rows: minmax(20rem, 1fr) clamp(9rem, 17dvh, 13rem); }
+  .center-panel { grid-column: 2; grid-row: 1; }
+  .dashboard-main > section[aria-label="Attack console"], .dashboard-main > section[aria-label="Replay"] { grid-column: 1; grid-row: 1; }
+  .dashboard-main > section[aria-label="Incident"] { grid-column: 3; grid-row: 1; }
+  .timeline-panel { grid-row: 2; }
+}
+@media (min-width: 75rem) and (max-height: 56.25rem) {
+  .dashboard-shell { height: auto; min-height: 100dvh; }
+  .dashboard-main { flex: none; grid-template-rows: minmax(30rem, 55dvh) 11rem; }
+}
+@media (max-width: 68.75rem) {
+  .center-panel:has(.asset-inspector) { height: auto; min-height: 38rem; }
+  .center-panel:has(.asset-inspector) .process-workspace { height: auto; }
+  .process-canvas.has-inspector { display: flex; flex-direction: column; overflow: visible; }
+  .process-canvas.has-inspector .process-primary { min-height: 20rem; height: 20rem; flex: 0 0 20rem; }
+  .process-canvas.has-inspector .asset-inspector { max-height: none; overflow: visible; }
+  .process-workspace.workspace-expanded { overflow-y: auto; overscroll-behavior: contain; }
+  .process-workspace.workspace-expanded > .process-canvas.has-inspector { flex: 0 0 auto; }
+  .process-workspace.workspace-expanded > button { flex-shrink: 0; }
+}
