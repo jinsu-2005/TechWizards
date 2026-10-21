@@ -1,3 +1,4 @@
+import { useAccess } from "../auth/access";
 import { LoaderCircle, ShieldCheck, TriangleAlert, Unplug } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ApiError, postIsolate } from "../../lib/api";
@@ -17,6 +18,7 @@ import { noticeIfLocked } from "../../store/ui";
 /** Isolate the best candidate not tried yet. Containment is read from the incident, never assumed:
  *  idle -> pending -> Contained (green, with time) or Not contained (amber, offers the next one). */
 export function IsolateButton({ incident }: { incident: Incident }) {
+  const { canAdmin } = useAccess();
   const hai = useLive((s) => s.latest?.mode === "hai");
   const live = useLive((s) => s.latest?.mode === "live");
   const replaying = useLive((s) => s.cursor !== null);
@@ -29,7 +31,7 @@ export function IsolateButton({ incident }: { incident: Incident }) {
 
   const tried = iso.incidentId === incident.id ? iso.tried : [];
   const next = candidateFor(incident, tried);
-  const reason = disabledReason(incident, { hai, live, replaying });
+  const reason = !canAdmin ? "Administrator access is required" : disabledReason(incident, { hai, live, replaying });
 
   const click = async () => {
     if (!next) return;
@@ -65,7 +67,7 @@ export function IsolateButton({ incident }: { incident: Incident }) {
         type="button"
         disabled
         data-testid="isolate-state"
-        className="flex h-8 items-center gap-1 rounded bg-accent px-3 text-xs font-medium text-bg opacity-70"
+        className="flex h-8 items-center gap-1 rounded bg-accent px-3 text-xs font-medium text-on-accent opacity-70"
       >
         <LoaderCircle size={14} className="animate-spin" aria-hidden />
         Isolating {iso.node}
@@ -90,7 +92,7 @@ export function IsolateButton({ incident }: { incident: Incident }) {
         onClick={() => void click()}
         disabled={reason !== null || next === null}
         title={reason ?? undefined}
-        className="flex h-8 w-fit items-center gap-1 rounded bg-accent px-3 text-xs font-medium text-bg transition-opacity duration-150 hover:opacity-90 disabled:opacity-50"
+        className="flex h-8.5 w-full items-center justify-center gap-1.5 rounded-md bg-origin text-xs font-semibold text-on-accent shadow-md shadow-origin/30 transition-all duration-150 hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
       >
         <Unplug size={14} aria-hidden />
         {next ? `Isolate ${next}` : "No candidate"}
