@@ -18,14 +18,19 @@ services:
     env_file:
       - path: .env
         required: false
-    ports: ["8000:8000"]
+    ports: ["127.0.0.1:8000:8000"]
     environment:
-      AT_HOST: "0.0.0.0"  # declares this deployment non-loopback; .env must set AT_API_KEY (B3)
+      AT_HOST: "0.0.0.0"  # Non-loopback container binding; private authentication is enabled below.
       AT_HAI_DIR: /data/hai
       AT_REPORTS_DIR: /reports
       AT_LIVE_HOST: plant-emulator
       AT_LIVE_TAGMAP: /config/tagmap.yaml
       AT_LIVE_DB: /data/live/incidents.sqlite
+      AT_SOC_DB: /data/live/investigations.sqlite
+      AT_AUTH_ENABLED: "true"  # Local .env must not disable the private deployment boundary.
+      AT_FIREBASE_PROJECT_ID: attacktrace-private-20261016
+      AT_AUTH_COOKIE_SECURE: "true"
+      AT_DEMO_MODE: "false"
     volumes:
       - ./data/hai:/data/hai:ro
       - ./reports:/reports
@@ -38,7 +43,7 @@ services:
         - CMD
         - python
         - -c
-        - import urllib.request; urllib.request.urlopen("http://localhost:8000/api/status", timeout=3)
+        - import urllib.request; urllib.request.urlopen("http://localhost:8000/api/health", timeout=3)
       interval: 5s
       timeout: 5s
       retries: 60
@@ -48,8 +53,8 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_KEY: ${VITE_API_KEY:-}
-    ports: ["5173:80"]
+        VITE_API_KEY: ""  # Private access uses server sessions, never a bundled demo key.
+    ports: ["127.0.0.1:5173:80"]
     depends_on:
       backend:
         condition: service_healthy

@@ -19,3 +19,11 @@ submission/screenshots
 submission/evidence
 __pycache__
 *.pyc
+.env
+.env.*
+!.env.example
+backups
+*service-account*.json
+deploy/gateway/.dev.vars*
+deploy/gateway/.wrangler
+deploy/gateway/node_modules

@@ -1,0 +1,72 @@
+# Creates paid services only when explicitly applied in a Render account. No automatic deploys.
+services:
+  - type: pserv
+    name: attacktrace-emulator
+    runtime: docker
+    region: singapore
+    plan: starter
+    dockerContext: .
+    dockerfilePath: ./plant_emulator/Dockerfile
+    autoDeployTrigger: "off"
+    envVars:
+      - key: EMU_HOST
+        value: 0.0.0.0
+      - key: EMU_PORT
+        value: "5020"
+      - key: EMU_HEALTH_PORT
+        value: "8081"
+  - type: web
+    name: attacktrace-api
+    runtime: docker
+    region: singapore
+    plan: standard
+    numInstances: 1
+    dockerContext: .
+    dockerfilePath: ./backend/Dockerfile
+    dockerCommand: python -m app.deploy
+    autoDeployTrigger: "off"
+    healthCheckPath: /api/health
+    disk:
+      name: attacktrace-data
+      mountPath: /var/data
+      sizeGB: 10
+    envVars:
+      - key: AT_HOST
+        value: 0.0.0.0
+      - key: AT_AUTH_ENABLED
+        value: "true"
+      - key: AT_AUTH_COOKIE_SECURE
+        value: "true"
+      - key: AT_DEMO_MODE
+        value: "false"
+      - key: AT_FIREBASE_PROJECT_ID
+        value: attacktrace-private-20261016
+      - key: AT_GATEWAY_SECRET
+        sync: false
+      - key: AT_AUTH_MEMBERS
+        sync: false
+      - key: AT_CORS_ORIGINS
+        sync: false
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        sync: false
+      - key: AT_DEPLOY_DATA_ROOT
+        value: /var/data
+      - key: AT_SOC_DB
+        value: /var/data/journal/investigations.sqlite
+      - key: AT_LIVE_DB
+        value: /var/data/live/incidents.sqlite
+      - key: AT_MODELS_DIR
+        value: /var/data/models
+      - key: AT_REPORTS_DIR
+        value: /var/data/reports
+      - key: AT_HAI_DIR
+        value: /var/data/hai
+      - key: AT_LIVE_TAGMAP
+        value: /app/config/tagmap.yaml
+      - key: AT_LIVE_HOST
+        fromService:
+          type: pserv
+          name: attacktrace-emulator
+          property: host
+      - key: AT_LIVE_PORT
+        value: "5020"

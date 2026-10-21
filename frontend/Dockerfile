@@ -2,7 +2,7 @@
 # the backend service (nginx.conf) -- the app's own code is unchanged from dev, it still calls
 # relative /api and /ws/live paths (vite.config.ts's dev-server proxy does the same job locally).
 # For local development with hot reload, use Dockerfile.dev via docker-compose.dev.yml instead.
-FROM node:22-slim AS build
+FROM node:24-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci

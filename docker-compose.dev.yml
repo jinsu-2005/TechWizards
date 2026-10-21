@@ -7,12 +7,14 @@ services:
   backend:
     environment:
       AT_HOST: "127.0.0.1"
+      AT_AUTH_ENABLED: ${AT_AUTH_ENABLED:-false}
+      AT_DEMO_MODE: "true"
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
       args: {}
-    ports: !override ["5173:5173"]
+    ports: !override ["127.0.0.1:5173:5173"]
     environment:
       VITE_API_PROXY: http://backend:8000
       VITE_API_KEY: ${VITE_API_KEY:-}

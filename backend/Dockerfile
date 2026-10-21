@@ -7,9 +7,18 @@ COPY backend/pyproject.toml ./
 COPY backend/app ./app
 COPY backend/eval ./eval
 COPY attacker ./attacker
+COPY config ./config
+COPY scripts/backup-journal.py /app/scripts/backup-journal.py
+COPY scripts/check-firebase-adc.py /app/scripts/check-firebase-adc.py
+COPY docs /docs
 # CPU-only torch keeps the image small.
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
+RUN python -m pip install --no-cache-dir --upgrade 'pip>=26.2' \
+ && pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
  && pip install --no-cache-dir .
 COPY backend/models ./models
+RUN useradd --uid 10001 --create-home attacktrace \
+ && mkdir -p /data/live /reports \
+ && chown -R attacktrace:attacktrace /app /data/live /reports
+USER attacktrace
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
