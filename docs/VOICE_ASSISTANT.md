@@ -1,0 +1,9 @@
+# AttackTrace voice assistant
+
+The Copilot microphone records one user-initiated turn. The transcript appears in the composer for review. Recognized requests can navigate to a workspace page, focus a known asset, or show the Process Graph or Digital Twin. Other requests are sent to the evidence-grounded Copilot. The microphone never executes isolation, source switching, reset, lab changes, or other control actions. Existing on-screen permissions and confirmation remain in force.
+
+AI & Voice settings at `/settings` select browser or server speech, voice, rate for browser synthesis, spoken reply summaries, and incident briefings. Spoken incident briefings are off by default and state uncertainty. A stop button cancels speech. These settings are stored in this browser; they are not synchronized across users or devices.
+
+Browser speech recognition may use a browser-vendor service. Browser speech output uses available system voices. The optional server path requires `OPENAI_API_KEY` **only on the backend**. It uses `gpt-transcribe` for a bounded push-to-talk recording and `gpt-4o-mini-tts` for bounded speech output. The server limits recordings to 8 MB, responses to 400 characters, and requests to 12 per minute per authenticated user or local client. The server applies the same authentication, role, CSRF and API-key boundary as the rest of the private application. Audio and spoken text sent through this path reach OpenAI; the UI discloses this before the provider is selected. Do not put the key in `VITE_*` settings.
+
+This is a turn-based voice interface. It does not provide full-duplex interruption, background listening, arbitrary voice automation, or a continuously running agent. Later real-time audio models would require a separate streaming session and cost controls. The current model labels come from server capabilities rather than claiming every provider model works with every audio endpoint.

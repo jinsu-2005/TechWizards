@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { Incident, LiveMessage } from "./types";
+import { synthesizeSpeech } from "./voiceApi";
 
 export type VoiceSettings = {
   replySpeech: boolean;
@@ -60,7 +61,6 @@ export async function speak(text: string, options = useVoice.getState()): Promis
   if (!short) return;
   stopSpeech();
   if (options.speechProvider === "openai") {
-    const { synthesizeSpeech } = await import("./voiceApi");
     const blob = await synthesizeSpeech(short, options.openaiVoice);
     const audio = new Audio(URL.createObjectURL(blob));
     currentAudio = audio;
@@ -85,7 +85,7 @@ export function incidentBrief(incident: Incident, mode: LiveMessage["mode"]): st
   return `An anomaly was detected in ${source}. ${leading.id} is the leading origin hypothesis, not a confirmed source. Review the evidence.`;
 }
 
-export type VoiceCommand = { kind: "navigate"; path: string; label: string } | { kind: "selectAsset"; asset: string } | { kind: "ask"; text: string };
+export type VoiceCommand = { kind: "navigate"; path: string; label: string } | { kind: "selectAsset"; asset: string } | { kind: "view"; view: "graph" | "twin"; label: string } | { kind: "ask"; text: string };
 const destinations: [RegExp, string, string][] = [
   [/\b(monitoring|dashboard|home|process graph|digital twin)\b/i, "/", "Monitoring"],
   [/\b(alerts?)\b/i, "/alerts", "Alerts"],
@@ -101,6 +101,7 @@ export function parseVoiceCommand(text: string, assetIds: string[]): VoiceComman
   const navigation = /^(?:go to|open|show|navigate to)\s+(.+)$/i.exec(normalized);
   if (navigation) {
     const target = navigation[1] ?? "";
+    if (/\b(process graph|digital twin)\b/i.test(target)) return { kind: "view", view: /graph/i.test(target) ? "graph" : "twin", label: /graph/i.test(target) ? "Process graph" : "Digital twin" };
     const asset = assetIds.find((id) => id.toLowerCase() === target.toLowerCase() || new RegExp(`\\b${id}\\b`, "i").test(target));
     if (asset) return { kind: "selectAsset", asset };
     const destination = destinations.find(([pattern]) => pattern.test(target));

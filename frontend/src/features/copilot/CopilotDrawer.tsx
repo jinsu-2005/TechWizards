@@ -209,6 +209,9 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
     if (parsedCommand.kind === "selectAsset") {
       useUi.getState().selectAsset(parsedCommand.asset);
       navigate(`/?asset=${encodeURIComponent(parsedCommand.asset)}`);
+    } else if (parsedCommand.kind === "view") {
+      useUi.getState().setView(parsedCommand.view);
+      navigate("/");
     } else navigate(parsedCommand.path);
     setInput(""); setVoiceStatus(""); setOpen(false);
   };

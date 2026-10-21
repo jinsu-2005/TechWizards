@@ -6,10 +6,13 @@ import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
-from app.api.security import RateLimiter
+from app.api.security import RateLimiter, require_key
 
 router = APIRouter(prefix="/api/voice", tags=["voice"])
-VOICES = ("alloy", "ash", "ballad", "coral", "echo", "fable", "nova", "onyx", "sage", "shimmer", "verse", "marin", "cedar")
+VOICES = (
+    "alloy", "ash", "ballad", "coral", "echo", "fable", "nova", "onyx", "sage",
+    "shimmer", "verse", "marin", "cedar",
+)
 MAX_AUDIO_BYTES = 8 * 1024 * 1024
 
 
@@ -18,6 +21,7 @@ def _key() -> str:
 
 
 def _limit(request: Request) -> None:
+    require_key(request)
     state = request.app.state
     if getattr(state, "voice_limiter", None) is None:
         state.voice_limiter = RateLimiter(12)
@@ -46,10 +50,20 @@ async def transcribe(request: Request) -> dict[str, str]:
     allowed = {"audio/webm", "audio/mp4", "audio/mpeg", "audio/wav", "audio/ogg"}
     if content_type not in allowed:
         raise HTTPException(415, "Unsupported audio format")
-    payload = await request.body()
-    if not payload or len(payload) > MAX_AUDIO_BYTES:
-        raise HTTPException(413, "Audio must be between 1 byte and 8 MB")
-    extension = {"audio/webm": "webm", "audio/mp4": "mp4", "audio/mpeg": "mp3", "audio/wav": "wav", "audio/ogg": "ogg"}[content_type]
+    chunks = []
+    total = 0
+    async for chunk in request.stream():
+        total += len(chunk)
+        if total > MAX_AUDIO_BYTES:
+            raise HTTPException(413, "Audio must be between 1 byte and 8 MB")
+        chunks.append(chunk)
+    payload = b"".join(chunks)
+    if not payload:
+        raise HTTPException(422, "Audio recording is empty")
+    extension = {
+        "audio/webm": "webm", "audio/mp4": "mp4", "audio/mpeg": "mp3",
+        "audio/wav": "wav", "audio/ogg": "ogg",
+    }[content_type]
     try:
         async with httpx.AsyncClient(timeout=35) as client:
             response = await client.post(
@@ -82,9 +96,15 @@ async def synthesize(body: SpeechRequest, request: Request) -> Response:
             response = await client.post(
                 "https://api.openai.com/v1/audio/speech",
                 headers={"Authorization": f"Bearer {_key()}"},
-                json={"model": "gpt-4o-mini-tts", "voice": body.voice, "input": body.text, "response_format": "mp3"},
+                json={
+                    "model": "gpt-4o-mini-tts", "voice": body.voice,
+                    "input": body.text, "response_format": "mp3",
+                },
             )
         response.raise_for_status()
-        return Response(content=response.content, media_type="audio/mpeg", headers={"Cache-Control": "no-store"})
+        return Response(
+            content=response.content, media_type="audio/mpeg",
+            headers={"Cache-Control": "no-store"},
+        )
     except httpx.HTTPError as exc:
         raise HTTPException(502, "Speech synthesis service is unavailable") from exc

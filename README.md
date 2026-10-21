@@ -50,7 +50,7 @@ LIVE mode (optional, real protocol) reads the local Modbus emulator. A saved det
 3. Attack console: *Sensor offset*, target *LIT101*, press **Launch**.
 4. The LIT101 badge shows the spoofed reading next to `true …`; the tank drifts.
 5. Within seconds, an audible **siren** warbles and the perimeter flashes red. The incident panel names LIT101, confidence, score-breakdown bar, path, action, T0856.
-6. Click **Ask AI** or the top-bar **AI Copilot** button to open the Gemini assistant.
+6. Click **Ask AI** or the top-bar **AI Copilot** button to open the Gemini assistant. Optional push-to-talk, spoken summaries and incident narration are configured under **AI & Voice**; see [voice assistant setup and limits](docs/VOICE_ASSISTANT.md).
 7. Click suggestion pills (e.g. *"Why was LIT101 identified as the origin?"* or *"What physical damage will occur?"*) to receive deep root-cause triage and MITRE ICS SOPs.
 8. Click **Isolate LIT101** (or *"Isolate LIT101 Now"* inside Copilot):
    - A containment chime plays.
