@@ -16,104 +16,224 @@ AttackTrace is deployed and operational across three coordinated cloud tiers:
 
 | Tier | Service | URL | Role |
 | :--- | :--- | :--- | :--- |
-| **Frontend** | Vercel | [**tech-wizards-attacktrace.vercel.app**](https://tech-wizards-attacktrace.vercel.app) | Real-time React dashboard, Digital Twin, animated telemetry, and AI Pilot |
+| **Frontend** | Vercel | [**tech-wizards-attacktrace.vercel.app**](https://tech-wizards-attacktrace.vercel.app) | Real-time React 19 dashboard, Digital Twin, animated telemetry, and AI Pilot |
 | **Backend** | Render | [**techwizards.onrender.com**](https://techwizards.onrender.com/api/status) | FastAPI backend, Graph Neural Network (GDN), Modbus engine, `/ws/live` stream |
 | **Edge Gateway** | Cloudflare Workers | [**attacktrace-console.jinsu-j2005.workers.dev**](https://attacktrace-console.jinsu-j2005.workers.dev) | Single-origin edge gateway unifying Vercel & Render with strict security headers |
 
 > [!NOTE]
-> **Authentication Status**: The live dashboard runs in frictionless **Demo Mode** (`AT_AUTH_ENABLED=false`) for instant demonstration. Enterprise-grade Firebase Google Auth, JWT verification, and Role-Based Access Control (`admin`, `analyst`, `viewer`) remain built-in and can be toggled via `AT_AUTH_ENABLED=true`.
+> **Authentication Status**: The live dashboard defaults to frictionless **Demo Mode** (`AT_AUTH_ENABLED=false`) for instant demonstration. Enterprise-grade Firebase Google Auth, JWT verification, and Role-Based Access Control (`admin`, `analyst`, `viewer`) remain built-in and can be toggled via `AT_AUTH_ENABLED=true`.
 
 ---
 
-## 🚀 Key Features
+## 🏛 5-Layer System Architecture (Graphify Mapped)
 
-### 1. Cyber-Physical Digital Twin & Telemetry Stream
-- **Interactive 3-Stage Plant Simulation**: Visualizes a high-fidelity water treatment facility across **Stage 1 (Raw Intake & Storage)**, **Stage 2 (Filtration & Dosing)**, and **Stage 3 (Disinfection & Dispatch)**.
-- **Synchronized Telemetry (2 Hz / 10 Hz)**: Real-time tank fill levels, dynamic pipe flow animations, pump speeds, sensor readings (`LIT101`, `FIT201`, `PIT301`, `LIT301`), and multi-track scrolling waveform timeline.
-- **Graph & Split Views**: Toggle between the physical schematic twin, the learned causal process graph with propagation pulses, and the **Split View** comparing alert volumes against standard baselines.
-
-### 2. Multi-Signal Detection & Root-Cause Localization
-- **Graph Deviation Network (GDN)**: Employs graph attention neural networks and forecasting error residuals over learned causal dependencies.
-- **Three-Signal Localization Algorithm**: Ranks the attack origin by balancing:
-  $$\text{Score} = 0.6 \times \text{Deviation} + 0.2 \times \text{Onset Time} + 0.2 \times \text{Causal Topology}$$
-- **MITRE ATT&CK for ICS**: Automatically tags attacks with tactics and techniques (e.g., `T0856: Impair Process Control`, `T0831: Manipulation of Control`).
-
-### 3. Virtual Sensor Self-Healing
-- **Closed-Loop Mitigation**: Clicking **Isolate** on a compromised sensor immediately swaps corrupted physical telemetry for physics-based predictive estimations.
-- **Continuous Plant Operation**: Tank levels smoothly return to 50% setpoints without tripping emergency emergency shutdowns or wasting water/power.
-- **Forensic PDF Export**: One-click generation of court-admissible forensic incident reports documenting attack onset, propagation paths, and self-healing recovery audits.
-
-### 4. AI Pilot · Signal Room & Gemini Live Voice
-- **Multi-Model Intelligence**: Backed by Google Gemini (`gemini-3.8-flash`, `gemini-3.8-live`, `gemini-3.5-flash-lite`, and `gemma-4-31b-it`).
-- **Live Bidirectional Voice Assistant**: Real-time WebSockets streaming voice investigations with stateful audio waveforms (listening, thinking, speaking, muting).
-- **Incident Grounding**: Automatically ingests incident context, evidence records, and telemetry states to answer root-cause questions and recommend operational SOPs without hallucinating.
-
-### 5. Multi-Source Ingestion Modes
-- **SIM Mode**: Live physics simulation with 5 injected cyber-physical attack scenarios:
-  1. *Sensor Offset*: Spoofs constant bias into level or flow measurements.
-  2. *Sensor Freeze*: Locks transmitter output at stale values.
-  3. *Sensor Ramp*: Subtly drifts readings over time to evade simple threshold triggers.
-  4. *Scaling Factor*: Multiplicatively skews sensor telemetry.
-  5. *Replay Attack*: Replays benign historical recordings during an active process upset.
-- **HAI Mode**: Replay of the real-world industrial security dataset (HAI 20.07).
-- **LIVE Mode**: Direct Modbus TCP ingestion from software plant emulators with sub-2ms read latency.
-
-### 6. Investigation SOC Workspace
-- **Alerts** (`/alerts`): Centralized triage queue for prioritized security alerts.
-- **Assets** (`/assets`): Health tracking across physical sensors, PLCs, pumps, and valves.
-- **Investigations** (`/investigations`): Case management system persisting analyst notes and confidence metrics to SQLite.
-- **Attribution Lab** (`/lab`): Attribution diagnostics and firmware attestation sandbox.
-- **Metrics** (`/metrics`): Live benchmark evaluations, ROC curves, and baseline comparison tables.
-
----
-
-## 🏛 Architecture
+*Architectural map extracted by **Graphify** across 2,879 nodes, 9,036 edges, and 128 community clusters.*
 
 ```mermaid
 flowchart TD
-  subgraph Edge [Cloud Edge & Gateway]
-    CFW["Cloudflare Worker Gateway<br/>(attacktrace-console.workers.dev)"]
-    VCL["Vercel Static Hosting<br/>(tech-wizards-attacktrace.vercel.app)"]
+  subgraph L1["Layer 1: Frontend (React 19 + TypeScript + Vite)"]
+    direction TB
+    MainApp["App.tsx / main.tsx<br/><i>Entry point, routing & layout</i>"]
+    TwinView["TwinView.tsx<br/><i>Digital Twin (SVG, liquid dynamics)</i>"]
+    GraphView["GraphView.tsx<br/><i>Causal Graph (@xyflow/react)</i>"]
+    IncidentPanel["IncidentPanel.tsx<br/><i>Origin rank, confidence & actions</i>"]
+    SplitView["SplitView.tsx<br/><i>AttackTrace vs Baseline flood</i>"]
+    AttackConsole["AttackConsole.tsx<br/><i>Scenario selection & triggers</i>"]
+    Timeline["Timeline.tsx<br/><i>ECharts real-time sparklines</i>"]
+    AIPilot["CopilotDrawer.tsx / LiveVoicePanel.tsx<br/><i>AI Pilot Signal Room & Gemini Live Voice</i>"]
+    ZustandStore["live.ts & ui.ts<br/><i>Global Zustand stores & buffer</i>"]
+    WSClient["ws.ts & api.ts<br/><i>WebSocket & REST client</i>"]
   end
 
-  subgraph Client [Browser Application]
-    UI["React 19 + TypeScript Dashboard"]
-    DT["SVG Process Digital Twin"]
-    GW["Graph & Split View Engine"]
-    AIP["AI Pilot Signal Room & Voice"]
-    AUD["Web Audio Synthesizer (800/600 Hz Siren)"]
+  subgraph L2["Layer 2: API & Gateway (FastAPI + Cloudflare Workers)"]
+    direction TB
+    CFWorker["deploy/gateway/src/index.mjs<br/><i>Single-origin edge reverse proxy</i>"]
+    FastAPIApp["main.py (create_app)<br/><i>Lifespan manager & CORS</i>"]
+    SecurityMiddleware["security.py & GatewayBoundary<br/><i>Header auth, rate limiting & gateway checks</i>"]
+    RestRouter["api/rest.py<br/><i>/api/status, /attack, /isolate, /report</i>"]
+    WSRouter["api/ws.py<br/><i>/ws/live broadcast hub (2 Hz tick)</i>"]
+    LiveVoiceRouter["api/live_voice.py<br/><i>/ws/voice bidirectional audio gateway</i>"]
   end
 
-  subgraph Backend [Render Cloud Backend]
-    API["FastAPI App (techwizards.onrender.com)"]
-    WS["/ws/live WebSocket Broadcaster"]
-    GDN["PyTorch Graph Deviation Network"]
-    LOC["3-Signal Origin Localizer"]
-    HEAL["Virtual Sensor Self-Healing Engine"]
-    SOC["SQLite Journal & Incident Store"]
+  subgraph L3["Layer 3: Services & Core Detection Engine"]
+    direction TB
+    EngineCore["engine.py (Engine)<br/><i>2 Hz event loop & ring buffer</i>"]
+    RuntimeRouter["runtime.py<br/><i>active_runtime(state) dispatcher</i>"]
+    GDNDetector["detect/detector.py<br/><i>GDN forecaster & EWMA threshold</i>"]
+    LocalizerService["localize/locator.py<br/><i>Tri-signal origin rank (0.6 dev, 0.2 onset, 0.2 causal)</i>"]
+    IncidentManager["localize/incident.py<br/><i>Incident lifecycle & Ambiguous gate</i>"]
+    VirtualSensor["Virtual Sensor Self-Healing<br/><i>Closed-loop predictive substitution</i>"]
+    CopilotEngine["explain/copilot_engine.py<br/><i>Gemini 3.8/3.5 grounding & evidence summary</i>"]
+    SimPlant["sim/plant.py<br/><i>Water plant ODE physics model</i>"]
+    LiveSource["live/source.py<br/><i>Modbus poller, aligner & quality</i>"]
+    HaiEngine["engine_hai.py<br/><i>ETRI HAI testbed replay engine</i>"]
+    ReportService["report/pdf.py<br/><i>Pure ASCII single-page PDF generator</i>"]
   end
 
-  subgraph AI [Google GenAI]
-    GEM["Gemini 3.8 / 3.5 Live & Flash"]
+  subgraph L4["Layer 4: Storage & Data Persistence"]
+    direction TB
+    SQLiteDB[("SQLite WAL DB<br/>data/investigations.sqlite<br/><i>tables: incidents, cases, notes</i>")]
+    ModelStorage["backend/models/<br/><i>gdn.pt, mlp.pt, baseline.joblib, graph.json</i>"]
+    ReportsStorage["reports/<br/><i>metrics.json, live_metrics.json, robustness.json</i>"]
   end
 
-  subgraph Sources [Industrial Telemetry Sources]
-    SIM["SIM: Water Treatment Simulator (10 Hz)"]
-    HAI["HAI: 20.07 Industrial Dataset Replay"]
-    MOD["LIVE: Modbus TCP Plant Emulator"]
+  subgraph L5["Layer 5: External Protocol & Hardware"]
+    direction TB
+    PlantEmulator["plant_emulator/server.py<br/><i>Modbus TCP (:5020) & health (:8081)</i>"]
+    AttackerCLI["attacker/cli.py<br/><i>Modbus register tamperer (loopback allowlisted)</i>"]
+    HAIDataset["data/hai/<br/><i>ETRI HAI 20.07 testbed CSVs</i>"]
   end
 
-  VCL -->|Serves Static Assets| UI
-  CFW -->|Single-Origin Reverse Proxy| UI
-  UI -->|HTTP / API| API
-  UI -->|Telemetry WebSocket| WS
-  AIP <-->|Live Voice WebSockets| API
-  API <-->|AI Prompts & Voice Streaming| GEM
+  %% Inter-layer connections
+  CFWorker --> MainApp
+  MainApp --> ZustandStore
+  TwinView & GraphView & IncidentPanel & SplitView & AttackConsole & Timeline & AIPilot --> ZustandStore
+  ZustandStore <--> WSClient
+  WSClient -- "WebSocket /ws/live" --> WSRouter
+  AIPilot -- "WebSocket /ws/voice" --> LiveVoiceRouter
+  WSClient -- "REST POST /api/*" --> SecurityMiddleware --> RestRouter
 
-  Sources --> API
-  API --> GDN --> LOC --> HEAL
-  LOC --> WS
-  API --> SOC
+  RestRouter & WSRouter --> RuntimeRouter
+  RuntimeRouter --> EngineCore & LiveSource & HaiEngine
+
+  EngineCore --> SimPlant
+  EngineCore --> GDNDetector
+  GDNDetector --> LocalizerService
+  LocalizerService --> IncidentManager
+  IncidentManager --> VirtualSensor
+  IncidentManager --> CopilotEngine
+
+  LiveSource -- "Modbus TCP" --> PlantEmulator
+  AttackerCLI -- "Modbus write" --> PlantEmulator
+  HaiEngine -- "CSV replay" --> HAIDataset
+
+  IncidentManager -- "Persist incidents" --> SQLiteDB
+  GDNDetector -- "Loads weights" --> ModelStorage
+  RestRouter -- "Serves /metrics" --> ReportsStorage
+  RestRouter -- "Generates PDF" --> ReportService
+```
+
+---
+
+## 🔍 Layer-by-Layer Component Breakdown
+
+### 🎨 Layer 1: Frontend (React 19 + TypeScript + Vite)
+| Component / Module | Source File | Description |
+|---|---|---|
+| **Entry Point** | [`frontend/src/main.tsx`](frontend/src/main.tsx) | Initializes application container `#root`. |
+| **Main App Shell** | [`frontend/src/app/App.tsx`](frontend/src/app/App.tsx) | Controls layout, mode switching, center view routing (Twin vs Graph vs Split), and error banners. |
+| **Digital Twin** | [`frontend/src/features/twin/TwinView.tsx`](frontend/src/features/twin/TwinView.tsx) | SVG animated visualization of tanks T1/T2 with liquid levels, valves MV101, PLCs, and pumps. |
+| **Node Badges** | [`frontend/src/features/twin/NodeBadge.tsx`](frontend/src/features/twin/NodeBadge.tsx) | Badges displaying real-time sensor metrics, quality flags, and spoofed vs true readings. |
+| **Causal Graph** | [`frontend/src/features/graph/GraphView.tsx`](frontend/src/features/graph/GraphView.tsx) | Interactive directed graph layout built on `@xyflow/react` showing propagation pulses. |
+| **Incident Panel** | [`frontend/src/features/incident/IncidentPanel.tsx`](frontend/src/features/incident/IncidentPanel.tsx) | Displays top candidate origin, confidence scores, propagation sequence, and MITRE ICS IDs. |
+| **Containment Action** | [`frontend/src/features/incident/IsolateButton.tsx`](frontend/src/features/incident/IsolateButton.tsx) | Triggers Virtual Sensor Self-Healing on the suspected compromised component. |
+| **Split Comparison** | [`frontend/src/features/split/SplitView.tsx`](frontend/src/features/split/SplitView.tsx) | Side-by-side view contrasting baseline alarm flooding (6+ nodes) with AttackTrace. |
+| **Attack Console** | [`frontend/src/features/console/AttackConsole.tsx`](frontend/src/features/console/AttackConsole.tsx) | Operator console for launching 5 attack scenarios (offset, ramp, freeze, scale, replay). |
+| **AI Pilot (Signal Room)** | [`frontend/src/features/copilot/CopilotDrawer.tsx`](frontend/src/features/copilot/CopilotDrawer.tsx) | Full-height responsive investigation drawer with evidence grounding and numbered triage paths. |
+| **Live Voice Panel** | [`frontend/src/features/copilot/LiveVoicePanel.tsx`](frontend/src/features/copilot/LiveVoicePanel.tsx) | Real-time bidirectional voice assistant interface with stateful orbit/waveform visualization. |
+| **Telemetry Timeline** | [`frontend/src/features/timeline/Timeline.tsx`](frontend/src/features/timeline/Timeline.tsx) | ECharts streaming sparklines with time scrubbing and pause/resume controls. |
+| **Metrics Dashboard** | [`frontend/src/features/metrics/MetricsPage.tsx`](frontend/src/features/metrics/MetricsPage.tsx) | Benchmark tables for F1 score, Top-1/Top-3 localization accuracy, and Modbus latency. |
+| **Zustand Store** | [`frontend/src/store/live.ts`](frontend/src/store/live.ts) | Centralized state store managing telemetry buffer, active incidents, and connection health. |
+| **WebSocket Client** | [`frontend/src/lib/ws.ts`](frontend/src/lib/ws.ts) | Resilient WebSocket connection to `/ws/live` with automatic reconnection and fallback. |
+
+---
+
+### ⚡ Layer 2: API & Gateway (FastAPI + Cloudflare Workers)
+| Component / Module | Source File | Description |
+|---|---|---|
+| **Edge Gateway** | [`deploy/gateway/src/index.mjs`](deploy/gateway/src/index.mjs) | Cloudflare Worker reverse proxy combining Vercel frontend and Render backend into a single origin. |
+| **Gateway Config** | [`deploy/gateway/wrangler.jsonc`](deploy/gateway/wrangler.jsonc) | Cloudflare Wrangler configuration routing `/api/*` and `/ws/live` to Render and `/` to Vercel. |
+| **FastAPI Root** | [`backend/app/main.py`](backend/app/main.py) | Application factory (`create_app`), async lifespan management, CORS configuration. |
+| **Gateway Boundary** | [`backend/app/api/gateway.py`](backend/app/api/gateway.py) | Middleware verifying reverse proxy tokens and managing WebSocket upgrades. |
+| **Security & Auth** | [`backend/app/api/security.py`](backend/app/api/security.py) | Header-based authentication (`X-API-Key == AT_API_KEY`), sliding-window attack rate limiting. |
+| **REST Controller** | [`backend/app/api/rest.py`](backend/app/api/rest.py) | Endpoints: `GET /api/status`, `POST /api/mode`, `POST /api/attack`, `POST /api/isolate`, `GET /api/incidents`, `GET /api/incidents/{id}/report.pdf`. |
+| **WebSocket Hub** | [`backend/app/api/ws.py`](backend/app/api/ws.py) | Broadcast hub dispatching engine telemetry ticks to connected frontends at 2 Hz (`/ws/live`). |
+| **Live Voice WS** | [`backend/app/api/live_voice.py`](backend/app/api/live_voice.py) | WebSocket bridge streaming PCM16 audio bidirectionally with Google Gemini Live API. |
+| **Pydantic Schemas** | [`backend/app/schemas.py`](backend/app/schemas.py) | Strict data schemas for `Sample`, `Incident`, `OriginCandidate`, `PathStep`, and `AttackRequest`. |
+
+---
+
+### 🧠 Layer 3: Services & Core Detection Engine
+| Component / Module | Source File | Description |
+|---|---|---|
+| **Core Engine** | [`backend/app/engine.py`](backend/app/engine.py) | Orchestrates physics step, detector execution, localization ranking, and 5-minute ring buffer. |
+| **Runtime Dispatcher** | [`backend/app/runtime.py`](backend/app/runtime.py) | Polymorphic runtime switcher selecting `Engine` (SIM), `HaiEngine` (HAI), or `LiveRuntime` (LIVE). |
+| **GDN Forecaster** | [`backend/app/detect/forecaster.py`](backend/app/detect/forecaster.py) | Graph Deviation Network with graph attention layers predicting expected sensor values. |
+| **Streaming Detector** | [`backend/app/detect/detector.py`](backend/app/detect/detector.py) | Calculates forecast residuals, applies EWMA filter ($\alpha = 0.25$), and checks 3-sample persistence. |
+| **Baseline Detector** | [`backend/app/detect/baseline.py`](backend/app/detect/baseline.py) | Traditional baseline: Isolation Forest combined with $3\sigma$ thresholding for split comparison. |
+| **Origin Localizer** | [`backend/app/localize/locator.py`](backend/app/localize/locator.py) | Tri-signal ranking algorithm: $0.6 \times \text{Deviation} + 0.2 \times \text{Onset} + 0.2 \times \text{Causal}$. |
+| **Incident Manager** | [`backend/app/localize/incident.py`](backend/app/localize/incident.py) | Manages incident states (`new`, `active`, `contained`, `closed`) and evaluates ambiguity gates. |
+| **Copilot Engine** | [`backend/app/explain/copilot_engine.py`](backend/app/explain/copilot_engine.py) | Grounded evidence summarizer and Gemini integration with zero-hallucination fallback. |
+| **MITRE ICS Mapper** | [`backend/app/explain/templates.py`](backend/app/explain/templates.py) | Maps components to MITRE ATT&CK for ICS technique IDs (`T0856`, `T0831`, `T0855`) and actions. |
+| **Plant Simulator** | [`backend/app/sim/plant.py`](backend/app/sim/plant.py) | 10 Hz Euler ODE numerical solver simulating 2-stage water plant hydraulics and control logic. |
+| **Live Modbus Source** | [`backend/app/live/source.py`](backend/app/live/source.py) | Non-blocking Modbus TCP poller, sample aligner, and quality tracking engine (`Good`, `Stale`, `Frozen`). |
+| **PDF Report Service** | [`backend/app/report/pdf.py`](backend/app/report/pdf.py) | Dependency-free ASCII/PostScript PDF engine generating official 1-page audit certificates. |
+
+---
+
+### 💾 Layer 4: Storage & Data Persistence
+| Component / Module | Source File | Description |
+|---|---|---|
+| **Incident SQLite DB** | [`backend/app/soc.py`](backend/app/soc.py) | SQLite database (`data/investigations.sqlite`, WAL mode) storing immutable incident evidence and cases. |
+| **Neural Weights** | [`backend/models/`](backend/models/) | Pre-trained PyTorch checkpoints (`gdn.pt`, `mlp.pt`), `baseline.joblib`, and causal `graph.json`. |
+| **Evaluation Reports** | [`reports/`](reports/) | Benchmark results (`metrics.json`, `robustness.json`, `baseline_comparison.json`) with F1 scores and ROC metrics. |
+
+---
+
+### 🏭 Layer 5: External Protocol & Hardware
+| Component / Module | Source File | Description |
+|---|---|---|
+| **Plant Emulator** | [`plant_emulator/server.py`](plant_emulator/server.py) | Modbus TCP server on port `5020` simulating hardware registers for PLC coils and holding registers. |
+| **Tag Map Configuration** | [`config/tagmap.yaml`](config/tagmap.yaml) | Mapping file linking human-readable tag names (`LIT101`, `MV101`) to Modbus register addresses. |
+| **Attacker Tool** | [`attacker/cli.py`](attacker/cli.py) | Standalone penetration test tool allowlisted to loopback to inject sensor offsets via Modbus writes. |
+| **HAI Testbed** | [`data/hai/`](data/hai/) | Dataset files from Korean ETRI hardware testbed used for evaluation replay. |
+
+---
+
+## 🔄 End-to-End Incident Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Operator as Plant Operator
+    participant UI as React UI (Digital Twin)
+    participant REST as FastAPI REST API
+    participant Engine as Engine (2 Hz Loop)
+    participant Plant as Sim Plant / Modbus Emulator
+    participant GDN as GDN Forecaster
+    participant Localizer as Tri-Signal Localizer
+    participant Store as SQLite DB / PDF Engine
+
+    Operator->>UI: 1. Select scenario & click "Launch" (e.g. LIT101 sensor offset)
+    UI->>REST: POST /api/attack {target: "LIT101", scenario: "sensor_offset", mag: -25}
+    REST->>Engine: launch(attack_spec)
+    Engine->>Plant: Apply spoofing offset on LIT101
+    
+    loop Every 500 ms (2 Hz)
+        Engine->>Plant: Step physics / Poll Modbus registers
+        Plant-->>Engine: Telemetry sample (true & measured values)
+        Engine->>GDN: predict(window)
+        GDN-->>Engine: Forecast residual error
+        Engine->>Localizer: check_sustained(errors)
+        alt Residual exceeds threshold for 3 samples
+            Localizer->>Localizer: Compute deviation (0.6) + onset (0.2) + causal (0.2)
+            Localizer-->>Engine: Incident detected: Origin = LIT101 (84% conf)
+            Engine->>Store: Save incident to SQLite
+        end
+        Engine-->>UI: WebSocket broadcast (Sample + Incident state)
+    end
+
+    UI->>UI: Status turns to INCIDENT; Siren sounds; LIT101 badge glows red
+    Operator->>UI: 2. Click "Isolate LIT101"
+    UI->>REST: POST /api/isolate {incident_id, node_id: "LIT101"}
+    REST->>Engine: isolate("LIT101")
+    Engine->>Plant: Engage Virtual Sensor Self-Healing (substitute predicted value)
+    Plant-->>Engine: Tank levels stabilize; process returns to 50% setpoint
+    Engine-->>UI: Status changes to CONTAINED (Chime sounds)
+    Operator->>UI: 3. Click "Report" icon
+    UI->>REST: GET /api/incidents/{id}/report.pdf
+    REST->>Store: Render PDF PostScript
+    REST-->>Operator: 1-page forensic incident audit report downloaded
 ```
 
 ---
@@ -139,7 +259,7 @@ Evaluated on held-out test attacks across 50 attack runs (10 per scenario), 20 c
 ## ⚡ Quick Start
 
 ### Option 1: Open the Live Cloud Dashboard
-Simply visit [https://tech-wizards-attacktrace.vercel.app](https://tech-wizards-attacktrace.vercel.app) or [https://attacktrace-console.jinsu-j2005.workers.dev](https://attacktrace-console.jinsu-j2005.workers.dev). No installation required.
+Visit [https://tech-wizards-attacktrace.vercel.app](https://tech-wizards-attacktrace.vercel.app) or [https://attacktrace-console.jinsu-j2005.workers.dev](https://attacktrace-console.jinsu-j2005.workers.dev).
 
 ### Option 2: Run with Docker Compose
 ```bash
@@ -204,20 +324,24 @@ npm run dev
 
 ---
 
-## 🗺 Codebase Navigation & Knowledge Graph
+## 🗺 Graphify Codebase Navigation
 
-This repository is indexed with **Graphify** (`graphify-out/`), featuring a 2,871-node knowledge graph capturing dependencies, AST symbols, and cross-subsystem call flows.
+The entire codebase is indexed into a persistent **Graphify Knowledge Graph** (`graphify-out/`):
 
-You can inspect or query the graph directly:
+- **Interactive 2D/3D Graph Visualization**: [`graphify-out/graph.html`](graphify-out/graph.html)
+- **Call-Flow Hierarchy**: [`graphify-out/Attacktrace-callflow.html`](graphify-out/Attacktrace-callflow.html)
+- **Graph Metrics & Community Report**: [`graphify-out/GRAPH_REPORT.md`](graphify-out/GRAPH_REPORT.md)
+
+CLI inspection commands:
 ```bash
-# Query any architectural concept or component
+# Query any concept, function, or subsystem
 graphify query "How does virtual sensor self-healing work?"
 
-# Find shortest path between two symbols
+# Trace dependencies or relationship paths between two nodes
 graphify path "Engine" "VirtualSensor"
 
-# Open interactive visual graph in browser
-# View file: graphify-out/graph.html
+# Deep-dive into a specific abstraction or God Node
+graphify explain "backend_app_engine_engine"
 ```
 
 ---

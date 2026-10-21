@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>Attacktrace — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 2879 nodes, 9036 edges, 128 communities. Commit: 206bef5</p>
+<p class="subtitle">Generated from graphify knowledge graph: 2879 nodes, 9041 edges, 129 communities. Commit: f1d1c1c</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -74,10 +74,10 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <a href="#security-global">Security &amp; Global Graph</a>
     <a href="#tests-fixtures">Tests &amp; Fixtures</a>
     <a href="#backend-app-schemaspy">Backend App Schemaspy</a>
-    <a href="#backend-app-enginepy">Backend App Enginepy</a>
     <a href="#docs-review-calibration">Docs Review Calibration</a>
     <a href="#frontend-metricsts-metrics">Frontend Metricsts Metrics</a>
     <a href="#backend-live-app">Backend Live App</a>
+    <a href="#readmemd-third-partymd">Readmemd Third Partymd</a>
     <a href="#other">Other</a>
 </div>
 
@@ -90,11 +90,11 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 flowchart LR
     EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>3 nodes</small>")
     class EXTRACT_PIPELINE_5F350230 module;
-    BUILD_GRAPH_321CBB04("Graph Build<br/><small>379 nodes</small>")
+    BUILD_GRAPH_321CBB04("Graph Build<br/><small>353 nodes</small>")
     class BUILD_GRAPH_321CBB04 module;
     ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>120 nodes</small>")
     class ANALYSIS_CLUSTERING_C79796DA module;
-    OUTPUTS_DOCS_ED82387C("Outputs &amp; Docs<br/><small>56 nodes</small>")
+    OUTPUTS_DOCS_ED82387C("Outputs &amp; Docs<br/><small>72 nodes</small>")
     class OUTPUTS_DOCS_ED82387C module;
     CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>149 nodes</small>")
     class CLI_SKILLS_9964CBB8 module;
@@ -104,32 +104,32 @@ flowchart LR
     class SERVE_API_35EC8E86 module;
     SECURITY_GLOBAL_5B9C6A04("Security &amp; Global Graph<br/><small>8 nodes</small>")
     class SECURITY_GLOBAL_5B9C6A04 module;
-    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>1532 nodes</small>")
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>1543 nodes</small>")
     class TESTS_FIXTURES_B84B1DCC module;
     BACKEND_APP_SCHEMASPY_6DA0EDFD("Backend App Schemaspy<br/><small>32 nodes</small>")
     class BACKEND_APP_SCHEMASPY_6DA0EDFD module;
-    BACKEND_APP_ENGINEPY_3BE07FD7("Backend App Enginepy<br/><small>27 nodes</small>")
-    class BACKEND_APP_ENGINEPY_3BE07FD7 module;
     DOCS_REVIEW_CALIBRATION_7F9C3DC5("Docs Review Calibration<br/><small>23 nodes</small>")
     class DOCS_REVIEW_CALIBRATION_7F9C3DC5 module;
     FRONTEND_METRICSTS_METRICS_C37093E9("Frontend Metricsts Metrics<br/><small>23 nodes</small>")
     class FRONTEND_METRICSTS_METRICS_C37093E9 module;
     BACKEND_LIVE_APP_529A3068("Backend Live App<br/><small>22 nodes</small>")
     class BACKEND_LIVE_APP_529A3068 module;
-    OTHER_D0941E68("Other<br/><small>171 nodes</small>")
+    READMEMD_THIRD_PARTYMD_313A2E96("Readmemd Third Partymd<br/><small>20 nodes</small>")
+    class READMEMD_THIRD_PARTYMD_313A2E96 module;
+    OTHER_D0941E68("Other<br/><small>177 nodes</small>")
     class OTHER_D0941E68 module;
-    BUILD_GRAPH_321CBB04 -->|imports x274| TESTS_FIXTURES_B84B1DCC
-    SERVE_API_35EC8E86 -->|imports x233| TESTS_FIXTURES_B84B1DCC
-    TESTS_FIXTURES_B84B1DCC -->|calls x229| BUILD_GRAPH_321CBB04
-    TESTS_FIXTURES_B84B1DCC -->|imports x196| SERVE_API_35EC8E86
-    ANALYSIS_CLUSTERING_C79796DA -->|imports x157| TESTS_FIXTURES_B84B1DCC
-    TESTS_FIXTURES_B84B1DCC -->|imports x146| ANALYSIS_CLUSTERING_C79796DA
+    BUILD_GRAPH_321CBB04 -->|imports x275| TESTS_FIXTURES_B84B1DCC
+    SERVE_API_35EC8E86 -->|imports x236| TESTS_FIXTURES_B84B1DCC
+    TESTS_FIXTURES_B84B1DCC -->|calls x233| BUILD_GRAPH_321CBB04
+    TESTS_FIXTURES_B84B1DCC -->|imports x195| SERVE_API_35EC8E86
+    ANALYSIS_CLUSTERING_C79796DA -->|imports x162| TESTS_FIXTURES_B84B1DCC
+    TESTS_FIXTURES_B84B1DCC -->|imports x145| ANALYSIS_CLUSTERING_C79796DA
     TESTS_FIXTURES_B84B1DCC -->|imports x112| CLI_SKILLS_9964CBB8
-    TESTS_FIXTURES_B84B1DCC -->|uses x103| BACKEND_APP_ENGINEPY_3BE07FD7
     CLI_SKILLS_9964CBB8 -->|imports x83| TESTS_FIXTURES_B84B1DCC
-    TESTS_FIXTURES_B84B1DCC -->|imports x55| BACKEND_APP_SCHEMASPY_6DA0EDFD
+    TESTS_FIXTURES_B84B1DCC -->|imports x57| BACKEND_APP_SCHEMASPY_6DA0EDFD
     BUILD_GRAPH_321CBB04 -->|imports x51| ANALYSIS_CLUSTERING_C79796DA
     SERVE_API_35EC8E86 -->|imports x36| CLI_SKILLS_9964CBB8
+    CLI_SKILLS_9964CBB8 -->|imports x36| SERVE_API_35EC8E86
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -146,24 +146,24 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>3</td><td><code>129</code></td></tr><tr><td>Graph Build</td><td>379</td><td><code>3, 81, 48, 109, 30, 58, 115, 46, 55, 60, 75, 78, 87, 90</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>120</td><td><code>41, 24, 8</code></td></tr><tr><td>Outputs &amp; Docs</td><td>56</td><td><code>39, 65, 68, 82</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>149</td><td><code>17, 70, 18, 35, 125, 92</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>2</td><td><code>110</code></td></tr><tr><td>Serving API</td><td>332</td><td><code>7, 12, 19, 49, 43, 77, 44, 5, 40, 57, 80, 84</code></td></tr><tr><td>Security &amp; Global Graph</td><td>8</td><td><code>88</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>1532</td><td><code>38, 6, 21, 72, 36, 0, 11, 13, 20, 14, 56, 16, 33, 28, 47, 45, 26, 2, 51, 23, 27, 1, 50, 52, 9, 29, 4, 32, 59, 62, 64, 10, 25, 31, 34, 66, 71, 61, 63, 73, 89, 91, 111, 102</code></td></tr><tr><td>Backend App Schemaspy</td><td>32</td><td><code>22</code></td></tr><tr><td>Backend App Enginepy</td><td>27</td><td><code>112</code></td></tr><tr><td>Docs Review Calibration</td><td>23</td><td><code>54</code></td></tr><tr><td>Frontend Metricsts Metrics</td><td>23</td><td><code>67</code></td></tr><tr><td>Backend Live App</td><td>22</td><td><code>15</code></td></tr><tr><td>Other</td><td>171</td><td><code>53, 37, 69, 74, 42, 108, 76, 85, 114, 79, 86, 118, 127, 128, 83, 93, 94, 95, 96, 113, 119, 97, 98, 100, 101, 103, 104, 105, 106, 107, 120, 121, 122, 123, 124, 130, 99</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>3</td><td><code>129</code></td></tr><tr><td>Graph Build</td><td>353</td><td><code>3, 81, 48, 109, 30, 58, 46, 55, 60, 75, 78, 87, 90</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>120</td><td><code>41, 24, 8</code></td></tr><tr><td>Outputs &amp; Docs</td><td>72</td><td><code>39, 65, 68, 82</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>149</td><td><code>17, 70, 18, 35, 125, 92</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>2</td><td><code>110</code></td></tr><tr><td>Serving API</td><td>332</td><td><code>7, 12, 19, 49, 43, 77, 44, 5, 40, 57, 80, 84</code></td></tr><tr><td>Security &amp; Global Graph</td><td>8</td><td><code>88</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>1543</td><td><code>38, 6, 21, 72, 36, 0, 11, 13, 20, 14, 56, 16, 33, 28, 47, 45, 26, 2, 51, 23, 27, 1, 50, 52, 9, 112, 29, 4, 32, 59, 62, 10, 25, 31, 34, 66, 71, 61, 63, 73, 89, 91, 64, 111, 102</code></td></tr><tr><td>Backend App Schemaspy</td><td>32</td><td><code>22</code></td></tr><tr><td>Docs Review Calibration</td><td>23</td><td><code>54</code></td></tr><tr><td>Frontend Metricsts Metrics</td><td>23</td><td><code>67</code></td></tr><tr><td>Backend Live App</td><td>22</td><td><code>15</code></td></tr><tr><td>Readmemd Third Partymd</td><td>20</td><td><code>115</code></td></tr><tr><td>Other</td><td>177</td><td><code>53, 37, 69, 74, 42, 108, 76, 85, 114, 79, 116, 86, 118, 127, 128, 83, 93, 94, 95, 96, 113, 119, 97, 98, 100, 101, 103, 104, 105, 106, 107, 120, 121, 122, 123, 124, 130, 99</code></td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Core Flow</h4>
-    <div class="arrow-chain">Extraction Pipeline -&gt; Graph Build -&gt; Tests &amp; Fixtures -&gt; Serving API -&gt; CLI &amp; Skill Installers -&gt; Backend App Schemaspy -&gt; Backend App Enginepy</div>
+    <div class="arrow-chain">Extraction Pipeline -&gt; Graph Build -&gt; Tests &amp; Fixtures -&gt; Serving API -&gt; CLI &amp; Skill Installers -&gt; Backend App Schemaspy -&gt; Outputs &amp; Docs</div>
   </div>
 </div>
 <div class="grid">
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>2879 nodes · 9036 edges · 128 communities (97 shown, 31 thin omitted)</li>
-      <li>Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 914 edges (avg confidence: 0.9)</li>
+      <li>2879 nodes · 9041 edges · 129 communities (97 shown, 32 thin omitted)</li>
+      <li>Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 919 edges (avg confidence: 0.9)</li>
       <li>Token cost: 0 input · 0 output</li>
-      <li>1. `Engine` - 141 edges</li>
+      <li>1. `Engine` - 142 edges</li>
       <li>2. `Settings` - 107 edges</li>
-      <li>3. `LiveRuntime` - 69 edges</li>
+      <li>3. `LiveRuntime` - 70 edges</li>
     </ul>
   </div>
 </div>
@@ -248,12 +248,12 @@ flowchart LR
 
 <!-- ====== 3. Graph Build ====== -->
 <h2 id="build-graph">3. Graph Build</h2>
-<p>Graph Build groups implementation around frontend, backend, graph, packagejson, mostly in frontend/package.json, README.md, frontend/tsconfig.json. This section covers 379 nodes and 670 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Graph Build groups implementation around frontend, backend, graph, packagejson, mostly in frontend/package.json, frontend/tsconfig.json, deploy/gateway/package.json. This section covers 353 nodes and 645 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Graph Build (379 nodes, 670 edges)
+    %% Section: Graph Build (353 nodes, 645 edges)
     subgraph build_graph_features_graph_edges_ts_dfe8c373["features/graph/edges.ts"]
         frontend_src_features_graph_edges_visibleedges_79251d7d("visibleEdges()<br/><small>features/graph/edges.ts</small>")
         frontend_src_features_graph_edges_layoutedges_9310d5b1("layoutEdges()<br/><small>features/graph/edges.ts</small>")
@@ -301,7 +301,7 @@ flowchart LR
     frontend_src_features_graph_graphview_a1c8fee8 -->|imports| frontend_src_features_graph_layout_grouplayout_1a4fe306
     frontend_src_features_graph_graphview_a1c8fee8 -->|imports| frontend_src_features_graph_layout_layerlayout_1297b17c
     backend_eval_live_faults_712b2027 -->|imports| backend_eval_live_soak_14e9e816
-    %% Omitted for readability: 361 nodes, 0 edges
+    %% Omitted for readability: 335 nodes, 0 edges
     class frontend_src_features_graph_edges_visibleedges_79251d7d function;
     class frontend_src_features_graph_edges_layoutedges_9310d5b1 function;
     class frontend_src_features_graph_edges_edgedelay_1f13cb5f function;
@@ -589,18 +589,18 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>frontend/package.json</code></td><td>63 nodes</td></tr>
-<tr><td><code>README.md</code></td><td>19 nodes</td></tr>
 <tr><td><code>frontend/tsconfig.json</code></td><td>18 nodes</td></tr>
 <tr><td><code>deploy/gateway/package.json</code></td><td>14 nodes</td></tr>
 <tr><td><code>backend/eval/live_soak.py</code></td><td>12 nodes</td></tr>
 <tr><td><code>app/graph/builder.py</code></td><td>11 nodes</td></tr>
 <tr><td><code>features/graph/GraphParts.tsx</code></td><td>11 nodes</td></tr>
 <tr><td><code>submission/tools/capture_screenshots.mjs</code></td><td>11 nodes</td></tr>
+<tr><td><code>backend/eval/live_faults.py</code></td><td>10 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x240, imports x149, calls x133, imports x63. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x216, imports x149, calls x133, imports x63. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -970,12 +970,12 @@ flowchart LR
 
 <!-- ====== 5. Outputs & Docs ====== -->
 <h2 id="outputs-docs">5. Outputs &amp; Docs</h2>
-<p>Outputs &amp; Docs groups implementation around attacktrace, documentationmd, submission, report, mostly in submission/AttackTrace_Documentation.md, app/report/pdf.py, app/report/incident.py. This section covers 56 nodes and 77 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Outputs &amp; Docs groups implementation around backend, report, attacktrace, app, mostly in submission/AttackTrace_Documentation.md, app/report/pdf.py, backend/tests/test_report.py. This section covers 72 nodes and 109 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Outputs &amp; Docs (56 nodes, 77 edges)
+    %% Section: Outputs &amp; Docs (72 nodes, 109 edges)
     subgraph outputs_docs_app_report_pdf_py_2042c154["app/report/pdf.py"]
         backend_app_report_pdf_page_89485c81("Page<br/><small>app/report/pdf.py</small>")
         backend_app_report_pdf_page_init_04cfa32b("__init__()<br/><small>app/report/pdf.py</small>")
@@ -984,45 +984,47 @@ flowchart LR
         backend_app_report_pdf_page_hline_7a6d1748("hline()<br/><small>app/report/pdf.py</small>")
         backend_app_report_pdf_page_build_93719012("build()<br/><small>app/report/pdf.py</small>")
         backend_app_report_pdf_wrap_61998260("wrap()<br/><small>app/report/pdf.py</small>")
-        backend_app_report_pdf_escape_f1216f0f("_escape()<br/><small>app/report/pdf.py</small>")
-        backend_app_report_pdf_ascii_text_48335506("ascii_text()<br/><small>app/report/pdf.py</small>")
-        backend_app_report_pdf_text_width_7c9021b4("text_width()<br/><small>app/report/pdf.py</small>")
-        backend_app_report_pdf_4bb914c6("pdf.py")
     end
     subgraph outputs_docs_app_report_incident_py_5a859736["app/report/incident.py"]
         backend_app_report_incident_render_report_4aae6ffb("render_report()<br/><small>app/report/incident.py</small>")
         backend_app_report_incident_6a0e9d32("incident.py")
-        backend_app_report_incident_render_report_para_d819e887("para()<br/><small>app/report/incident.py</small>")
         backend_app_report_incident_eta_4246cac8("_eta()<br/><small>app/report/incident.py</small>")
         backend_app_report_incident_utc_1c353938("_utc()<br/><small>app/report/incident.py</small>")
+        backend_app_report_incident_render_report_para_d819e887("para()<br/><small>app/report/incident.py</small>")
     end
-    backend_app_report_init_cd2f028e("__init__.py")
-    backend_tests_test_report_test_pdf_text_helpers_754e227d("test_pdf_text_helpers()<br/><small>backend/tests/test_report.py</small>")
+    subgraph outputs_docs_backend_tests_test_report_py_8576a41b["backend/tests/test_report.py"]
+        backend_tests_test_report_ec97bd6a("test_report.py")
+        backend_tests_test_report_test_pdf_text_helpers_754e227d("test_pdf_text_helpers()<br/><small>backend/tests/test_report.py</small>")
+        backend_tests_test_report_test_impact_snapshot_k_2e170f3b("the worst values()<br/><small>backend/tests/test_report.py</small>")
+        backend_tests_test_report_test_report_shows_the_ae1e6514("banner and breakdown()<br/><small>backend/tests/test_report.py</small>")
+    end
+    backend_app_engine_worst_impact_ffc79293("worst_impact()<br/><small>backend/app/engine.py</small>")
+    backend_app_schemas_impact_32f96d2c("Impact<br/><small>backend/app/schemas.py</small>")
     backend_app_report_pdf_page_89485c81 -->|method| backend_app_report_pdf_page_init_04cfa32b
     backend_app_report_pdf_page_89485c81 -->|method| backend_app_report_pdf_page_text_6f2aef91
     backend_app_report_pdf_page_89485c81 -->|method| backend_app_report_pdf_page_rect_e0c4afee
     backend_app_report_pdf_page_89485c81 -->|method| backend_app_report_pdf_page_hline_7a6d1748
     backend_app_report_pdf_page_89485c81 -->|method| backend_app_report_pdf_page_build_93719012
+    backend_app_engine_worst_impact_ffc79293 -->|calls| backend_app_schemas_impact_32f96d2c
     backend_app_report_incident_render_report_4aae6ffb -->|calls| backend_app_report_incident_eta_4246cac8
     backend_app_report_incident_render_report_4aae6ffb -->|calls| backend_app_report_pdf_page_89485c81
     backend_app_report_incident_render_report_4aae6ffb -->|calls| backend_app_report_pdf_wrap_61998260
     backend_app_report_incident_render_report_4aae6ffb -->|calls| backend_app_report_incident_utc_1c353938
     backend_app_report_incident_render_report_para_d819e887 -->|calls| backend_app_report_pdf_wrap_61998260
-    backend_app_report_pdf_escape_f1216f0f -->|calls| backend_app_report_pdf_ascii_text_48335506
-    backend_app_report_pdf_page_text_6f2aef91 -->|calls| backend_app_report_pdf_escape_f1216f0f
-    backend_app_report_pdf_text_width_7c9021b4 -->|calls| backend_app_report_pdf_ascii_text_48335506
-    backend_app_report_pdf_wrap_61998260 -->|calls| backend_app_report_pdf_ascii_text_48335506
-    backend_app_report_pdf_wrap_61998260 -->|calls| backend_app_report_pdf_text_width_7c9021b4
-    backend_tests_test_report_test_pdf_text_helpers_754e227d -->|calls| backend_app_report_pdf_ascii_text_48335506
+    backend_tests_test_report_test_impact_snapshot_k_2e170f3b -->|calls| backend_app_engine_worst_impact_ffc79293
+    backend_tests_test_report_test_impact_snapshot_k_2e170f3b -->|calls| backend_app_schemas_impact_32f96d2c
     backend_tests_test_report_test_pdf_text_helpers_754e227d -->|calls| backend_app_report_pdf_wrap_61998260
     backend_tests_test_report_test_pdf_text_helpers_754e227d -->|calls| backend_app_report_pdf_page_89485c81
+    backend_tests_test_report_test_report_shows_the_ae1e6514 -->|calls| backend_app_report_incident_render_report_4aae6ffb
     backend_app_report_incident_6a0e9d32 -->|imports| backend_app_report_pdf_page_89485c81
-    backend_app_report_incident_6a0e9d32 -->|imports| backend_app_report_pdf_text_width_7c9021b4
     backend_app_report_incident_6a0e9d32 -->|imports| backend_app_report_pdf_wrap_61998260
-    backend_app_report_incident_6a0e9d32 -->|imports| backend_app_report_pdf_4bb914c6
-    backend_app_report_init_cd2f028e -->|imports| backend_app_report_incident_render_report_4aae6ffb
-    backend_app_report_incident_render_report_4aae6ffb -->|calls| backend_app_report_pdf_page_hline_7a6d1748
-    %% Omitted for readability: 38 nodes, 5 edges
+    backend_app_report_incident_6a0e9d32 -->|imports| backend_app_schemas_impact_32f96d2c
+    backend_tests_test_report_ec97bd6a -->|imports| backend_app_engine_worst_impact_ffc79293
+    backend_tests_test_report_ec97bd6a -->|imports| backend_app_report_incident_render_report_4aae6ffb
+    backend_tests_test_report_ec97bd6a -->|imports| backend_app_report_pdf_page_89485c81
+    backend_tests_test_report_ec97bd6a -->|imports| backend_app_report_pdf_wrap_61998260
+    backend_tests_test_report_ec97bd6a -->|imports| backend_app_schemas_impact_32f96d2c
+    %% Omitted for readability: 54 nodes, 7 edges
     class backend_app_report_pdf_page_89485c81 klass;
     class backend_app_report_pdf_page_init_04cfa32b function;
     class backend_app_report_pdf_page_text_6f2aef91 function;
@@ -1030,17 +1032,17 @@ flowchart LR
     class backend_app_report_pdf_page_hline_7a6d1748 function;
     class backend_app_report_pdf_page_build_93719012 function;
     class backend_app_report_pdf_wrap_61998260 function;
-    class backend_app_report_pdf_escape_f1216f0f function;
-    class backend_app_report_pdf_ascii_text_48335506 function;
-    class backend_app_report_pdf_text_width_7c9021b4 function;
-    class backend_app_report_pdf_4bb914c6 module;
     class backend_app_report_incident_render_report_4aae6ffb function;
     class backend_app_report_incident_6a0e9d32 module;
-    class backend_app_report_incident_render_report_para_d819e887 function;
     class backend_app_report_incident_eta_4246cac8 function;
     class backend_app_report_incident_utc_1c353938 function;
-    class backend_app_report_init_cd2f028e module;
+    class backend_app_report_incident_render_report_para_d819e887 function;
+    class backend_tests_test_report_ec97bd6a test;
     class backend_tests_test_report_test_pdf_text_helpers_754e227d test;
+    class backend_tests_test_report_test_impact_snapshot_k_2e170f3b test;
+    class backend_tests_test_report_test_report_shows_the_ae1e6514 test;
+    class backend_app_engine_worst_impact_ffc79293 function;
+    class backend_app_schemas_impact_32f96d2c klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -1072,6 +1074,46 @@ flowchart LR
 </tr>
 <tr>
   <td>2</td>
+  <td><code>Impact</code><br><small style="color:var(--muted)">backend/app/schemas.py</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td><code>_has_hazard()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>engine.py</code><br><small style="color:var(--muted)">app/live/engine.py</small><br>+7 more</td>
+  <td>No direct outbound edge</td>
+  <td>Impact node in backend/app/schemas.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>._impact()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>step_sample()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>._impact() node in backend/app/engine.py.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>worst_impact()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>step_sample()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>test_report.py</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small><br><code>the worst values()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
+  <td><code>Impact</code><br><small style="color:var(--muted)">backend/app/schemas.py</small></td>
+  <td>worst_impact() node in backend/app/engine.py.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>soonest()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>soonest() node in backend/app/engine.py.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>._impact()</code><br><small style="color:var(--muted)">app/live/engine.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>LiveEngine</code><br><small style="color:var(--muted)">app/live/engine.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>._impact() node in app/live/engine.py.</td>
+</tr>
+<tr>
+  <td>7</td>
   <td><code>_eta()</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
@@ -1079,7 +1121,7 @@ flowchart LR
   <td>_eta() node in app/report/incident.py.</td>
 </tr>
 <tr>
-  <td>3</td>
+  <td>8</td>
   <td><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>__init__.py</code><br><small style="color:var(--muted)">app/report/__init__.py</small><br><code>banner and breakdown()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small><br><code>get_incident_report()</code><br><small style="color:var(--muted)">app/api/rest.py</small><br>+2 more</td>
@@ -1087,7 +1129,7 @@ flowchart LR
   <td>render_report() node in app/report/incident.py.</td>
 </tr>
 <tr>
-  <td>4</td>
+  <td>9</td>
   <td><code>heading()</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
@@ -1095,7 +1137,7 @@ flowchart LR
   <td>heading() node in app/report/incident.py.</td>
 </tr>
 <tr>
-  <td>5</td>
+  <td>10</td>
   <td><code>para()</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
@@ -1103,7 +1145,7 @@ flowchart LR
   <td>para() node in app/report/incident.py.</td>
 </tr>
 <tr>
-  <td>6</td>
+  <td>11</td>
   <td><code>_utc()</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
@@ -1111,7 +1153,7 @@ flowchart LR
   <td>_utc() node in app/report/incident.py.</td>
 </tr>
 <tr>
-  <td>7</td>
+  <td>12</td>
   <td><code>ascii_text()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>_escape()</code><br><small style="color:var(--muted)">app/report/pdf.py</small><br><code>test_pdf_text_helpers()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small><br><code>test_report.py</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small><br>+2 more</td>
@@ -1119,7 +1161,7 @@ flowchart LR
   <td>ascii_text() node in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>8</td>
+  <td>13</td>
   <td><code>_escape()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>text()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
@@ -1127,7 +1169,7 @@ flowchart LR
   <td>_escape() node in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>9</td>
+  <td>14</td>
   <td><code>.build()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Page</code><br><small style="color:var(--muted)">app/report/pdf.py</small><br><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small><br><code>test_pdf_text_helpers()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
@@ -1135,7 +1177,7 @@ flowchart LR
   <td>.build() node in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>10</td>
+  <td>15</td>
   <td><code>.hline()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Page</code><br><small style="color:var(--muted)">app/report/pdf.py</small><br><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
@@ -1143,7 +1185,7 @@ flowchart LR
   <td>.hline() node in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>11</td>
+  <td>16</td>
   <td><code>.__init__()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Page</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
@@ -1151,7 +1193,7 @@ flowchart LR
   <td>.__init__() node in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>12</td>
+  <td>17</td>
   <td><code>.rect()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Page</code><br><small style="color:var(--muted)">app/report/pdf.py</small><br><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
@@ -1159,7 +1201,7 @@ flowchart LR
   <td>.rect() node in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>13</td>
+  <td>18</td>
   <td><code>.text()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Page</code><br><small style="color:var(--muted)">app/report/pdf.py</small><br><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small><br><code>test_pdf_text_helpers()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
@@ -1167,7 +1209,7 @@ flowchart LR
   <td>.text() node in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>14</td>
+  <td>19</td>
   <td><code>text_width()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>incident.py</code><br><small style="color:var(--muted)">app/report/incident.py</small><br><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small><br><code>wrap()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
@@ -1175,7 +1217,7 @@ flowchart LR
   <td>text_width() node in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>15</td>
+  <td>20</td>
   <td><code>wrap()</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>incident.py</code><br><small style="color:var(--muted)">app/report/incident.py</small><br><code>para()</code><br><small style="color:var(--muted)">app/report/incident.py</small><br><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small><br>+2 more</td>
@@ -1183,7 +1225,23 @@ flowchart LR
   <td>wrap() node in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>16</td>
+  <td>21</td>
+  <td><code>check_structure()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>banner and breakdown()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small><br><code>one page pdf()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
+  <td><code>re</code></td>
+  <td>check_structure() node in backend/tests/test_report.py.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>test_impact_snapshot_keeps_the_worst_values()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Impact</code><br><small style="color:var(--muted)">backend/app/schemas.py</small><br><code>with_incident()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small><br>+1 more</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>23</td>
   <td><code>test_pdf_text_helpers()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
@@ -1191,7 +1249,31 @@ flowchart LR
   <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
-  <td>17</td>
+  <td>24</td>
+  <td><code>test_report_endpoint_returns_a_valid_one_page_pdf()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>check_structure()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>with_incident()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
+  <td>Organizes documentation pages, navigation, or content lookup.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>test_report_shows_the_ambiguous_banner_and_breakdown()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>check_structure()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>render_report()</code><br><small style="color:var(--muted)">app/report/incident.py</small><br>+1 more</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>test_unknown_incident_is_404()</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>27</td>
   <td><code>report/incident.py</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
   <td><span class="tag tag-class">Module</span></td>
   <td>External entry / no inbound edge</td>
@@ -1199,7 +1281,7 @@ flowchart LR
   <td>Module file in app/report/incident.py.</td>
 </tr>
 <tr>
-  <td>18</td>
+  <td>28</td>
   <td><code>report/__init__.py</code><br><small style="color:var(--muted)">app/report/__init__.py</small></td>
   <td><span class="tag tag-class">Module</span></td>
   <td><code>rest.py</code><br><small style="color:var(--muted)">app/api/rest.py</small><br><code>test_report.py</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
@@ -1207,7 +1289,7 @@ flowchart LR
   <td>Module file in app/report/__init__.py.</td>
 </tr>
 <tr>
-  <td>19</td>
+  <td>29</td>
   <td><code>pdf.py</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
   <td><span class="tag tag-class">Module</span></td>
   <td><code>incident.py</code><br><small style="color:var(--muted)">app/report/incident.py</small><br><code>test_report.py</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
@@ -1215,92 +1297,12 @@ flowchart LR
   <td>Module file in app/report/pdf.py.</td>
 </tr>
 <tr>
-  <td>20</td>
-  <td><code>Lay out the one-page incident report from an `Incident` and the worst impact…</code><br><small style="color:var(--muted)">app/report/incident.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Lay out the one-page incident report from an `Incident` and the worst impact….</td>
-</tr>
-<tr>
-  <td>21</td>
-  <td><code>One-page incident report (Phase 11 B6).</code><br><small style="color:var(--muted)">app/report/__init__.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for One-page incident report (Phase 11 B6)..</td>
-</tr>
-<tr>
-  <td>22</td>
-  <td><code>Minimal single-page PDF writer (no dependency): text in the built-in Helvetica…</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Minimal single-page PDF writer (no dependency): text in the built-in Helvetica….</td>
-</tr>
-<tr>
-  <td>23</td>
-  <td><code>Greedy word wrap to `width` points.</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Greedy word wrap to `width` points..</td>
-</tr>
-<tr>
-  <td>24</td>
-  <td><code>Top-left origin helpers over PDF&#x27;s bottom-left coordinates.</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Top-left origin helpers over PDF&#x27;s bottom-left coordinates..</td>
-</tr>
-<tr>
-  <td>25</td>
-  <td><code>Fill with a gray level (0 black .. 1 white) and/or stroke the outline.</code><br><small style="color:var(--muted)">app/report/pdf.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Fill with a gray level (0 black .. 1 white) and/or stroke the outline..</td>
-</tr>
-<tr>
-  <td>26</td>
-  <td><code>AttackTrace_Documentation.md</code><br><small style="color:var(--muted)">submission/AttackTrace_Documentation.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing AttackTrace_Documentation.md.</td>
-</tr>
-<tr>
-  <td>27</td>
-  <td><code>1. Problem</code><br><small style="color:var(--muted)">submission/AttackTrace_Documentation.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 1. Problem.</td>
-</tr>
-<tr>
-  <td>28</td>
-  <td><code>2. Solution overview</code><br><small style="color:var(--muted)">submission/AttackTrace_Documentation.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 2. Solution overview.</td>
-</tr>
-<tr>
-  <td>29</td>
-  <td><code>4. Data</code><br><small style="color:var(--muted)">submission/AttackTrace_Documentation.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 4. Data.</td>
-</tr>
-<tr>
   <td>30</td>
-  <td><code>6. Novelty, feasibility, scalability, sustainability</code><br><small style="color:var(--muted)">submission/AttackTrace_Documentation.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
+  <td><code>test_report.py</code><br><small style="color:var(--muted)">backend/tests/test_report.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 6. Novelty, feasibility, scalability, sustainability.</td>
+  <td><code>__init__.py</code><br><small style="color:var(--muted)">app/report/__init__.py</small><br><code>__init__.py</code><br><small style="color:var(--muted)">app/attacks/__init__.py</small><br><code>ascii_text()</code><br><small style="color:var(--muted)">app/report/pdf.py</small><br>+19 more</td>
+  <td>Module file in backend/tests/test_report.py.</td>
 </tr>
 </table>
 
@@ -1311,15 +1313,17 @@ flowchart LR
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>submission/AttackTrace_Documentation.md</code></td><td>30 nodes</td></tr>
 <tr><td><code>app/report/pdf.py</code></td><td>15 nodes</td></tr>
+<tr><td><code>backend/tests/test_report.py</code></td><td>9 nodes</td></tr>
 <tr><td><code>app/report/incident.py</code></td><td>7 nodes</td></tr>
+<tr><td><code>backend/app/engine.py</code></td><td>4 nodes</td></tr>
 <tr><td><code>app/report/__init__.py</code></td><td>2 nodes</td></tr>
-<tr><td><code>backend/tests/test_authentication.py</code></td><td>1 nodes</td></tr>
-<tr><td><code>backend/tests/test_report.py</code></td><td>1 nodes</td></tr>
+<tr><td><code>app/live/engine.py</code></td><td>1 nodes</td></tr>
+<tr><td><code>backend/app/schemas.py</code></td><td>1 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x39, calls x19, explains x6, method x5. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x46, calls x26, imports x12, explains x9. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -2231,12 +2235,12 @@ flowchart LR
 
 <!-- ====== 10. Tests & Fixtures ====== -->
 <h2 id="tests-fixtures">10. Tests &amp; Fixtures</h2>
-<p>Tests &amp; Fixtures groups implementation around backend, test, app, tests, mostly in backend/tests/test_live_connectors.py, backend/tests/test_live_runtime.py, backend/tests/test_attacker.py. This section covers 1532 nodes and 4558 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Tests &amp; Fixtures groups implementation around backend, test, app, tests, mostly in backend/tests/test_live_connectors.py, backend/tests/test_live_runtime.py, backend/app/engine.py. This section covers 1543 nodes and 4673 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Tests &amp; Fixtures (1532 nodes, 4558 edges)
+    %% Section: Tests &amp; Fixtures (1543 nodes, 4673 edges)
     subgraph tests_fixtures_app_detect_baseline_py_61e2a8d1["app/detect/baseline.py"]
         backend_app_detect_baseline_baselinedetector_d4e8cff3("BaselineDetector<br/><small>app/detect/baseline.py</small>")
         backend_app_detect_baseline_baselinedetector_ini_fde5ba1d("__init__()<br/><small>app/detect/baseline.py</small>")
@@ -2251,9 +2255,9 @@ flowchart LR
         backend_app_localize_locator_candidate_286dbfeb("Candidate<br/><small>app/localize/locator.py</small>")
         backend_app_localize_locator_candidate_contribut_6265bdd9("contributions()<br/><small>app/localize/locator.py</small>")
     end
-    subgraph tests_fixtures_plant_emulator_server_py_f20bd58e["plant_emulator/server.py"]
-        plant_emulator_server_plantemulator_d764cc79("PlantEmulator<br/><small>plant_emulator/server.py</small>")
-        plant_emulator_server_plantemulator_start_fbfc5681("start()<br/><small>plant_emulator/server.py</small>")
+    subgraph tests_fixtures_backend_app_engine_py_7b50c8cc["backend/app/engine.py"]
+        backend_app_engine_engine_4fb0b7c8("Engine<br/><small>backend/app/engine.py</small>")
+        backend_app_engine_engine_init_c92f3518("__init__()<br/><small>backend/app/engine.py</small>")
     end
     backend_app_live_runtime_acbd070a("runtime.py")
     backend_tests_test_attacker_2a011982("test_attacker.py")
@@ -2269,20 +2273,21 @@ flowchart LR
     backend_app_detect_baseline_baselinedetector_d4e8cff3 -->|method| backend_app_detect_baseline_baselinedetector_bre_4419eb2e
     backend_app_detect_baseline_baselinedetector_d4e8cff3 -->|method| backend_app_detect_baseline_baselinedetector_ala_6560147e
     backend_app_detect_baseline_baselinedetector_d4e8cff3 -->|method| backend_app_detect_baseline_baselinedetector_ale_9198efbe
-    plant_emulator_server_plantemulator_d764cc79 -->|method| plant_emulator_server_plantemulator_start_fbfc5681
+    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_init_c92f3518
     backend_app_detect_baseline_baselinedetector_ala_6560147e -->|calls| backend_app_detect_baseline_baselinedetector_bre_4419eb2e
     backend_app_detect_baseline_baselinedetector_ale_9198efbe -->|calls| backend_app_detect_baseline_baselinedetector_z_a59107a0
     backend_app_detect_baseline_baselinedetector_ale_9198efbe -->|calls| backend_app_detect_baseline_baselinedetector_bre_4419eb2e
     backend_app_detect_baseline_baselinedetector_bre_4419eb2e -->|calls| backend_app_detect_baseline_baselinedetector_z_a59107a0
     backend_app_detect_baseline_baselinedetector_zsc_80ad3981 -->|calls| backend_app_detect_baseline_baselinedetector_z_a59107a0
-    backend_tests_test_attacker_2a011982 -->|imports| plant_emulator_server_plantemulator_d764cc79
     backend_tests_test_attacker_2a011982 -->|imports| backend_app_detect_baseline_baselinedetector_d4e8cff3
     backend_tests_test_attacker_2a011982 -->|imports| backend_app_live_runtime_acbd070a
+    backend_tests_test_hai_ed5637cb -->|imports| backend_app_engine_engine_4fb0b7c8
     backend_tests_test_detect_a3d1319b -->|imports| backend_app_detect_baseline_baselinedetector_d4e8cff3
     backend_tests_test_live_runtime_caebe0c7 -->|imports| backend_app_detect_baseline_baselinedetector_d4e8cff3
-    backend_tests_test_live_runtime_caebe0c7 -->|imports| plant_emulator_server_plantemulator_d764cc79
+    backend_tests_test_live_runtime_caebe0c7 -->|imports| backend_app_engine_engine_4fb0b7c8
     backend_tests_test_live_runtime_caebe0c7 -->|imports| backend_app_live_runtime_acbd070a
-    %% Omitted for readability: 1514 nodes, 0 edges
+    backend_app_engine_engine_4fb0b7c8 -->|uses| backend_app_detect_baseline_baselinedetector_d4e8cff3
+    %% Omitted for readability: 1525 nodes, 0 edges
     class backend_app_detect_baseline_baselinedetector_d4e8cff3 klass;
     class backend_app_detect_baseline_baselinedetector_ini_fde5ba1d function;
     class backend_app_detect_baseline_baselinedetector_fit_ce830bb8 function;
@@ -2293,8 +2298,8 @@ flowchart LR
     class backend_app_detect_baseline_baselinedetector_ale_9198efbe function;
     class backend_app_localize_locator_candidate_286dbfeb klass;
     class backend_app_localize_locator_candidate_contribut_6265bdd9 function;
-    class plant_emulator_server_plantemulator_d764cc79 klass;
-    class plant_emulator_server_plantemulator_start_fbfc5681 function;
+    class backend_app_engine_engine_4fb0b7c8 klass;
+    class backend_app_engine_engine_init_c92f3518 function;
     class backend_app_live_runtime_acbd070a module;
     class backend_tests_test_attacker_2a011982 test;
     class backend_tests_test_detect_a3d1319b test;
@@ -2571,17 +2576,17 @@ flowchart LR
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>backend/tests/test_live_connectors.py</code></td><td>36 nodes</td></tr>
 <tr><td><code>backend/tests/test_live_runtime.py</code></td><td>35 nodes</td></tr>
+<tr><td><code>backend/app/engine.py</code></td><td>34 nodes</td></tr>
 <tr><td><code>backend/tests/test_attacker.py</code></td><td>29 nodes</td></tr>
 <tr><td><code>app/live/runtime.py</code></td><td>28 nodes</td></tr>
 <tr><td><code>app/detect/detector.py</code></td><td>27 nodes</td></tr>
 <tr><td><code>backend/tests/test_hai.py</code></td><td>26 nodes</td></tr>
 <tr><td><code>plant_emulator/server.py</code></td><td>26 nodes</td></tr>
-<tr><td><code>backend/tests/test_emulator.py</code></td><td>25 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: calls x1640, contains x733, imports x697, references x434. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: calls x1651, contains x724, imports x698, references x441. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -2936,335 +2941,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 12. Backend App Enginepy ====== -->
-<h2 id="backend-app-enginepy">12. Backend App Enginepy</h2>
-<p>Backend App Enginepy groups implementation around backend, app, enginepy, truth, mostly in backend/app/engine.py, backend/app/schemas.py, app/live/engine.py. This section covers 27 nodes and 38 internal edges; the diagram shows only representative relationships to stay readable.</p>
-
-<div class="mermaid">
-%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
-flowchart LR
-    %% Section: Backend App Enginepy (27 nodes, 38 edges)
-    subgraph backend_app_enginepy_backend_app_engine_py_59a319f4["backend/app/engine.py"]
-        backend_app_engine_engine_4fb0b7c8("Engine<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_advance_incident_ce2dcb3a("_advance_incident()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_init_c92f3518("__init__()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_setup_source_ebcd4c3c("_setup_source()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_acquire_01a169e5("_acquire()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_source_t_82833596("_source_t()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_init_state_0c44b5aa("_init_state()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_prewarm_d095b8d3("_prewarm()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_uptime_s_5ae726a3("uptime_s()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_record_external_launch_d93dc57c("record_external_launch()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_truth_for_598f83e1("_truth_for()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_arrays_dc14e981("_arrays()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_analyze_abc927c9("_analyze()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_sync_history_db48d7c9("_sync_history()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_engine_node_states_bdf03da7("_node_states()<br/><small>backend/app/engine.py</small>")
-        backend_app_engine_open_b4c5d41a("_Open<br/><small>backend/app/engine.py</small>")
-    end
-    backend_app_live_engine_liveengine_reset_351f3b73("reset()<br/><small>app/live/engine.py</small>")
-    backend_app_schemas_groundtruthinfo_43071562("GroundTruthInfo<br/><small>backend/app/schemas.py</small>")
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_init_c92f3518
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_setup_source_ebcd4c3c
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_acquire_01a169e5
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_source_t_82833596
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_init_state_0c44b5aa
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_prewarm_d095b8d3
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_uptime_s_5ae726a3
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_record_external_launch_d93dc57c
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_truth_for_598f83e1
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_arrays_dc14e981
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_analyze_abc927c9
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_advance_incident_ce2dcb3a
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_sync_history_db48d7c9
-    backend_app_engine_engine_4fb0b7c8 -->|method| backend_app_engine_engine_node_states_bdf03da7
-    backend_app_engine_engine_advance_incident_ce2dcb3a -->|calls| backend_app_engine_engine_arrays_dc14e981
-    backend_app_engine_engine_advance_incident_ce2dcb3a -->|calls| backend_app_engine_engine_analyze_abc927c9
-    backend_app_engine_engine_advance_incident_ce2dcb3a -->|calls| backend_app_engine_engine_source_t_82833596
-    backend_app_engine_engine_advance_incident_ce2dcb3a -->|calls| backend_app_engine_engine_truth_for_598f83e1
-    backend_app_engine_engine_advance_incident_ce2dcb3a -->|calls| backend_app_engine_open_b4c5d41a
-    backend_app_engine_engine_advance_incident_ce2dcb3a -->|calls| backend_app_engine_engine_sync_history_db48d7c9
-    backend_app_engine_engine_analyze_abc927c9 -->|calls| backend_app_engine_engine_arrays_dc14e981
-    backend_app_engine_engine_init_c92f3518 -->|calls| backend_app_engine_engine_setup_source_ebcd4c3c
-    backend_app_engine_engine_init_c92f3518 -->|calls| backend_app_engine_engine_init_state_0c44b5aa
-    backend_app_engine_engine_init_c92f3518 -->|calls| backend_app_engine_engine_prewarm_d095b8d3
-    %% Omitted for readability: 9 nodes, 2 edges
-    class backend_app_engine_engine_4fb0b7c8 klass;
-    class backend_app_engine_engine_advance_incident_ce2dcb3a function;
-    class backend_app_engine_engine_init_c92f3518 function;
-    class backend_app_engine_engine_setup_source_ebcd4c3c function;
-    class backend_app_engine_engine_acquire_01a169e5 function;
-    class backend_app_engine_engine_source_t_82833596 function;
-    class backend_app_engine_engine_init_state_0c44b5aa function;
-    class backend_app_engine_engine_prewarm_d095b8d3 function;
-    class backend_app_engine_engine_uptime_s_5ae726a3 function;
-    class backend_app_engine_engine_record_external_launch_d93dc57c function;
-    class backend_app_engine_engine_truth_for_598f83e1 function;
-    class backend_app_engine_engine_arrays_dc14e981 function;
-    class backend_app_engine_engine_analyze_abc927c9 function;
-    class backend_app_engine_engine_sync_history_db48d7c9 function;
-    class backend_app_engine_engine_node_states_bdf03da7 function;
-    class backend_app_engine_open_b4c5d41a function;
-    class backend_app_live_engine_liveengine_reset_351f3b73 function;
-    class backend_app_schemas_groundtruthinfo_43071562 klass;
-    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
-    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
-    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
-    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
-    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
-    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
-    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
-    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
-    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
-</div>
-
-<h3>Call Details</h3>
-<table class="call-table">
-<tr>
-  <th style="width:5%">#</th>
-  <th style="width:28%">Node</th>
-  <th style="width:10%">Type</th>
-  <th style="width:17%">Caller</th>
-  <th style="width:20%">Callees</th>
-  <th style="width:20%">Description</th>
-</tr>
-<tr>
-  <td>1</td>
-  <td><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>_engine()</code><br><small style="color:var(--muted)">app/api/rest.py</small><br><code>_impact_with_vs_without()</code><br><small style="color:var(--muted)">eval/analysis/a8_sustainability.py</small><br><code>_isolate()</code><br><small style="color:var(--muted)">backend/eval/isolation.py</small><br>+102 more</td>
-  <td><code>__init__()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>_acquire()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>_advance_incident()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br>+30 more</td>
-  <td>Engine node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>2</td>
-  <td><code>_Open</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>_advance_incident()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><code>Incident</code><br><small style="color:var(--muted)">backend/app/schemas.py</small></td>
-  <td>_Open node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>3</td>
-  <td><code>GroundTruthInfo</code><br><small style="color:var(--muted)">backend/app/schemas.py</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>engine.py</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>GroundTruthInfo node in backend/app/schemas.py.</td>
-</tr>
-<tr>
-  <td>4</td>
-  <td><code>.uptime_s()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>.uptime_s() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>5</td>
-  <td><code>._acquire()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>step_sample()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>._acquire() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>6</td>
-  <td><code>._advance_incident()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>step_sample()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><code>_analyze()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>_arrays()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>_Open</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br>+4 more</td>
-  <td>._advance_incident() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>7</td>
-  <td><code>._analyze()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>_advance_incident()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><code>_arrays()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>build_incident()</code><br><small style="color:var(--muted)">app/localize/incident.py</small></td>
-  <td>Orchestrates analysis and returns structured documentation data.</td>
-</tr>
-<tr>
-  <td>8</td>
-  <td><code>._arrays()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>_advance_incident()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>_analyze()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>._arrays() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>9</td>
-  <td><code>.__init__()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>__init__()</code><br><small style="color:var(--muted)">app/live/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><code>_init_state()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>_prewarm()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>_setup_source()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br>+1 more</td>
-  <td>.__init__() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>10</td>
-  <td><code>._init_state()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>__init__()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>reset()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br>+1 more</td>
-  <td>No direct outbound edge</td>
-  <td>._init_state() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>11</td>
-  <td><code>._node_states()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>step_sample()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>._node_states() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>12</td>
-  <td><code>._prewarm()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>__init__()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>reset()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><code>step_sample()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>._prewarm() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>13</td>
-  <td><code>.record_external_launch()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>.record_external_launch() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>14</td>
-  <td><code>._setup_source()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>__init__()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><code>AttackEngine</code><br><small style="color:var(--muted)">app/attacks/engine.py</small><br><code>Plant</code><br><small style="color:var(--muted)">app/sim/plant.py</small></td>
-  <td>._setup_source() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>15</td>
-  <td><code>._source_t()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>_advance_incident()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>._source_t() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>._sync_history()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>_advance_incident()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>._sync_history() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>._truth_for()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>_advance_incident()</code><br><small style="color:var(--muted)">backend/app/engine.py</small><br><code>Engine</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>._truth_for() node in backend/app/engine.py.</td>
-</tr>
-<tr>
-  <td>18</td>
-  <td><code>.reset()</code><br><small style="color:var(--muted)">app/live/engine.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>LiveEngine</code><br><small style="color:var(--muted)">app/live/engine.py</small></td>
-  <td><code>_init_state()</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td>.reset() node in app/live/engine.py.</td>
-</tr>
-<tr>
-  <td>19</td>
-  <td><code>Analysis</code><br><small style="color:var(--muted)"></small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Orchestrates analysis and returns structured documentation data.</td>
-</tr>
-<tr>
-  <td>20</td>
-  <td><code>DiGraph</code><br><small style="color:var(--muted)"></small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Builds dependency relationships and graph data.</td>
-</tr>
-<tr>
-  <td>21</td>
-  <td><code>F64</code><br><small style="color:var(--muted)"></small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>F64 node in project.</td>
-</tr>
-<tr>
-  <td>22</td>
-  <td><code>One emit period of data: (values as reported to SCADA, physical truth when…</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for One emit period of data: (values as reported to SCADA, physical truth when….</td>
-</tr>
-<tr>
-  <td>23</td>
-  <td><code>Seconds on the source&#x27;s own clock (plant time in SIM).</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Seconds on the source&#x27;s own clock (plant time in SIM)..</td>
-</tr>
-<tr>
-  <td>24</td>
-  <td><code>Bring the detector to steady state before the first message. Its first `window`…</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Bring the detector to steady state before the first message. Its first `window`….</td>
-</tr>
-<tr>
-  <td>25</td>
-  <td><code>Phase 13: register ground truth for an attack launched outside this engine (the…</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Phase 13: register ground truth for an attack launched outside this engine (the….</td>
-</tr>
-<tr>
-  <td>26</td>
-  <td><code>`hazard`: the plant still reports an overflow / dry-run estimate. A persistent…</code><br><small style="color:var(--muted)">backend/app/engine.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for `hazard`: the plant still reports an overflow / dry-run estimate. A persistent….</td>
-</tr>
-<tr>
-  <td>27</td>
-  <td><code>Revealed by the UI after localization (SIM only).</code><br><small style="color:var(--muted)">backend/app/schemas.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Revealed by the UI after localization (SIM only)..</td>
-</tr>
-</table>
-
-<div class="grid">
-  <div class="card">
-    <h4>Key Files</h4>
-    <table style="width:100%;font-size:0.85rem;">
-      <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>backend/app/engine.py</code></td><td>21 nodes</td></tr>
-<tr><td><code>backend/app/schemas.py</code></td><td>2 nodes</td></tr>
-<tr><td><code>app/live/engine.py</code></td><td>1 nodes</td></tr>
-    </table>
-  </div>
-  <div class="card">
-    <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: method x14, calls x11, references x6, explains x6. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
-  </div>
-</div>
-<hr>
-
-<!-- ====== 13. Docs Review Calibration ====== -->
-<h2 id="docs-review-calibration">13. Docs Review Calibration</h2>
+<!-- ====== 12. Docs Review Calibration ====== -->
+<h2 id="docs-review-calibration">12. Docs Review Calibration</h2>
 <p>Docs Review Calibration groups implementation around docs, review, calibration, live, mostly in docs/LIVE_CALIBRATION_AND_NEXT_PLAN.md, docs/IMPLEMENTATION_DELIVERY.md, docs/ui-review/REVIEW.md. This section covers 23 nodes and 22 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -3558,8 +3236,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 14. Frontend Metricsts Metrics ====== -->
-<h2 id="frontend-metricsts-metrics">14. Frontend Metricsts Metrics</h2>
+<!-- ====== 13. Frontend Metricsts Metrics ====== -->
+<h2 id="frontend-metricsts-metrics">13. Frontend Metricsts Metrics</h2>
 <p>Frontend Metricsts Metrics groups implementation around frontend, metricsts, metrics, chartoptionts, mostly in src/lib/metrics.ts, features/metrics/chartOption.ts. This section covers 23 nodes and 44 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -3850,8 +3528,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 15. Backend Live App ====== -->
-<h2 id="backend-live-app">15. Backend Live App</h2>
+<!-- ====== 14. Backend Live App ====== -->
+<h2 id="backend-live-app">14. Backend Live App</h2>
 <p>Backend Live App groups implementation around backend, live, app, modbuspy, mostly in app/live/modbus.py, backend/eval/live_faults.py. This section covers 22 nodes and 27 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -4134,14 +3812,279 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 16. Other ====== -->
-<h2 id="other">16. Other</h2>
-<p>Other groups implementation around submission, backend, docs, demo, mostly in submission/AttackTrace_Slides.md, backend/eval/demo_trials.py, ARCHIFY_ARCHITECTURE_MAP.md. This section covers 171 nodes and 165 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<!-- ====== 15. Readmemd Third Partymd ====== -->
+<h2 id="readmemd-third-partymd">15. Readmemd Third Partymd</h2>
+<p>Readmemd Third Partymd groups implementation around readmemd, third, partymd, submission, mostly in README.md, submission/THIRD_PARTY.md. This section covers 20 nodes and 19 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Other (171 nodes, 165 edges)
+    %% Section: Readmemd Third Partymd (20 nodes, 19 edges)
+    subgraph readmemd_third_partymd_README_md_d2d16128["README.md"]
+        readme_attacktrace_bfb53e14("AttackTrace<br/><small>README.md</small>")
+        readme_quick_start_bb6875fc("⚡ Quick Start<br/><small>README.md</small>")
+        readme_f78a71af("README.md")
+        readme_option_1_open_the_live_cloud_dashboard_702eb243("Option 1: Open the Live Cloud Dashboard<br/><small>README.md</small>")
+        readme_option_2_run_with_docker_compose_af849491("Option 2: Run with Docker Compose<br/><small>README.md</small>")
+        readme_option_3_local_development_cd5fa170("Option 3: Local Development<br/><small>README.md</small>")
+        readme_live_deployments_46a0ddf3("🌐 Live Deployments<br/><small>README.md</small>")
+        readme_interactive_live_demo_script_40296ee2("🎮 Interactive Live Demo Script<br/><small>README.md</small>")
+        readme_5_layer_system_architecture_graphify_mapp_fae98382("🏛 5-Layer System Architecture (Graphify...<br/><small>README.md</small>")
+        readme_license_attribution_0a5bdb6a("📄 License &amp; Attribution<br/><small>README.md</small>")
+        readme_benchmark_evaluation_results_50f0ecc6("📊 Benchmark &amp; Evaluation Results<br/><small>README.md</small>")
+        readme_end_to_end_incident_lifecycle_852e2758("🔄 End-to-End Incident Lifecycle<br/><small>README.md</small>")
+        readme_graphify_codebase_navigation_d97b9c7f("🗺 Graphify Codebase Navigation<br/><small>README.md</small>")
+    end
+    subgraph readmemd_third_partymd_submission_THIRD_PARTY_md_93e231f0["submission/THIRD_PARTY.md"]
+        submission_third_party_third_party_resources_3caa3f6a("Third-party resources<br/><small>submission/THIRD_PARTY.md</small>")
+        submission_third_party_e8412fea("THIRD_PARTY.md")
+        submission_third_party_dataset_08cb8e85("Dataset<br/><small>submission/THIRD_PARTY.md</small>")
+        submission_third_party_backend_python_3_11_e2b36299("Backend (Python 3.11)<br/><small>submission/THIRD_PARTY.md</small>")
+        submission_third_party_external_services_fonts_a_c257b7e1("External services, fonts and reference...<br/><small>submission/THIRD_PARTY.md</small>")
+    end
+    readme_f78a71af -->|references| submission_third_party_e8412fea
+    readme_f78a71af -->|contains| readme_attacktrace_bfb53e14
+    readme_attacktrace_bfb53e14 -->|contains| readme_live_deployments_46a0ddf3
+    readme_attacktrace_bfb53e14 -->|contains| readme_end_to_end_incident_lifecycle_852e2758
+    readme_attacktrace_bfb53e14 -->|contains| readme_benchmark_evaluation_results_50f0ecc6
+    readme_attacktrace_bfb53e14 -->|contains| readme_quick_start_bb6875fc
+    readme_attacktrace_bfb53e14 -->|contains| readme_5_layer_system_architecture_graphify_mapp_fae98382
+    readme_attacktrace_bfb53e14 -->|contains| readme_interactive_live_demo_script_40296ee2
+    readme_attacktrace_bfb53e14 -->|contains| readme_graphify_codebase_navigation_d97b9c7f
+    readme_attacktrace_bfb53e14 -->|contains| readme_license_attribution_0a5bdb6a
+    readme_quick_start_bb6875fc -->|contains| readme_option_1_open_the_live_cloud_dashboard_702eb243
+    readme_quick_start_bb6875fc -->|contains| readme_option_2_run_with_docker_compose_af849491
+    readme_quick_start_bb6875fc -->|contains| readme_option_3_local_development_cd5fa170
+    submission_third_party_e8412fea -->|contains| submission_third_party_third_party_resources_3caa3f6a
+    submission_third_party_third_party_resources_3caa3f6a -->|contains| submission_third_party_backend_python_3_11_e2b36299
+    submission_third_party_third_party_resources_3caa3f6a -->|contains| submission_third_party_dataset_08cb8e85
+    submission_third_party_third_party_resources_3caa3f6a -->|contains| submission_third_party_external_services_fonts_a_c257b7e1
+    %% Omitted for readability: 2 nodes, 0 edges
+    class readme_attacktrace_bfb53e14 concept;
+    class readme_quick_start_bb6875fc concept;
+    class readme_f78a71af concept;
+    class readme_option_1_open_the_live_cloud_dashboard_702eb243 concept;
+    class readme_option_2_run_with_docker_compose_af849491 concept;
+    class readme_option_3_local_development_cd5fa170 concept;
+    class readme_live_deployments_46a0ddf3 concept;
+    class readme_interactive_live_demo_script_40296ee2 concept;
+    class readme_5_layer_system_architecture_graphify_mapp_fae98382 concept;
+    class readme_license_attribution_0a5bdb6a concept;
+    class readme_benchmark_evaluation_results_50f0ecc6 concept;
+    class readme_end_to_end_incident_lifecycle_852e2758 concept;
+    class readme_graphify_codebase_navigation_d97b9c7f concept;
+    class submission_third_party_third_party_resources_3caa3f6a concept;
+    class submission_third_party_e8412fea concept;
+    class submission_third_party_dataset_08cb8e85 concept;
+    class submission_third_party_backend_python_3_11_e2b36299 concept;
+    class submission_third_party_external_services_fonts_a_c257b7e1 concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>README.md</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing README.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>🏛 5-Layer System Architecture (Graphify Mapped)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🏛 5-Layer System Architecture (Graphify Mapped).</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>AttackTrace</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing AttackTrace.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>📊 Benchmark &amp; Evaluation Results</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 📊 Benchmark &amp; Evaluation Results.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>🔄 End-to-End Incident Lifecycle</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🔄 End-to-End Incident Lifecycle.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>🗺 Graphify Codebase Navigation</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🗺 Graphify Codebase Navigation.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>🎮 Interactive Live Demo Script</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🎮 Interactive Live Demo Script.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>📄 License &amp; Attribution</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 📄 License &amp; Attribution.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>🌐 Live Deployments</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🌐 Live Deployments.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>Option 1: Open the Live Cloud Dashboard</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Option 1: Open the Live Cloud Dashboard.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>Option 2: Run with Docker Compose</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Option 2: Run with Docker Compose.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>Option 3: Local Development</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Option 3: Local Development.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>⚡ Quick Start</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing ⚡ Quick Start.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>THIRD_PARTY.md</code><br><small style="color:var(--muted)">submission/THIRD_PARTY.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing THIRD_PARTY.md.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>Backend (Python 3.11)</code><br><small style="color:var(--muted)">submission/THIRD_PARTY.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Backend (Python 3.11).</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Dataset</code><br><small style="color:var(--muted)">submission/THIRD_PARTY.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Dataset.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>External services, fonts and reference data</code><br><small style="color:var(--muted)">submission/THIRD_PARTY.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing External services, fonts and reference data.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Frontend (Node 22)</code><br><small style="color:var(--muted)">submission/THIRD_PARTY.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Frontend (Node 22).</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>HAI licence terms (re-read 2026-10-08 from https://github.com/icsdataset/hai, `README.md`)</code><br><small style="color:var(--muted)">submission/THIRD_PARTY.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing HAI licence terms (re-read 2026-10-08 from https://github.com/icsdataset/hai, `README.md`).</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>Third-party resources</code><br><small style="color:var(--muted)">submission/THIRD_PARTY.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Third-party resources.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>README.md</code></td><td>13 nodes</td></tr>
+<tr><td><code>submission/THIRD_PARTY.md</code></td><td>7 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x18, references x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 16. Other ====== -->
+<h2 id="other">16. Other</h2>
+<p>Other groups implementation around submission, backend, docs, demo, mostly in submission/AttackTrace_Slides.md, backend/eval/demo_trials.py, ARCHIFY_ARCHITECTURE_MAP.md. This section covers 177 nodes and 170 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Other (177 nodes, 170 edges)
     subgraph other_plant_emulator_overlay_py_d3fc9e36["plant_emulator/overlay.py"]
         plant_emulator_overlay_registeroverlay_3c6044ac("RegisterOverlay<br/><small>plant_emulator/overlay.py</small>")
         plant_emulator_overlay_registeroverlay_init_4c8bcc4c("__init__()<br/><small>plant_emulator/overlay.py</small>")
@@ -4183,7 +4126,7 @@ flowchart LR
     backend_eval_detection_evaluate_ab126809 -->|calls| backend_eval_detection_counts_39f170d4
     backend_eval_detection_evaluate_ab126809 -->|calls| backend_eval_detection_counts_add_7a1f1c4d
     backend_eval_detection_evaluate_ab126809 -->|calls| backend_eval_detection_counts_prf_c4e60151
-    %% Omitted for readability: 153 nodes, 0 edges
+    %% Omitted for readability: 159 nodes, 0 edges
     class plant_emulator_overlay_registeroverlay_3c6044ac klass;
     class plant_emulator_overlay_registeroverlay_init_4c8bcc4c function;
     class plant_emulator_overlay_registeroverlay_sensor_e6f8d85f function;
@@ -4482,7 +4425,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x92, calls x27, references x23, method x8. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x97, calls x27, references x23, method x8. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -4494,9 +4437,9 @@ flowchart LR
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><td>Nodes</td><td>2879</td></tr>
-      <tr><td>Edges</td><td>9036</td></tr>
+      <tr><td>Edges</td><td>9041</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>128</td></tr>
+      <tr><td>Communities</td><td>129</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
     </table>
   </div>
@@ -4504,7 +4447,7 @@ flowchart LR
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><td>EXTRACTED</td><td>8122</td></tr>
-      <tr><td>INFERRED</td><td>914</td></tr>
+      <tr><td>INFERRED</td><td>919</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
   </div>
@@ -4512,7 +4455,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>Attacktrace — Architecture Documentation</p>
-  <p>Generated: 2026-10-21 17:49 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-10-21 17:54 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

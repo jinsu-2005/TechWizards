@@ -1,17 +1,17 @@
 # Graph Report - Attacktrace  (2026-10-21)
 
 ## Corpus Check
-- 389 files · ~881,153 words
+- 389 files · ~882,047 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 58 file(s) not represented in the graph (top: (none) 22, .pt 12, .log 8)
 
 ## Summary
-- 2879 nodes · 9036 edges · 128 communities (97 shown, 31 thin omitted)
-- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 914 edges (avg confidence: 0.9)
+- 2879 nodes · 9041 edges · 129 communities (97 shown, 32 thin omitted)
+- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 919 edges (avg confidence: 0.9)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `206bef5f`
+- Built from commit: `f1d1c1c6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -80,7 +80,7 @@
 - test_authentication.py
 - models.py
 - test_gateway.py
-- test_report.py
+- client
 - AttackTrace: Documentation
 - Isolate
 - metrics.ts
@@ -118,6 +118,7 @@
 - VOICE_ASSISTANT.md
 - Presenter cheat sheet (one page)
 - AttackTrace
+- 🔍 Layer-by-Layer Component Breakdown
 - Demo script (3 minutes)
 - QA_Prep.md
 - argparse
@@ -125,11 +126,11 @@
 - python-dependency-audit.json
 
 ## God Nodes (most connected - your core abstractions)
-1. `Engine` - 141 edges
+1. `Engine` - 142 edges
 2. `Settings` - 107 edges
-3. `LiveRuntime` - 69 edges
+3. `LiveRuntime` - 70 edges
 4. `BaselineDetector` - 63 edges
-5. `create_app()` - 60 edges
+5. `create_app()` - 61 edges
 6. `Scenario` - 59 edges
 7. `LiveSource` - 59 edges
 8. `PlantEmulator` - 56 edges
@@ -141,17 +142,17 @@
   ARCHIFY_ARCHITECTURE_MAP.md → backend/app/api/security.py
 - `⚡ Layer 2: API & Gateway` --references--> `create_app()`  [INFERRED]
   ARCHIFY_ARCHITECTURE_MAP.md → backend/app/main.py
+- `⚡ Layer 2: API & Gateway (FastAPI + Cloudflare Workers)` --references--> `create_app()`  [INFERRED]
+  README.md → backend/app/main.py
 - `3.6 Confidence gate` --references--> `Ambiguous()`  [INFERRED]
   submission/AttackTrace_Documentation.md → frontend/src/features/incident/OriginCard.tsx
 - `Novelty` --references--> `Ambiguous()`  [INFERRED]
   submission/AttackTrace_Documentation.md → frontend/src/features/incident/OriginCard.tsx
-- `3.10 LIVE ingestion: a real industrial protocol` --references--> `live()`  [INFERRED]
-  submission/AttackTrace_Documentation.md → backend/app/api/ws.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (128 total, 31 thin omitted)
+## Communities (129 total, 32 thin omitted)
 
 ### Community 0 - "numpy"
 Cohesion: 0.09
@@ -310,8 +311,8 @@ Cohesion: 0.07
 Nodes (28): node_kind(), aggregate(), best_threshold(), fit_err_sd(), ForecastDetector, residuals(), build_model(), GDN (+20 more)
 
 ### Community 39 - "Report"
-Cohesion: 0.16
-Nodes (10): _eta(), render_report(), para(), _utc(), ascii_text(), _escape(), Page, text_width() (+2 more)
+Cohesion: 0.10
+Nodes (17): worst_impact(), _eta(), render_report(), para(), _utc(), ascii_text(), _escape(), Page (+9 more)
 
 ### Community 40 - "Authentication"
 Cohesion: 0.22
@@ -408,10 +409,6 @@ Nodes (11): classify_failure(), Failure, ModelRouter, _retry_after(), _status_co
 ### Community 63 - "test_gateway.py"
 Cohesion: 0.21
 Nodes (6): GatewayBoundary, gateway_app(), test_direct_origin_denied_even_for_auth_config_and_docs(), test_gateway_secret_does_not_replace_firebase_identity(), test_local_mode_is_unchanged_without_an_origin_secret(), test_stream_requires_gateway_secret_before_upgrade()
-
-### Community 64 - "test_report.py"
-Cohesion: 0.16
-Nodes (10): worst_impact(), Impact, check_structure(), client(), test_impact_snapshot_keeps_the_worst_values(), test_report_endpoint_returns_a_valid_one_page_pdf(), test_report_is_open_without_a_key(), test_report_shows_the_ambiguous_banner_and_breakdown() (+2 more)
 
 ### Community 65 - "AttackTrace: Documentation"
 Cohesion: 0.15
@@ -518,16 +515,20 @@ Cohesion: 0.06
 Nodes (28): AttackTrace implementation plan, Build order, Data modes, Milestone 1 — trustworthy assistance and investigation UI, Milestone 2 — explicit evidence records and uncertainty, Milestone 3 — local communication-channel attribution, Milestone 4 — emulated firmware/configuration integrity, Milestone 5 — validation and response workflow (+20 more)
 
 ### Community 112 - "Engine"
-Cohesion: 0.11
-Nodes (3): Engine, _Open, GroundTruthInfo
+Cohesion: 0.10
+Nodes (4): Engine, _Open, GroundTruthInfo, clean_states()
 
 ### Community 114 - "Presenter cheat sheet (one page)"
 Cohesion: 0.29
 Nodes (6): Click path (SIM), Fast facts if asked, Headline numbers (say the n, not just the %), If LIVE fails mid-demo, If Top-1 is wrong, Presenter cheat sheet (one page)
 
 ### Community 115 - "AttackTrace"
-Cohesion: 0.08
-Nodes (24): 1. Cyber-Physical Digital Twin & Telemetry Stream, 2. Multi-Signal Detection & Root-Cause Localization, 3. Virtual Sensor Self-Healing, 4. AI Pilot · Signal Room & Gemini Live Voice, 5. Multi-Source Ingestion Modes, 6. Investigation SOC Workspace, 🏛 Architecture, AttackTrace (+16 more)
+Cohesion: 0.10
+Nodes (18): 🏛 5-Layer System Architecture (Graphify Mapped), AttackTrace, 📊 Benchmark & Evaluation Results, 🔄 End-to-End Incident Lifecycle, 🗺 Graphify Codebase Navigation, 🎮 Interactive Live Demo Script, 📄 License & Attribution, 🌐 Live Deployments (+10 more)
+
+### Community 116 - "🔍 Layer-by-Layer Component Breakdown"
+Cohesion: 0.33
+Nodes (6): 🎨 Layer 1: Frontend (React 19 + TypeScript + Vite), ⚡ Layer 2: API & Gateway (FastAPI + Cloudflare Workers), 🧠 Layer 3: Services & Core Detection Engine, 💾 Layer 4: Storage & Data Persistence, 🏭 Layer 5: External Protocol & Hardware, 🔍 Layer-by-Layer Component Breakdown
 
 ### Community 118 - "Demo script (3 minutes)"
 Cohesion: 0.40
@@ -543,22 +544,22 @@ Nodes (4): error(), fetch(), handle(), origin()
 
 ## Knowledge Gaps
 - **11 isolated node(s):** `attacktrace`, `echarts`, `echarts-for-react`, `@types/node`, `@types/react` (+6 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 918 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **31 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 916 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **32 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `3. Method` connect `3. Method` to `AttackTrace: Documentation`?**
-  _High betweenness centrality (0.282) - this node is a cross-community bridge._
-- **Are the 96 inferred relationships involving `Engine` (e.g. with `🧠 Layer 3: Services & Detection Engine` and `_engine()`) actually correct?**
-  _`Engine` has 96 INFERRED edges - model-reasoned connections that need verification._
+  _High betweenness centrality (0.283) - this node is a cross-community bridge._
+- **Are the 97 inferred relationships involving `Engine` (e.g. with `🧠 Layer 3: Services & Detection Engine` and `_engine()`) actually correct?**
+  _`Engine` has 97 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `attacktrace`, `echarts`, `echarts-for-react` to the rest of the system?**
   _11 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `numpy` be split into smaller, more focused modules?**
   _Cohesion score 0.08581349206349206 - nodes in this community are weakly interconnected._
 - **Why does `3.10 LIVE ingestion: a real industrial protocol` connect `3. Method` to `Rest`, `PlantEmulator`, `AttackSpec`?**
-  _High betweenness centrality (0.281) - this node is a cross-community bridge._
+  _High betweenness centrality (0.282) - this node is a cross-community bridge._
 - **Are the 33 inferred relationships involving `Settings` (e.g. with `prepare_storage()` and `validate()`) actually correct?**
   _`Settings` has 33 INFERRED edges - model-reasoned connections that need verification._
 - **Should `BaselineDetector` be split into smaller, more focused modules?**
