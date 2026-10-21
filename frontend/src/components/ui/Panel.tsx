@@ -15,10 +15,12 @@ export function Panel({ title, icon: Icon, className = "", actions, children }: 
   return (
     <section
       aria-label={title}
-      className={`flex min-h-0 min-w-0 flex-col rounded border border-border bg-surface ${className}`}
+      className={`flex min-h-0 min-w-0 flex-col rounded-lg border border-border bg-surface shadow-sm ${className}`}
     >
-      <header className="flex h-8 shrink-0 items-center gap-1 border-b border-border px-2 text-xs font-medium uppercase tracking-wide text-muted">
-        <Icon size={14} aria-hidden />
+      <header className="panel-heading flex min-h-11 shrink-0 flex-wrap items-center gap-1.5 border-b border-border bg-surface px-3 py-1.5 text-sm font-semibold text-text">
+        <div className="flex h-5 w-5 items-center justify-center rounded bg-accent/10 text-accent">
+          <Icon size={12} aria-hidden />
+        </div>
         <span>{title}</span>
         {actions && <div className="ml-auto flex items-center normal-case tracking-normal">{actions}</div>}
       </header>

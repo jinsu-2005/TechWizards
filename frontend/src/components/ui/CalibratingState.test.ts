@@ -24,4 +24,23 @@ describe("CalibratingState", () => {
     expect(html(1.4)).toContain("Calibrating 100%");
     expect(html(-0.2)).toContain("Calibrating 0%");
   });
+
+  it("explains rejected readings and avoids promising a completion time", () => {
+    const m = renderToStaticMarkup(createElement(CalibratingState, { progress: .1, source: {
+      mode: "live", connected: true, protocol: "modbus", state: "calibrating",
+      calibration: { stage: "blocked", collected_samples: 60, target_samples: 600, skipped_samples: 8, elapsed_s: 50, remaining_s: null, blockers: ["LIT101: frozen"] },
+    } }));
+    expect(m).toContain("Calibration needs clean readings");
+    expect(m).toContain("LIT101: frozen");
+    expect(m).not.toContain("remaining, then");
+  });
+
+  it("distinguishes model training from a completed recording", () => {
+    const m = renderToStaticMarkup(createElement(CalibratingState, { progress: 1, source: {
+      mode: "live", connected: true, protocol: "modbus", state: "calibrating",
+      calibration: { stage: "training", collected_samples: 600, target_samples: 600, skipped_samples: 0, elapsed_s: 300, blockers: [] },
+    } }));
+    expect(m).toContain("Training LIVE detector");
+    expect(m).not.toContain("Calibrating 100%");
+  });
 });

@@ -46,9 +46,9 @@ describe("ModeToggle: LIVE option", () => {
     expect(b).toContain('aria-pressed="true"');
   });
 
-  it("gives SIM no tooltip: it is always available", () => {
+  it("explains SIM while keeping it available", () => {
     const b = buttonFor(html(), "sim");
     expect(b).not.toContain(" disabled=");
-    expect(b).not.toContain("title=");
+    expect(b).toContain("Simulation: virtual plant");
   });
 });
