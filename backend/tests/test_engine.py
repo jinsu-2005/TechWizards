@@ -46,7 +46,7 @@ def test_attack_produces_localized_incident(engine: Engine) -> None:
                 assert dt < 1.0  # decision latency
     assert first is not None
     inc = engine.incidents[0]
-    assert inc.id == "inc_001"
+    assert inc.id.startswith("inc_") and len(inc.id) == 36
     assert "P101" in [o.id for o in inc.origin]
     assert inc.ground_truth is not None and inc.ground_truth.target == "P101"
     assert inc.ground_truth.attack_id == attack_id

@@ -219,6 +219,26 @@ def test_mode_switch_streams_hai_and_back(client: TestClient) -> None:
     assert len(client.get("/api/topology").json()["nodes"]) == 9
 
 
+def test_hai_playback_controls_pause_without_consuming_rows(client: TestClient) -> None:
+    assert client.post("/api/hai/replay", json={"speed": 2}).status_code == 409
+    client.post("/api/mode", json={"mode": "hai"})
+    info = client.get("/api/hai/replay").json()
+    assert info["file"] == "test1" and info["features"] == len(FEATURES)
+    assert "attack" not in info  # evaluation labels never become detector/UI evidence
+    assert client.post("/api/hai/replay", json={"speed": 21}).status_code == 422
+    assert client.post("/api/hai/replay", json={"speed": 0}).status_code == 422
+    assert client.post("/api/hai/replay", json={"unknown": True}).status_code == 422
+    paused = client.post("/api/hai/replay", json={"paused": True, "speed": 2}).json()
+    hai = client.app.state.hai  # type: ignore[attr-defined]
+    for _ in range(5):
+        hai.step_sample()
+    assert hai._pos == paused["position"]
+    assert client.get("/api/hai/replay").json()["paused"] is True
+    client.post("/api/hai/replay", json={"paused": False})
+    hai.step_sample()
+    assert hai._pos == paused["position"] + 1
+
+
 def test_hai_mode_is_refused_without_data_or_models(
     engine: Engine, hai_dir: Path, tmp_path: Path
 ) -> None:

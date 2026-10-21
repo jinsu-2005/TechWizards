@@ -58,7 +58,9 @@ def test_incidents_and_reset(client: TestClient, engine: Engine) -> None:
     incidents = [Incident.model_validate(i) for i in client.get("/api/incidents").json()]
     assert incidents and incidents[0].ground_truth is not None
     assert client.post("/api/reset").status_code == 200
-    assert client.get("/api/incidents").json() == []
+    saved = client.get("/api/incidents").json()
+    assert saved[0]["id"] == incidents[0].id
+    assert engine.latest is None and engine.incidents == []
 
 
 def test_metrics(client: TestClient, tmp_path: Path) -> None:

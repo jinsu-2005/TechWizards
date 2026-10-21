@@ -177,6 +177,15 @@ def test_training_needs_enough_clean_data(tmp_path: Path) -> None:
         train_live(np.zeros((MIN_SAMPLES - 1, 9)), tmp_path)
 
 
+def test_resumed_training_never_builds_windows_across_a_gap(tmp_path: Path, engine: Engine) -> None:
+    from app.detect.forecaster import WINDOW
+
+    x = collect(engine, MIN_SAMPLES)
+    metadata = train_live(x, tmp_path, epochs=1, log_it=False, segments=[0, 300])
+    assert metadata["train_windows"] == 480 - 2 * WINDOW
+    assert metadata["validation_windows"] == 120 - WINDOW
+
+
 def test_trainer_splits_by_time_and_sets_the_threshold_from_clean_validation(
     tmp_path: Path, engine: Engine
 ) -> None:
@@ -224,6 +233,117 @@ def test_the_recorder_keeps_only_clean_complete_snapshots(
     assert (len(rec.rows), rec.skipped) == (1, 1) and rec.progress == pytest.approx(0.1)
 
 
+def test_calibration_does_not_accept_subminimum_or_infinite_recordings() -> None:
+    from pydantic import ValidationError
+
+    for minutes in (0, 1, float("nan"), float("inf")):
+        with pytest.raises(ValidationError):
+            Settings(live_train_min=minutes)
+
+
+def test_recording_stops_growing_when_full(engine: Engine) -> None:
+    clock = FakeClock()
+    cfg, tm = load_live(Settings(live_tagmap=TAGMAP))
+    src = LiveSource(cfg, tm, clock=clock)
+    feed(src, engine._plant.state(), clock)
+    rec = LiveRecorder(1)
+    assert rec.add(src.snapshot())
+    assert not rec.add(src.snapshot())
+    assert len(rec.rows) == 1
+
+
+def test_calibration_reports_quality_blocker_and_recovers(tmp_path: Path, engine: Engine) -> None:
+    s = live_settings(tmp_path)
+    cfg, tm = load_live(s)
+    clock = FakeClock()
+    src = LiveSource(cfg, tm, clock=clock)
+    rt = LiveRuntime(s, cfg, tm, source=src, clock=clock)
+    rt.advance_calibration(start=True)
+    blocked = rt.calibration_info()
+    assert blocked and blocked.stage == "blocked" and "LIT101: missing" in blocked.blockers
+    assert blocked.remaining_s is None and blocked.skipped_samples == 1
+    feed(src, engine._plant.state(), clock)
+    rt.advance_calibration()
+    collecting = rt.calibration_info()
+    assert collecting and collecting.stage == "collecting"
+    assert collecting.collected_samples == 1 and collecting.target_samples == 600
+    assert collecting.remaining_s == 299.5
+    rt.advance_calibration()  # same engine instant must not add a duplicate sample
+    assert len(rt.recorder.rows) == 1
+
+
+async def test_training_failure_preserves_data_and_requires_explicit_retry(
+    tmp_path: Path, engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import app.live.runtime as module
+
+    s = live_settings(tmp_path)
+    cfg, tm = load_live(s)
+    clock = FakeClock()
+    src = LiveSource(cfg, tm, clock=clock)
+    rt = LiveRuntime(s, cfg, tm, source=src, clock=clock)
+    feed(src, engine._plant.state(), clock)
+    rt.advance_calibration(start=True)
+
+    def fail(*args: object, **kwargs: object) -> None:
+        raise RuntimeError("test training failure")
+
+    monkeypatch.setattr(module, "train_live", fail)
+    await rt._train()
+    assert rt.train_error and "test training failure" in rt.train_error
+    assert len(rt.recorder.rows) == 1
+    for _ in range(5):
+        feed(src, engine._plant.state(), clock)
+        rt.advance_calibration()
+    assert len(rt.recorder.rows) == 1 and rt._training is None
+    assert rt.calibration_info().stage == "failed"
+    rt.restart_calibration()
+    assert not rt.recorder.rows and rt.train_error is None
+    rt.advance_calibration()
+    assert len(rt.recorder.rows) == 1
+
+
+def test_calibration_cadence_tolerates_tick_jitter(tmp_path: Path, engine: Engine) -> None:
+    s = live_settings(tmp_path)
+    cfg, tm = load_live(s)
+    clock = FakeClock()
+    src = LiveSource(cfg, tm, clock=clock)
+    rt = LiveRuntime(s, cfg, tm, source=src, clock=clock)
+    for i in range(20):
+        clock.tick(.49 if i % 2 else .51)
+        for tag in src.tagmap.by_role("value"):
+            src._on_sample(tag.tag, engine._plant.state()[tag.node_id], clock())
+        rt.advance_calibration(start=True)
+        rt.advance_calibration()  # a duplicate same-instant tick does not record twice
+    assert len(rt.recorder.rows) == 20
+
+
+async def test_started_live_calibration_advances_while_sim_is_selected(
+    tmp_path: Path, engine: Engine
+) -> None:
+    from types import SimpleNamespace
+
+    from app.api.ws import Hub, run_loop
+
+    s = live_settings(tmp_path)
+    cfg, tm = load_live(s)
+    clock = FakeClock()
+    src = LiveSource(cfg, tm, clock=clock)
+    rt = LiveRuntime(s, cfg, tm, source=src, clock=clock)
+    feed(src, engine._plant.state(), clock)
+    rt.advance_calibration()  # do not silently start collecting before LIVE was requested
+    assert not rt.recorder.rows
+    rt.advance_calibration(start=True)
+    feed(src, engine._plant.state(), clock)
+    state = SimpleNamespace(mode="sim", engine=engine, live=rt, soc=None)
+    loop = asyncio.create_task(run_loop(state, Hub(), .01))
+    await asyncio.sleep(.03)
+    loop.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await loop
+    assert len(rt.recorder.rows) == 2
+
+
 # ------------------------------------------------------------------ calibrating -> running
 async def test_calibrating_has_progress_no_alerts_and_then_runs(
     tmp_path: Path, engine: Engine
@@ -253,6 +373,11 @@ async def test_calibrating_has_progress_no_alerts_and_then_runs(
     assert rt.engine is not None and rt.phase == "running" and live_models_ready(s.models_dir)
     assert rt.detector_kind in ("gdn", "mlp")
     assert rt.train_error is None
+    reloaded = LiveRuntime(s, cfg, tm, source=src, clock=clock)
+    assert reloaded.engine is not None and reloaded.model_id == rt.model_id
+    changed = cfg.model_copy(update={"port": cfg.port + 1})
+    incompatible = LiveRuntime(s, changed, tm, source=src, clock=clock)
+    assert incompatible.engine is None
     engine.step_sample()
     feed(src, engine._plant.state(), clock)
     nxt = rt.step_sample()
@@ -398,3 +523,24 @@ async def test_a_source_that_goes_away_shows_down_not_a_crash(
         assert st["mode"] == "live" and st["source"]["state"] in ("down", "stale", "connecting")
         assert st["source"]["connected"] is False and st["source"]["reason"]
         assert c.get("/api/live/health").status_code == 200  # still answers, with ages
+
+
+async def test_calibration_restart_is_authenticated_and_refuses_an_active_trainer(
+    engine: Engine, emulator_runtime, tmp_path: Path  # type: ignore[no-untyped-def]
+) -> None:
+    rt = emulator_runtime[0]
+    app = create_app(engine, run_loop=False, live_runtime=rt)
+    app.state.hai_dir = tmp_path / "no-hai"
+    app.state.settings = Settings(api_key="calibration-test-key")
+    headers = {"x-api-key": "calibration-test-key"}
+    with TestClient(app) as client:
+        assert client.post("/api/live/calibration/restart").status_code == 401
+        response = client.post("/api/live/calibration/restart", headers=headers)
+        assert response.status_code == 200
+        assert response.json()["calibration"]["collected_samples"] == 0
+        rt._training = asyncio.current_task()
+        try:
+            busy = client.post("/api/live/calibration/restart", headers=headers)
+            assert busy.status_code == 409
+        finally:
+            rt._training = None
