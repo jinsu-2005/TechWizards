@@ -15,7 +15,7 @@ export async function getVoiceCapabilities(): Promise<VoiceCapabilities> {
 }
 export async function transcribeAudio(audio: Blob): Promise<string> {
   const response = await check(await fetch("/api/voice/transcribe", {
-    method: "POST", headers: { ...headers(), "content-type": audio.type.split(";")[0] }, body: audio,
+    method: "POST", headers: { ...headers(), "content-type": audio.type.split(";")[0] ?? audio.type }, body: audio,
   }));
   return (await response.json() as { text: string }).text;
 }

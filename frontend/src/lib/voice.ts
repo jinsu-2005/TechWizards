@@ -100,7 +100,7 @@ export function parseVoiceCommand(text: string, assetIds: string[]): VoiceComman
   const normalized = text.trim();
   const navigation = /^(?:go to|open|show|navigate to)\s+(.+)$/i.exec(normalized);
   if (navigation) {
-    const target = navigation[1];
+    const target = navigation[1] ?? "";
     const asset = assetIds.find((id) => id.toLowerCase() === target.toLowerCase() || new RegExp(`\\b${id}\\b`, "i").test(target));
     if (asset) return { kind: "selectAsset", asset };
     const destination = destinations.find(([pattern]) => pattern.test(target));
