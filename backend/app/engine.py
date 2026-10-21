@@ -10,6 +10,7 @@ from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import cast
+from uuid import uuid4
 
 import networkx as nx
 import numpy as np
@@ -166,6 +167,7 @@ class Engine:
 
     # ------------------------------------------------------------------ lifecycle
     def _init_state(self) -> None:
+        self.session_id = uuid4().hex
         self.loaded.detector.reset()
         self._hist: deque[tuple[F64, F64, F64]] = deque(maxlen=HISTORY)  # (scores, errors, x)
         self._k = 0
@@ -173,6 +175,7 @@ class Engine:
         self._alert_since: float | None = None
         self._open: _Open | None = None
         self._launched: list[tuple[GroundTruth, float]] = []  # (truth, wall-clock launch time)
+        self._virtual_sensors: set[str] = set()
         self.incident_impact: dict[str, Impact] = {}  # worst impact seen while each incident ran
 
     def reset(self, seed: int | None = None) -> None:
@@ -231,6 +234,8 @@ class Engine:
         if node_id in self._attacks.isolated:
             return False, "Node already isolated"
         self._attacks.isolate(node_id)
+        self._virtual_sensors.add(node_id)
+        op.inc.virtual_active = True
         live = self._attacks.active(self._plant.t)
         op.isolated_t = self._plant.t
         op.effective = bool(live) and all(g.target in self._attacks.isolated for g in live)
@@ -309,7 +314,7 @@ class Engine:
 
     def _to_schema(self, a: Analysis, base: Incident | None, alarms: set[str]) -> Incident:
         return Incident(
-            id=base.id if base else f"inc_{len(self.incidents) + 1:03d}",
+            id=base.id if base else f"inc_{uuid4().hex}",
             status=base.status if base else "localizing",
             detected_at=base.detected_at if base else self._clock(),
             origin=[
@@ -361,7 +366,7 @@ class Engine:
         else:
             op.inc.baseline_alarms = [n for n in NODE_IDS if n in op.alarms]
         if op.isolated_t is not None and op.effective and op.inc.status in ("localizing", "open"):
-            op.calm = op.calm + 1 if float(scores.max()) < self.loaded.threshold else 0
+            op.calm = op.calm + 1 if float(np.max(scores)) < self.loaded.threshold else 0
             if op.calm >= self._contain_samples:
                 op.inc.status = "contained"
                 op.inc.contained_at = now
@@ -406,6 +411,7 @@ class Engine:
                     truth=truth.get(n),
                     score=float(scores[i]),
                     status=status,
+                    is_virtual=True if n in self._virtual_sensors else None,
                 )
             )
         return out
