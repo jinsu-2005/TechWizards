@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "attacktrace-console" generated at 2026-10-16T04:49:14.519Z.

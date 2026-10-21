@@ -1,0 +1,1585 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-15T16:19:16.907213+00:00",
+  "mode": "sim",
+  "scope": "Offline simulator stress study; independent of local Modbus layer-rule checks",
+  "model_fingerprints": {
+    "detector.json": "ad61707eba5250ac8cfbf46a7c1ffe1df6c1bd1a918564aa3449299649083dc2",
+    "graph.json": "50b97db6da7544d5ed6d10e763609dce9b3e17b578903f1b084484948eeb0559",
+    "gdn.pt": "0f110ffbb6cdaf1e0d79464fc735e52ebaa29bfd351a69f138ea3694fc740409"
+  },
+  "protocol": "varied single-origin targets/magnitudes; fixed multi-origin and topology stress pairs",
+  "calibration_seeds": [
+    7100,
+    7101,
+    7102,
+    7103,
+    7104,
+    7105
+  ],
+  "test_seeds": [
+    8200,
+    8201,
+    8202,
+    8203
+  ],
+  "n_test_runs": 52,
+  "run_duration_s": 220.0,
+  "duration_note": "Per-run durations override nominal duration; drift lasts 600 seconds",
+  "event_start_s": 60.0,
+  "calibration": {
+    "available": true,
+    "n": 29,
+    "slope": 4.0,
+    "intercept": 0.25,
+    "calibration_log_loss": 0.09331363492003276,
+    "applied_to_live_ranking": false,
+    "scope": "Exploratory top-1 correctness calibration on detected single-origin SIM cases; not compromise probability"
+  },
+  "raw_reliability": {
+    "n": 18,
+    "brier": 0.13417207688658517,
+    "ece": 0.10599252910672635,
+    "bins": [
+      {
+        "lower": 0.4,
+        "upper": 0.6,
+        "n": 3,
+        "mean_confidence": 0.5490662717052098,
+        "accuracy": 1.0
+      },
+      {
+        "lower": 0.6,
+        "upper": 0.8,
+        "n": 3,
+        "mean_confidence": 0.6954473974299852,
+        "accuracy": 0.6666666666666666
+      },
+      {
+        "lower": 0.8,
+        "upper": 1,
+        "n": 12,
+        "mean_confidence": 0.955726845562229,
+        "accuracy": 0.9166666666666666
+      }
+    ],
+    "confidently_wrong": 1
+  },
+  "calibrated_reliability": {
+    "n": 18,
+    "brier": 0.12204348319330921,
+    "ece": 0.14685899305067776,
+    "bins": [
+      {
+        "lower": 0.6,
+        "upper": 0.8,
+        "n": 3,
+        "mean_confidence": 0.7370054314297617,
+        "accuracy": 1.0
+      },
+      {
+        "lower": 0.8,
+        "upper": 1,
+        "n": 15,
+        "mean_confidence": 0.9902985446134324,
+        "accuracy": 0.8666666666666667
+      }
+    ],
+    "confidently_wrong": 2
+  },
+  "calibration_assessment": {
+    "status": "not_recommended",
+    "reasons": [
+      "Expected calibration error increased on held-out cases",
+      "More incorrect origins received at least 80% confidence"
+    ]
+  },
+  "scenarios": [
+    {
+      "scenario": "clean",
+      "group": "normal",
+      "n": 4,
+      "detected": 0,
+      "alert_runs": 0,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "mean_detection_delay_s": null,
+      "mean_localization_delay_s": null
+    },
+    {
+      "scenario": "noisy_clean",
+      "group": "normal",
+      "n": 4,
+      "detected": 1,
+      "alert_runs": 1,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "mean_detection_delay_s": 20.0,
+      "mean_localization_delay_s": 30.0
+    },
+    {
+      "scenario": "approved_setpoint",
+      "group": "authorized_change",
+      "n": 4,
+      "detected": 4,
+      "alert_runs": 4,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "mean_detection_delay_s": 1.5,
+      "mean_localization_delay_s": 11.5
+    },
+    {
+      "scenario": "sensor_fault",
+      "group": "benign_fault",
+      "n": 4,
+      "detected": 4,
+      "alert_runs": 4,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "mean_detection_delay_s": 1.5,
+      "mean_localization_delay_s": 11.5
+    },
+    {
+      "scenario": "sensor_offset",
+      "group": "single_attack",
+      "n": 4,
+      "detected": 4,
+      "alert_runs": 4,
+      "top1_any": 1.0,
+      "top3_all": 1.0,
+      "top3_origin_recall": 1.0,
+      "mean_detection_delay_s": 1.5,
+      "mean_localization_delay_s": 11.5
+    },
+    {
+      "scenario": "sensor_freeze",
+      "group": "single_attack",
+      "n": 4,
+      "detected": 4,
+      "alert_runs": 4,
+      "top1_any": 1.0,
+      "top3_all": 1.0,
+      "top3_origin_recall": 1.0,
+      "mean_detection_delay_s": 7.25,
+      "mean_localization_delay_s": 17.25
+    },
+    {
+      "scenario": "slow_ramp",
+      "group": "single_attack",
+      "n": 4,
+      "detected": 2,
+      "alert_runs": 4,
+      "top1_any": 0.25,
+      "top3_all": 0.5,
+      "top3_origin_recall": 0.5,
+      "mean_detection_delay_s": 11.5,
+      "mean_localization_delay_s": 21.5
+    },
+    {
+      "scenario": "actuator_force",
+      "group": "single_attack",
+      "n": 4,
+      "detected": 4,
+      "alert_runs": 4,
+      "top1_any": 1.0,
+      "top3_all": 1.0,
+      "top3_origin_recall": 1.0,
+      "mean_detection_delay_s": 1.5,
+      "mean_localization_delay_s": 11.5
+    },
+    {
+      "scenario": "rogue_setpoint",
+      "group": "single_attack",
+      "n": 4,
+      "detected": 4,
+      "alert_runs": 4,
+      "top1_any": 0.75,
+      "top3_all": 1.0,
+      "top3_origin_recall": 1.0,
+      "mean_detection_delay_s": 1.5,
+      "mean_localization_delay_s": 11.5
+    },
+    {
+      "scenario": "simultaneous_origins",
+      "group": "multiple_attack",
+      "n": 4,
+      "detected": 4,
+      "alert_runs": 4,
+      "top1_any": 1.0,
+      "top3_all": 0.0,
+      "top3_origin_recall": 0.5,
+      "mean_detection_delay_s": 1.5,
+      "mean_localization_delay_s": 11.5
+    },
+    {
+      "scenario": "missing_topology",
+      "group": "topology_stress",
+      "n": 4,
+      "detected": 4,
+      "alert_runs": 4,
+      "top1_any": 1.0,
+      "top3_all": 1.0,
+      "top3_origin_recall": 1.0,
+      "mean_detection_delay_s": 1.5,
+      "mean_localization_delay_s": 11.5
+    },
+    {
+      "scenario": "reversed_topology",
+      "group": "topology_stress",
+      "n": 4,
+      "detected": 4,
+      "alert_runs": 4,
+      "top1_any": 0.0,
+      "top3_all": 1.0,
+      "top3_origin_recall": 1.0,
+      "mean_detection_delay_s": 1.5,
+      "mean_localization_delay_s": 11.5
+    },
+    {
+      "scenario": "ten_minute_sensor_drift",
+      "group": "slow_drift",
+      "n": 4,
+      "detected": 0,
+      "alert_runs": 4,
+      "top1_any": 0.0,
+      "top3_all": 0.0,
+      "top3_origin_recall": 0.0,
+      "mean_detection_delay_s": null,
+      "mean_localization_delay_s": null
+    }
+  ],
+  "runs": [
+    {
+      "scenario": "clean",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "normal",
+      "seed": 8200,
+      "targets": [],
+      "detected": false,
+      "alert_count": 0,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "noisy_clean",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "normal",
+      "seed": 8200,
+      "targets": [],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PLC1",
+        "LIT101",
+        "P301"
+      ],
+      "detection_delay_s": 20.0,
+      "localization_delay_s": 30.0,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": 0.7143808883681981,
+      "predicted_category": "controller",
+      "expected_category": null
+    },
+    {
+      "scenario": "approved_setpoint",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "authorized_change",
+      "seed": 8200,
+      "targets": [],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PLC1",
+        "MV101",
+        "P101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": 0.6972999786803991,
+      "predicted_category": "controller",
+      "expected_category": null
+    },
+    {
+      "scenario": "sensor_fault",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "benign_fault",
+      "seed": 8200,
+      "targets": [],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT101",
+        "PLC1",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": 0.46547158720736814,
+      "predicted_category": "sensor",
+      "expected_category": null
+    },
+    {
+      "scenario": "sensor_offset",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8200,
+      "targets": [
+        "LIT301"
+      ],
+      "detected": true,
+      "alert_count": 3,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT301",
+        "PLC2",
+        "P301"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.7474623704317956,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "sensor_freeze",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8200,
+      "targets": [
+        "FIT201"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "FIT201",
+        "PLC1",
+        "P101"
+      ],
+      "detection_delay_s": 7.0,
+      "localization_delay_s": 17.0,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9901664227682863,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "slow_ramp",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8200,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": false,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": false,
+      "top3_all": false,
+      "top3_origin_recall": 0.0,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "actuator_force",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8200,
+      "targets": [
+        "P101"
+      ],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "P101",
+        "FIT201",
+        "PIT301"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.8514806086976309,
+      "predicted_category": "actuator",
+      "expected_category": "actuator"
+    },
+    {
+      "scenario": "rogue_setpoint",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8200,
+      "targets": [
+        "PLC1"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PLC1",
+        "P101",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.5420141469274088,
+      "predicted_category": "controller",
+      "expected_category": "controller"
+    },
+    {
+      "scenario": "simultaneous_origins",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "multiple_attack",
+      "seed": 8200,
+      "targets": [
+        "LIT101",
+        "P301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT101",
+        "PLC1",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": false,
+      "top3_origin_recall": 0.5,
+      "ranking_confidence": 0.4030946216459738,
+      "predicted_category": "sensor",
+      "expected_category": null
+    },
+    {
+      "scenario": "missing_topology",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "topology_stress",
+      "seed": 8200,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "missing",
+      "ranking": [
+        "LIT101",
+        "PIT301",
+        "FIT201"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.34440054775844653,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "reversed_topology",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "topology_stress",
+      "seed": 8200,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "reversed",
+      "ranking": [
+        "PIT301",
+        "FIT201",
+        "LIT101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": false,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.5344711243130854,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "ten_minute_sensor_drift",
+      "event_duration_s": 600,
+      "run_duration_s": 720,
+      "group": "slow_drift",
+      "seed": 8200,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": false,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": false,
+      "top3_all": false,
+      "top3_origin_recall": 0.0,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "clean",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "normal",
+      "seed": 8201,
+      "targets": [],
+      "detected": false,
+      "alert_count": 0,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "noisy_clean",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "normal",
+      "seed": 8201,
+      "targets": [],
+      "detected": false,
+      "alert_count": 0,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "approved_setpoint",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "authorized_change",
+      "seed": 8201,
+      "targets": [],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PLC1",
+        "MV101",
+        "P101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": 0.7258633058499394,
+      "predicted_category": "controller",
+      "expected_category": null
+    },
+    {
+      "scenario": "sensor_fault",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "benign_fault",
+      "seed": 8201,
+      "targets": [],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT101",
+        "PLC1",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": 0.4211684605375276,
+      "predicted_category": "sensor",
+      "expected_category": null
+    },
+    {
+      "scenario": "sensor_offset",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8201,
+      "targets": [
+        "PIT301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PIT301",
+        "PLC2",
+        "LIT301"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9928878039615611,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "sensor_freeze",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8201,
+      "targets": [
+        "LIT301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT301",
+        "PLC2",
+        "PLC1"
+      ],
+      "detection_delay_s": 7.5,
+      "localization_delay_s": 17.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9261807139986826,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "slow_ramp",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8201,
+      "targets": [
+        "FIT201"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT301",
+        "FIT201",
+        "PLC2"
+      ],
+      "detection_delay_s": 15.5,
+      "localization_delay_s": 25.5,
+      "top1_any": false,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.7307119554221118,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "actuator_force",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8201,
+      "targets": [
+        "P301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "P301",
+        "PLC2",
+        "LIT301"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9939447854840348,
+      "predicted_category": "actuator",
+      "expected_category": "actuator"
+    },
+    {
+      "scenario": "rogue_setpoint",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8201,
+      "targets": [
+        "PLC2"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "P301",
+        "PLC2",
+        "LIT301"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": false,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9934498221866561,
+      "predicted_category": "actuator",
+      "expected_category": "controller"
+    },
+    {
+      "scenario": "simultaneous_origins",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "multiple_attack",
+      "seed": 8201,
+      "targets": [
+        "LIT101",
+        "P301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT101",
+        "PLC1",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": false,
+      "top3_origin_recall": 0.5,
+      "ranking_confidence": 0.40125910838080614,
+      "predicted_category": "sensor",
+      "expected_category": null
+    },
+    {
+      "scenario": "missing_topology",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "topology_stress",
+      "seed": 8201,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "missing",
+      "ranking": [
+        "LIT101",
+        "PIT301",
+        "FIT201"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.42370532003899364,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "reversed_topology",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "topology_stress",
+      "seed": 8201,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "reversed",
+      "ranking": [
+        "PIT301",
+        "FIT201",
+        "LIT101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": false,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.601642065704199,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "ten_minute_sensor_drift",
+      "event_duration_s": 600,
+      "run_duration_s": 720,
+      "group": "slow_drift",
+      "seed": 8201,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": false,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": false,
+      "top3_all": false,
+      "top3_origin_recall": 0.0,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "clean",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "normal",
+      "seed": 8202,
+      "targets": [],
+      "detected": false,
+      "alert_count": 0,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "noisy_clean",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "normal",
+      "seed": 8202,
+      "targets": [],
+      "detected": false,
+      "alert_count": 0,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "approved_setpoint",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "authorized_change",
+      "seed": 8202,
+      "targets": [],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PLC1",
+        "MV101",
+        "P101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": 0.7145519392176807,
+      "predicted_category": "controller",
+      "expected_category": null
+    },
+    {
+      "scenario": "sensor_fault",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "benign_fault",
+      "seed": 8202,
+      "targets": [],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT101",
+        "PLC1",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": 0.4478028395787234,
+      "predicted_category": "sensor",
+      "expected_category": null
+    },
+    {
+      "scenario": "sensor_offset",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8202,
+      "targets": [
+        "LIT301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT301",
+        "PLC2",
+        "P301"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.564529099475093,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "sensor_freeze",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8202,
+      "targets": [
+        "PIT301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PIT301",
+        "PLC1",
+        "LIT101"
+      ],
+      "detection_delay_s": 7.0,
+      "localization_delay_s": 17.0,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9879310006981936,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "slow_ramp",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8202,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": false,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": false,
+      "top3_all": false,
+      "top3_origin_recall": 0.0,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "actuator_force",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8202,
+      "targets": [
+        "P101"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "P101",
+        "FIT201",
+        "PIT301"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.8119311751655819,
+      "predicted_category": "actuator",
+      "expected_category": "actuator"
+    },
+    {
+      "scenario": "rogue_setpoint",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8202,
+      "targets": [
+        "PLC2"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PLC2",
+        "P301",
+        "LIT301"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9868227085184939,
+      "predicted_category": "controller",
+      "expected_category": "controller"
+    },
+    {
+      "scenario": "simultaneous_origins",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "multiple_attack",
+      "seed": 8202,
+      "targets": [
+        "LIT101",
+        "P301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT101",
+        "PLC1",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": false,
+      "top3_origin_recall": 0.5,
+      "ranking_confidence": 0.41501365570366733,
+      "predicted_category": "sensor",
+      "expected_category": null
+    },
+    {
+      "scenario": "missing_topology",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "topology_stress",
+      "seed": 8202,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "missing",
+      "ranking": [
+        "LIT101",
+        "PIT301",
+        "FIT201"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.38665668233847417,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "reversed_topology",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "topology_stress",
+      "seed": 8202,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "reversed",
+      "ranking": [
+        "PIT301",
+        "FIT201",
+        "LIT101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": false,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.5706724307752596,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "ten_minute_sensor_drift",
+      "event_duration_s": 600,
+      "run_duration_s": 720,
+      "group": "slow_drift",
+      "seed": 8202,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": false,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": false,
+      "top3_all": false,
+      "top3_origin_recall": 0.0,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "clean",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "normal",
+      "seed": 8203,
+      "targets": [],
+      "detected": false,
+      "alert_count": 0,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "noisy_clean",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "normal",
+      "seed": 8203,
+      "targets": [],
+      "detected": false,
+      "alert_count": 0,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": null
+    },
+    {
+      "scenario": "approved_setpoint",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "authorized_change",
+      "seed": 8203,
+      "targets": [],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PLC1",
+        "MV101",
+        "P101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": 0.7134010965020318,
+      "predicted_category": "controller",
+      "expected_category": null
+    },
+    {
+      "scenario": "sensor_fault",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "benign_fault",
+      "seed": 8203,
+      "targets": [],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT101",
+        "PLC1",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": null,
+      "top3_all": null,
+      "top3_origin_recall": null,
+      "ranking_confidence": 0.438769930966359,
+      "predicted_category": "sensor",
+      "expected_category": null
+    },
+    {
+      "scenario": "sensor_offset",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8203,
+      "targets": [
+        "LIT301"
+      ],
+      "detected": true,
+      "alert_count": 3,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT301",
+        "PLC2",
+        "P301"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.608167866436048,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "sensor_freeze",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8203,
+      "targets": [
+        "FIT201"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "FIT201",
+        "PLC1",
+        "LIT101"
+      ],
+      "detection_delay_s": 7.5,
+      "localization_delay_s": 17.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9894249950550214,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "slow_ramp",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8203,
+      "targets": [
+        "PIT301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PIT301",
+        "PLC1",
+        "LIT101"
+      ],
+      "detection_delay_s": 7.5,
+      "localization_delay_s": 17.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9449410173422778,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "actuator_force",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8203,
+      "targets": [
+        "P301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "P301",
+        "LIT301",
+        "PLC2"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.9995610928703289,
+      "predicted_category": "actuator",
+      "expected_category": "actuator"
+    },
+    {
+      "scenario": "rogue_setpoint",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "single_attack",
+      "seed": 8203,
+      "targets": [
+        "PLC1"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "PLC1",
+        "P101",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.5406555687131278,
+      "predicted_category": "controller",
+      "expected_category": "controller"
+    },
+    {
+      "scenario": "simultaneous_origins",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "multiple_attack",
+      "seed": 8203,
+      "targets": [
+        "LIT101",
+        "P301"
+      ],
+      "detected": true,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [
+        "LIT101",
+        "PLC1",
+        "MV101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": false,
+      "top3_origin_recall": 0.5,
+      "ranking_confidence": 0.41280784254884784,
+      "predicted_category": "sensor",
+      "expected_category": null
+    },
+    {
+      "scenario": "missing_topology",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "topology_stress",
+      "seed": 8203,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "missing",
+      "ranking": [
+        "LIT101",
+        "PIT301",
+        "FIT201"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": true,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.3960996125235175,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "reversed_topology",
+      "event_duration_s": 100.0,
+      "run_duration_s": 220.0,
+      "group": "topology_stress",
+      "seed": 8203,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": true,
+      "alert_count": 2,
+      "pre_event_alerts": 0,
+      "topology": "reversed",
+      "ranking": [
+        "PIT301",
+        "FIT201",
+        "LIT101"
+      ],
+      "detection_delay_s": 1.5,
+      "localization_delay_s": 11.5,
+      "top1_any": false,
+      "top3_all": true,
+      "top3_origin_recall": 1.0,
+      "ranking_confidence": 0.5773937192022333,
+      "predicted_category": "sensor",
+      "expected_category": "sensor"
+    },
+    {
+      "scenario": "ten_minute_sensor_drift",
+      "event_duration_s": 600,
+      "run_duration_s": 720,
+      "group": "slow_drift",
+      "seed": 8203,
+      "targets": [
+        "LIT101"
+      ],
+      "detected": false,
+      "alert_count": 1,
+      "pre_event_alerts": 0,
+      "topology": "original",
+      "ranking": [],
+      "detection_delay_s": null,
+      "localization_delay_s": null,
+      "top1_any": false,
+      "top3_all": false,
+      "top3_origin_recall": 0.0,
+      "ranking_confidence": null
+    }
+  ],
+  "category_confusion": [
+    {
+      "expected": "sensor",
+      "predicted": "sensor",
+      "n": 10
+    },
+    {
+      "expected": "actuator",
+      "predicted": "actuator",
+      "n": 4
+    },
+    {
+      "expected": "controller",
+      "predicted": "controller",
+      "n": 3
+    },
+    {
+      "expected": "controller",
+      "predicted": "actuator",
+      "n": 1
+    }
+  ],
+  "limits": [
+    "Small fixed synthetic study; no production guarantee or real-world compromise probabilities",
+    "Calibration evaluates detected single-origin cases only; misses count as localization failures in scenario tables",
+    "Top-1 any and Top-3 all report different questions for simultaneous origins",
+    "Benign faults and attacks can produce identical telemetry; anomalies do not establish malicious intent",
+    "Topology corruption affects localization only; the trained forecaster stays unchanged",
+    "No LIVE, HAI, communication or real firmware accuracy is inferred from this SIM study"
+  ]
+}

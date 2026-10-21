@@ -1,0 +1,260 @@
+{
+  "generated_at": "2026-10-15T15:55:55.718874+00:00",
+  "scope": "Held-out simulation of emulator physics at 2 Hz; not Modbus-path or hardware validation",
+  "training_seed": 41000,
+  "clean_seeds": [
+    42000,
+    42001,
+    42002
+  ],
+  "attack_seeds": [
+    42100,
+    42101,
+    42102
+  ],
+  "results": {
+    "5": {
+      "model": "mlp",
+      "training_seconds": 2.845627546310425,
+      "precision": 0.9368998628257887,
+      "recall": 0.7588888888888888,
+      "f1": 0.8385512584407613,
+      "clean_hours": 0.5,
+      "false_alarms_per_hour": 4.0,
+      "attacks": 15,
+      "detected": 14,
+      "missed": 1,
+      "top1_all_attacks": 0.5333333333333333,
+      "mean_detection_delay_s": 10.775570438980436,
+      "runs": [
+        {
+          "seed": 42100,
+          "scenario": "sensor_freeze",
+          "target": "LIT101",
+          "detected": true,
+          "ranked_origin": "LIT101"
+        },
+        {
+          "seed": 42101,
+          "scenario": "sensor_freeze",
+          "target": "LIT101",
+          "detected": true,
+          "ranked_origin": "LIT101"
+        },
+        {
+          "seed": 42102,
+          "scenario": "sensor_freeze",
+          "target": "FIT201",
+          "detected": true,
+          "ranked_origin": "P101"
+        },
+        {
+          "seed": 42100,
+          "scenario": "sensor_offset",
+          "target": "LIT101",
+          "detected": true,
+          "ranked_origin": "LIT101"
+        },
+        {
+          "seed": 42101,
+          "scenario": "sensor_offset",
+          "target": "LIT101",
+          "detected": true,
+          "ranked_origin": "LIT101"
+        },
+        {
+          "seed": 42102,
+          "scenario": "sensor_offset",
+          "target": "FIT201",
+          "detected": true,
+          "ranked_origin": "P101"
+        },
+        {
+          "seed": 42100,
+          "scenario": "sensor_ramp",
+          "target": "LIT101",
+          "detected": false,
+          "ranked_origin": null
+        },
+        {
+          "seed": 42101,
+          "scenario": "sensor_ramp",
+          "target": "LIT101",
+          "detected": true,
+          "ranked_origin": null
+        },
+        {
+          "seed": 42102,
+          "scenario": "sensor_ramp",
+          "target": "FIT201",
+          "detected": true,
+          "ranked_origin": "P101"
+        },
+        {
+          "seed": 42100,
+          "scenario": "actuator_force",
+          "target": "MV101",
+          "detected": true,
+          "ranked_origin": "MV101"
+        },
+        {
+          "seed": 42101,
+          "scenario": "actuator_force",
+          "target": "MV101",
+          "detected": true,
+          "ranked_origin": "MV101"
+        },
+        {
+          "seed": 42102,
+          "scenario": "actuator_force",
+          "target": "MV101",
+          "detected": true,
+          "ranked_origin": "P101"
+        },
+        {
+          "seed": 42100,
+          "scenario": "rogue_setpoint",
+          "target": "PLC1",
+          "detected": true,
+          "ranked_origin": "PLC1"
+        },
+        {
+          "seed": 42101,
+          "scenario": "rogue_setpoint",
+          "target": "PLC1",
+          "detected": true,
+          "ranked_origin": "PLC1"
+        },
+        {
+          "seed": 42102,
+          "scenario": "rogue_setpoint",
+          "target": "PLC1",
+          "detected": true,
+          "ranked_origin": "P101"
+        }
+      ]
+    },
+    "20": {
+      "model": "mlp",
+      "training_seconds": 0.637392520904541,
+      "precision": 0.9867256637168141,
+      "recall": 0.7433333333333333,
+      "f1": 0.8479087452471483,
+      "clean_hours": 0.5,
+      "false_alarms_per_hour": 0.0,
+      "attacks": 15,
+      "detected": 13,
+      "missed": 2,
+      "top1_all_attacks": 0.6,
+      "mean_detection_delay_s": 2.969770770006218,
+      "runs": [
+        {
+          "seed": 42100,
+          "scenario": "sensor_freeze",
+          "target": "LIT101",
+          "detected": true,
+          "ranked_origin": "LIT101"
+        },
+        {
+          "seed": 42101,
+          "scenario": "sensor_freeze",
+          "target": "LIT101",
+          "detected": true,
+          "ranked_origin": "LIT101"
+        },
+        {
+          "seed": 42102,
+          "scenario": "sensor_freeze",
+          "target": "FIT201",
+          "detected": true,
+          "ranked_origin": "MV101"
+        },
+        {
+          "seed": 42100,
+          "scenario": "sensor_offset",
+          "target": "LIT101",
+          "detected": true,
+          "ranked_origin": "LIT101"
+        },
+        {
+          "seed": 42101,
+          "scenario": "sensor_offset",
+          "target": "LIT101",
+          "detected": true,
+          "ranked_origin": "LIT101"
+        },
+        {
+          "seed": 42102,
+          "scenario": "sensor_offset",
+          "target": "FIT201",
+          "detected": true,
+          "ranked_origin": "MV101"
+        },
+        {
+          "seed": 42100,
+          "scenario": "sensor_ramp",
+          "target": "LIT101",
+          "detected": false,
+          "ranked_origin": null
+        },
+        {
+          "seed": 42101,
+          "scenario": "sensor_ramp",
+          "target": "LIT101",
+          "detected": false,
+          "ranked_origin": null
+        },
+        {
+          "seed": 42102,
+          "scenario": "sensor_ramp",
+          "target": "FIT201",
+          "detected": true,
+          "ranked_origin": "MV101"
+        },
+        {
+          "seed": 42100,
+          "scenario": "actuator_force",
+          "target": "MV101",
+          "detected": true,
+          "ranked_origin": "MV101"
+        },
+        {
+          "seed": 42101,
+          "scenario": "actuator_force",
+          "target": "MV101",
+          "detected": true,
+          "ranked_origin": "MV101"
+        },
+        {
+          "seed": 42102,
+          "scenario": "actuator_force",
+          "target": "MV101",
+          "detected": true,
+          "ranked_origin": "MV101"
+        },
+        {
+          "seed": 42100,
+          "scenario": "rogue_setpoint",
+          "target": "PLC1",
+          "detected": true,
+          "ranked_origin": "PLC1"
+        },
+        {
+          "seed": 42101,
+          "scenario": "rogue_setpoint",
+          "target": "PLC1",
+          "detected": true,
+          "ranked_origin": "PLC1"
+        },
+        {
+          "seed": 42102,
+          "scenario": "rogue_setpoint",
+          "target": "PLC1",
+          "detected": true,
+          "ranked_origin": "MV101"
+        }
+      ]
+    }
+  },
+  "limitations": "One baseline seed, 30 clean minutes and 15 attacks per model. Results do not establish production superiority; models are not deployed."
+}

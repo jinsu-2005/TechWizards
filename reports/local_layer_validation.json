@@ -1,0 +1,305 @@
+{
+  "schema_version": 2,
+  "generated_at": "2026-10-15T16:19:08.088313+00:00",
+  "scope": "Local paired-evidence rules; not detector accuracy or real firmware validation",
+  "seeds": [
+    401,
+    719,
+    997
+  ],
+  "cases": 24,
+  "passed": 24,
+  "confusion": [
+    {
+      "expected": "not_observed",
+      "predicted": "not_observed",
+      "count": 6
+    },
+    {
+      "expected": "supported",
+      "predicted": "supported",
+      "count": 9
+    },
+    {
+      "expected": "unresolved",
+      "predicted": "unresolved",
+      "count": 3
+    },
+    {
+      "expected": "approved_change",
+      "predicted": "approved_change",
+      "count": 3
+    },
+    {
+      "expected": "both_supported",
+      "predicted": "both_supported",
+      "count": 3
+    }
+  ],
+  "results": [
+    {
+      "seed": 401,
+      "scenario": "unchanged_reply",
+      "expected": "not_observed",
+      "predicted": "not_observed",
+      "elapsed_ms": 0.7709000001341337,
+      "client_value_verified": true
+    },
+    {
+      "seed": 401,
+      "scenario": "altered_reply",
+      "expected": "supported",
+      "predicted": "supported",
+      "elapsed_ms": 0.32620000001770677,
+      "client_value_verified": true
+    },
+    {
+      "seed": 401,
+      "scenario": "benign_delay",
+      "expected": "not_observed",
+      "predicted": "not_observed",
+      "elapsed_ms": 251.1597000002439,
+      "client_value_verified": true
+    },
+    {
+      "seed": 401,
+      "scenario": "gradual_channel_drift",
+      "expected": "supported",
+      "predicted": "supported",
+      "offsets": [
+        0.0,
+        0.5,
+        1.0,
+        1.5,
+        2.0
+      ],
+      "scope": "Five accelerated transactions; not a long-duration detector trial"
+    },
+    {
+      "seed": 401,
+      "scenario": "missing_pair",
+      "expected": "unresolved",
+      "predicted": "unresolved"
+    },
+    {
+      "seed": 401,
+      "scenario": "approved_config",
+      "expected": "approved_change",
+      "predicted": "approved_change"
+    },
+    {
+      "seed": 401,
+      "scenario": "unapproved_config",
+      "expected": "supported",
+      "predicted": "supported"
+    },
+    {
+      "seed": 401,
+      "scenario": "simultaneous_channel_and_controller",
+      "expected": "both_supported",
+      "predicted": "both_supported",
+      "hypotheses": [
+        {
+          "category": "communication_channel",
+          "asset_id": "LIT101",
+          "candidate_id": "channel:LIT101",
+          "event_ids": [
+            "channel"
+          ],
+          "result": "supported",
+          "explanation": "Paired replies differ within the local test proxy.",
+          "scope": "Local proxy evidence; association with this incident is not proof of causation or ongoing compromise"
+        },
+        {
+          "category": "controller_configuration",
+          "asset_id": "PLC1",
+          "candidate_id": "config:PLC1",
+          "event_ids": [
+            "config"
+          ],
+          "result": "supported",
+          "explanation": "Configuration change observed; approval is not established by this record.",
+          "scope": "Emulated configuration only; real firmware provenance remains unavailable"
+        }
+      ]
+    },
+    {
+      "seed": 719,
+      "scenario": "unchanged_reply",
+      "expected": "not_observed",
+      "predicted": "not_observed",
+      "elapsed_ms": 0.5706000001737266,
+      "client_value_verified": true
+    },
+    {
+      "seed": 719,
+      "scenario": "altered_reply",
+      "expected": "supported",
+      "predicted": "supported",
+      "elapsed_ms": 0.26389999948150944,
+      "client_value_verified": true
+    },
+    {
+      "seed": 719,
+      "scenario": "benign_delay",
+      "expected": "not_observed",
+      "predicted": "not_observed",
+      "elapsed_ms": 264.03209999989485,
+      "client_value_verified": true
+    },
+    {
+      "seed": 719,
+      "scenario": "gradual_channel_drift",
+      "expected": "supported",
+      "predicted": "supported",
+      "offsets": [
+        0.0,
+        0.5,
+        1.0,
+        1.5,
+        2.0
+      ],
+      "scope": "Five accelerated transactions; not a long-duration detector trial"
+    },
+    {
+      "seed": 719,
+      "scenario": "missing_pair",
+      "expected": "unresolved",
+      "predicted": "unresolved"
+    },
+    {
+      "seed": 719,
+      "scenario": "approved_config",
+      "expected": "approved_change",
+      "predicted": "approved_change"
+    },
+    {
+      "seed": 719,
+      "scenario": "unapproved_config",
+      "expected": "supported",
+      "predicted": "supported"
+    },
+    {
+      "seed": 719,
+      "scenario": "simultaneous_channel_and_controller",
+      "expected": "both_supported",
+      "predicted": "both_supported",
+      "hypotheses": [
+        {
+          "category": "communication_channel",
+          "asset_id": "LIT101",
+          "candidate_id": "channel:LIT101",
+          "event_ids": [
+            "channel"
+          ],
+          "result": "supported",
+          "explanation": "Paired replies differ within the local test proxy.",
+          "scope": "Local proxy evidence; association with this incident is not proof of causation or ongoing compromise"
+        },
+        {
+          "category": "controller_configuration",
+          "asset_id": "PLC1",
+          "candidate_id": "config:PLC1",
+          "event_ids": [
+            "config"
+          ],
+          "result": "supported",
+          "explanation": "Configuration change observed; approval is not established by this record.",
+          "scope": "Emulated configuration only; real firmware provenance remains unavailable"
+        }
+      ]
+    },
+    {
+      "seed": 997,
+      "scenario": "unchanged_reply",
+      "expected": "not_observed",
+      "predicted": "not_observed",
+      "elapsed_ms": 0.6487000000561238,
+      "client_value_verified": true
+    },
+    {
+      "seed": 997,
+      "scenario": "altered_reply",
+      "expected": "supported",
+      "predicted": "supported",
+      "elapsed_ms": 0.2518999999665539,
+      "client_value_verified": true
+    },
+    {
+      "seed": 997,
+      "scenario": "benign_delay",
+      "expected": "not_observed",
+      "predicted": "not_observed",
+      "elapsed_ms": 252.80089999978372,
+      "client_value_verified": true
+    },
+    {
+      "seed": 997,
+      "scenario": "gradual_channel_drift",
+      "expected": "supported",
+      "predicted": "supported",
+      "offsets": [
+        0.0,
+        0.5,
+        1.0,
+        1.5,
+        2.0
+      ],
+      "scope": "Five accelerated transactions; not a long-duration detector trial"
+    },
+    {
+      "seed": 997,
+      "scenario": "missing_pair",
+      "expected": "unresolved",
+      "predicted": "unresolved"
+    },
+    {
+      "seed": 997,
+      "scenario": "approved_config",
+      "expected": "approved_change",
+      "predicted": "approved_change"
+    },
+    {
+      "seed": 997,
+      "scenario": "unapproved_config",
+      "expected": "supported",
+      "predicted": "supported"
+    },
+    {
+      "seed": 997,
+      "scenario": "simultaneous_channel_and_controller",
+      "expected": "both_supported",
+      "predicted": "both_supported",
+      "hypotheses": [
+        {
+          "category": "communication_channel",
+          "asset_id": "LIT101",
+          "candidate_id": "channel:LIT101",
+          "event_ids": [
+            "channel"
+          ],
+          "result": "supported",
+          "explanation": "Paired replies differ within the local test proxy.",
+          "scope": "Local proxy evidence; association with this incident is not proof of causation or ongoing compromise"
+        },
+        {
+          "category": "controller_configuration",
+          "asset_id": "PLC1",
+          "candidate_id": "config:PLC1",
+          "event_ids": [
+            "config"
+          ],
+          "result": "supported",
+          "explanation": "Configuration change observed; approval is not established by this record.",
+          "scope": "Emulated configuration only; real firmware provenance remains unavailable"
+        }
+      ]
+    }
+  ],
+  "not_measured": [
+    "end-to-end origin accuracy",
+    "confidence calibration",
+    "physical hardware behavior",
+    "end-to-end simultaneous detector localization"
+  ]
+}

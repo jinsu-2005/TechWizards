@@ -12,14 +12,13 @@ backups/
 *.egg-info/
 data/hai/*
 !data/hai/.gitkeep
-backend/models/*
-!backend/models/.gitkeep
-reports/*
-!reports/.gitkeep
 node_modules/
 data/live/*
 !data/live/.gitkeep
 backend/models/live/
+!backend/models/**
+!reports/**
+!models/**
 dist/
 test-results/
 playwright-report/

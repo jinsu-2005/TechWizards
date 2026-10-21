@@ -1,0 +1,380 @@
+{
+ "nodes": [
+  "LIT101",
+  "MV101",
+  "P101",
+  "FIT201",
+  "PIT301",
+  "LIT301",
+  "P301",
+  "PLC1",
+  "PLC2"
+ ],
+ "types": {
+  "LIT101": "sensor",
+  "MV101": "actuator",
+  "P101": "actuator",
+  "FIT201": "sensor",
+  "PIT301": "sensor",
+  "LIT301": "sensor",
+  "P301": "actuator",
+  "PLC1": "controller",
+  "PLC2": "controller"
+ },
+ "edges": [
+  {
+   "src": "LIT101",
+   "dst": "PLC1",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "LIT101",
+   "dst": "FIT201",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "LIT101",
+   "dst": "MV101",
+   "weight": 0.03381315305617114,
+   "kind": "learned"
+  },
+  {
+   "src": "LIT101",
+   "dst": "P101",
+   "weight": 0.33096727010681193,
+   "kind": "learned"
+  },
+  {
+   "src": "LIT101",
+   "dst": "PIT301",
+   "weight": 0.4729642620216764,
+   "kind": "learned"
+  },
+  {
+   "src": "LIT101",
+   "dst": "LIT301",
+   "weight": 0.0414074036736172,
+   "kind": "learned"
+  },
+  {
+   "src": "MV101",
+   "dst": "LIT101",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "MV101",
+   "dst": "P101",
+   "weight": 0.264545249811461,
+   "kind": "learned"
+  },
+  {
+   "src": "MV101",
+   "dst": "FIT201",
+   "weight": 0.11699180651558785,
+   "kind": "learned"
+  },
+  {
+   "src": "MV101",
+   "dst": "PIT301",
+   "weight": 0.2139787271340148,
+   "kind": "learned"
+  },
+  {
+   "src": "MV101",
+   "dst": "LIT301",
+   "weight": 0.03865248007166409,
+   "kind": "learned"
+  },
+  {
+   "src": "MV101",
+   "dst": "P301",
+   "weight": 0.08496000009647055,
+   "kind": "learned"
+  },
+  {
+   "src": "MV101",
+   "dst": "PLC1",
+   "weight": 0.5,
+   "kind": "learned"
+  },
+  {
+   "src": "MV101",
+   "dst": "PLC2",
+   "weight": 0.12128180699530262,
+   "kind": "learned"
+  },
+  {
+   "src": "P101",
+   "dst": "LIT101",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "P101",
+   "dst": "FIT201",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "P101",
+   "dst": "MV101",
+   "weight": 0.06355379792783462,
+   "kind": "learned"
+  },
+  {
+   "src": "P101",
+   "dst": "PIT301",
+   "weight": 0.5,
+   "kind": "learned"
+  },
+  {
+   "src": "P101",
+   "dst": "LIT301",
+   "weight": 0.06108322035162187,
+   "kind": "learned"
+  },
+  {
+   "src": "P101",
+   "dst": "P301",
+   "weight": 0.03381667034040834,
+   "kind": "learned"
+  },
+  {
+   "src": "P101",
+   "dst": "PLC1",
+   "weight": 0.08276652503685819,
+   "kind": "learned"
+  },
+  {
+   "src": "FIT201",
+   "dst": "PIT301",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "FIT201",
+   "dst": "LIT301",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "FIT201",
+   "dst": "LIT101",
+   "weight": 0.07029481588407412,
+   "kind": "learned"
+  },
+  {
+   "src": "FIT201",
+   "dst": "MV101",
+   "weight": 0.020003278668485284,
+   "kind": "learned"
+  },
+  {
+   "src": "FIT201",
+   "dst": "P101",
+   "weight": 0.0768339388198398,
+   "kind": "learned"
+  },
+  {
+   "src": "PIT301",
+   "dst": "LIT101",
+   "weight": 0.32388157740699136,
+   "kind": "learned"
+  },
+  {
+   "src": "PIT301",
+   "dst": "MV101",
+   "weight": 0.047692313703083695,
+   "kind": "learned"
+  },
+  {
+   "src": "PIT301",
+   "dst": "P101",
+   "weight": 0.23229960493185955,
+   "kind": "learned"
+  },
+  {
+   "src": "PIT301",
+   "dst": "FIT201",
+   "weight": 0.2247333940674493,
+   "kind": "learned"
+  },
+  {
+   "src": "PIT301",
+   "dst": "LIT301",
+   "weight": 0.04891923665662454,
+   "kind": "learned"
+  },
+  {
+   "src": "PIT301",
+   "dst": "PLC1",
+   "weight": 0.09878460773069223,
+   "kind": "learned"
+  },
+  {
+   "src": "LIT301",
+   "dst": "PIT301",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "LIT301",
+   "dst": "FIT201",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "LIT301",
+   "dst": "PLC2",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "LIT301",
+   "dst": "LIT101",
+   "weight": 0.05241332201419735,
+   "kind": "learned"
+  },
+  {
+   "src": "LIT301",
+   "dst": "MV101",
+   "weight": 0.03149555529150764,
+   "kind": "learned"
+  },
+  {
+   "src": "LIT301",
+   "dst": "P101",
+   "weight": 0.03382202327623066,
+   "kind": "learned"
+  },
+  {
+   "src": "LIT301",
+   "dst": "P301",
+   "weight": 0.03507792152073454,
+   "kind": "learned"
+  },
+  {
+   "src": "LIT301",
+   "dst": "PLC1",
+   "weight": 0.030337552640527884,
+   "kind": "learned"
+  },
+  {
+   "src": "P301",
+   "dst": "LIT301",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "P301",
+   "dst": "LIT101",
+   "weight": 0.025604880237658008,
+   "kind": "learned"
+  },
+  {
+   "src": "P301",
+   "dst": "MV101",
+   "weight": 0.11362281054528278,
+   "kind": "learned"
+  },
+  {
+   "src": "P301",
+   "dst": "P101",
+   "weight": 0.024822811780818136,
+   "kind": "learned"
+  },
+  {
+   "src": "P301",
+   "dst": "PIT301",
+   "weight": 0.02242025159002757,
+   "kind": "learned"
+  },
+  {
+   "src": "P301",
+   "dst": "PLC1",
+   "weight": 0.15551509121221452,
+   "kind": "learned"
+  },
+  {
+   "src": "P301",
+   "dst": "PLC2",
+   "weight": 0.5,
+   "kind": "learned"
+  },
+  {
+   "src": "PLC1",
+   "dst": "MV101",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "PLC1",
+   "dst": "P101",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "PLC1",
+   "dst": "LIT101",
+   "weight": 0.5,
+   "kind": "learned"
+  },
+  {
+   "src": "PLC1",
+   "dst": "FIT201",
+   "weight": 0.14627390383967198,
+   "kind": "learned"
+  },
+  {
+   "src": "PLC1",
+   "dst": "PIT301",
+   "weight": 0.19570355055924732,
+   "kind": "learned"
+  },
+  {
+   "src": "PLC1",
+   "dst": "LIT301",
+   "weight": 0.030438984075192802,
+   "kind": "learned"
+  },
+  {
+   "src": "PLC1",
+   "dst": "P301",
+   "weight": 0.047883529604039916,
+   "kind": "learned"
+  },
+  {
+   "src": "PLC1",
+   "dst": "PLC2",
+   "weight": 0.07438913372516251,
+   "kind": "learned"
+  },
+  {
+   "src": "PLC2",
+   "dst": "P301",
+   "weight": 1.0,
+   "kind": "static"
+  },
+  {
+   "src": "PLC2",
+   "dst": "MV101",
+   "weight": 0.07096578038238456,
+   "kind": "learned"
+  },
+  {
+   "src": "PLC2",
+   "dst": "LIT301",
+   "weight": 0.5,
+   "kind": "learned"
+  },
+  {
+   "src": "PLC2",
+   "dst": "PLC1",
+   "weight": 0.08290238000140561,
+   "kind": "learned"
+  }
+ ]
+}
