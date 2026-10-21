@@ -11,6 +11,7 @@ const MetricsPage = lazy(() =>
 
 const WorkspacePage = lazy(() => import("../features/investigation/WorkspacePage").then((m) => ({ default: m.WorkspacePage })));
 const SocPage = lazy(() => import("../features/investigation/SocPage").then((m) => ({ default: m.SocPage })));
+const VoiceSettingsPage = lazy(() => import("../features/voice/VoiceSettingsPage").then((m) => ({ default: m.VoiceSettingsPage })));
 
 function WorkspaceLoading({ current }: { current: string }) {
   return <div className="p-3 sm:p-5"><WorkspaceHeader current={current} /><div role="status" aria-busy="true" className="mt-4 rounded-xl border border-border bg-surface p-6 text-sm text-muted">Loading workspace…</div></div>;
@@ -18,6 +19,7 @@ function WorkspaceLoading({ current }: { current: string }) {
 
 function Route() {
   const path = window.location.pathname.replace(/\/$/, "");
+  if (path === "/settings") return <Suspense fallback={<WorkspaceLoading current={path} />}><VoiceSettingsPage /></Suspense>;
   if (path === "/alerts" || path === "/assets" || path === "/lab") {
     return <Suspense fallback={<WorkspaceLoading current={path} />}><SocPage page={path.slice(1) as "alerts" | "assets" | "lab"} /></Suspense>;
   }
@@ -53,5 +55,5 @@ export function Root() {
     return () => observer.disconnect();
   }, [href]);
   const path = href.split("?")[0] ?? "/";
-  return <div ref={container} onClick={handleWorkspaceLink}><div key={href} id="workspace-content" tabIndex={-1}><Route /></div>{["/alerts", "/assets", "/lab", "/metrics"].includes(path) && <CopilotDrawer />}</div>;
+  return <div ref={container} onClick={handleWorkspaceLink}><div key={href} id="workspace-content" tabIndex={-1}><Route /></div>{["/alerts", "/assets", "/lab", "/metrics", "/settings"].includes(path) && <CopilotDrawer />}</div>;
 }

@@ -87,6 +87,13 @@
 .copilot-checklist:hover { color: var(--accent); }
 .copilot-composer { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
 .mobile-incident-list, .mobile-asset-list { display: grid; gap: .75rem; }
+.voice-settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 23rem), 1fr)); gap: 1rem; align-items: start; }
+.voice-settings-wide { grid-column: 1 / -1; }
+.voice-switch { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: .625rem; cursor: pointer; }
+.voice-switch strong, .voice-switch small { display: block; }
+.voice-switch strong { font-size: .875rem; }
+.voice-switch small { margin-top: .25rem; color: var(--muted); font-size: .75rem; line-height: 1.5; }
+.voice-switch input { width: 1.25rem; height: 1.25rem; flex: none; accent-color: var(--accent); }
 
 /* Phone-first layouts. Wider breakpoints progressively reveal the full workspace. */
 .mobile-navigation select { min-height: 2.75rem; width: 68%; min-width: 0; padding: 0 .625rem; background: var(--bg); border: 1px solid var(--border); border-radius: .5rem; color: var(--text); font-size: 1rem; }

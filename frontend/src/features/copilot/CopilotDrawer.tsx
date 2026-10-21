@@ -1,4 +1,4 @@
-import { Bot, Send, X, Wrench, RefreshCw, Plus, ArrowDown, FileSearch, GitBranch, BookOpen, ArrowUpRight } from "lucide-react";
+import { Bot, Send, X, Wrench, RefreshCw, Plus, ArrowDown, FileSearch, GitBranch, BookOpen, ArrowUpRight, Mic, MicOff, Volume2, VolumeX, Settings2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { postCopilotChat, postIsolate } from "../../lib/api";
 import type { CopilotChatResponse, Incident, EvidenceEvent } from "../../lib/types";
@@ -8,6 +8,9 @@ import { useUi } from "../../store/ui";
 import { CopilotAnswer } from "./CopilotAnswer";
 import { useAccess } from "../auth/access";
 import { useModalFocus } from "../../lib/useModalFocus";
+import { useVoice, parseVoiceCommand, speak, stopSpeech } from "../../lib/voice";
+import { startBrowserRecognition, startServerRecording } from "../../lib/voiceInput";
+import { navigate } from "../../lib/navigation";
 
 interface Message {
   id: string;
@@ -23,6 +26,7 @@ interface Message {
 }
 
 export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Incident } = {}) {
+  const voice = useVoice();
   const { canAdmin } = useAccess();
   const open = useUi((s) => s.copilotOpen);
   const setOpen = useUi((s) => s.setCopilotOpen);
@@ -51,12 +55,28 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isolating, setIsolating] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState("");
+  const stopListening = useRef<(() => void) | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<AbortController | null>(null);
   useEffect(() => {
     setLoading(false);
-    return () => { requestRef.current?.abort(); };
+    return () => { requestRef.current?.abort(); stopListening.current?.(); stopListening.current = null; stopSpeech(); };
   }, [scope, open]);
+
+  const startListening = async () => {
+    if (listening) { stopListening.current?.(); stopListening.current = null; setListening(false); setVoiceStatus("Processing transcript…"); return; }
+    stopSpeech(); setVoiceStatus("Listening… Speak one command or question."); setListening(true);
+    const onText = (text: string) => { setInput(text); setVoiceStatus(text ? "Transcript ready. Review it, then send or open the requested view." : "No speech recognized. Try again."); composerRef.current?.focus(); };
+    const onError = (message: string) => { setVoiceStatus(message); setListening(false); stopListening.current = null; };
+    const onEnd = () => { setListening(false); stopListening.current = null; };
+    try {
+      stopListening.current = voice.transcriptionProvider === "openai"
+        ? await startServerRecording(onText, onError, onEnd)
+        : startBrowserRecognition(onText, onError, onEnd);
+    } catch (error) { onError(error instanceof Error ? error.message : "Microphone unavailable."); }
+  };
 
   useModalFocus(open, dialogRef, () => setOpen(false), "textarea");
 
@@ -127,6 +147,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, aiMsg]);
+      if (useVoice.getState().replySpeech) void speak(res.reply).catch((error: unknown) => setVoiceStatus(`Speech unavailable: ${String(error)}`));
     } catch {
       if (scopeRef.current !== requestScope || requestRef.current !== controller) return;
       const errorMsg: Message = {
@@ -182,6 +203,15 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
     setMessages([welcome]); setInput(""); followRef.current = true; setAtBottom(true);
     composerRef.current?.focus();
   };
+  const parsedCommand = input.trim() ? parseVoiceCommand(input, useLive.getState().topology?.nodes.map((node) => node.id) ?? []) : null;
+  const executeCommand = () => {
+    if (!parsedCommand || parsedCommand.kind === "ask") return;
+    if (parsedCommand.kind === "selectAsset") {
+      useUi.getState().selectAsset(parsedCommand.asset);
+      navigate(`/?asset=${encodeURIComponent(parsedCommand.asset)}`);
+    } else navigate(parsedCommand.path);
+    setInput(""); setVoiceStatus(""); setOpen(false);
+  };
   return (
     <>
       <div data-dialog-backdrop className="fixed inset-0 z-40 bg-black/40" aria-hidden="true" onClick={() => setOpen(false)} />
@@ -207,7 +237,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
             <p className="text-xs text-muted">Evidence, alternatives and next checks</p>
           </div>
         </div>
-        <div className="flex gap-1"><button type="button" className="copilot-icon-button" aria-label="New conversation" title="New conversation" onClick={resetChat}><Plus size={17} /></button>
+        <div className="flex gap-1"><a href="/settings" onClick={() => setOpen(false)} className="copilot-icon-button" aria-label="AI and voice settings" title="AI and voice settings"><Settings2 size={17} /></a><button type="button" className="copilot-icon-button" aria-label="New conversation" title="New conversation" onClick={resetChat}><Plus size={17} /></button>
         <button
           type="button"
           onClick={() => setOpen(false)}
@@ -263,6 +293,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
             <div className="mt-1 flex items-center gap-2 px-1 text-[11px] font-mono text-muted">
               {m.model && <span>via {m.model}</span>}
               {m.timestamp && <span>{m.timestamp}</span>}
+              {m.sender === "copilot" && !m.retryText && <button type="button" className="min-h-8 rounded px-2 text-muted hover:text-accent" title="Speak this answer" aria-label="Speak this answer" onClick={() => void speak(m.text).catch((error: unknown) => setVoiceStatus(`Speech unavailable: ${String(error)}`))}><Volume2 size={15} /></button>}
             </div>
 
             {m.retryText && <button disabled={loading} className="mt-2 min-h-10 rounded border border-border px-3 text-sm disabled:opacity-50" onClick={() => { setMessages((items) => items.filter((item) => item.id !== m.id)); void handleSend(m.retryText, true); }}>Retry response</button>}
@@ -297,10 +328,12 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
       {!atBottom && <button onClick={() => { followRef.current = true; streamRef.current?.scrollTo({ top: streamRef.current.scrollHeight, behavior: "instant" }); setAtBottom(true); }} className="mx-auto my-2 inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-bg px-4 text-xs"><ArrowDown size={14} />Latest messages</button>}
       {/* Input Box */}
       <div className="copilot-composer border-t border-border/80 p-3.5 bg-surface">
+        {voiceStatus && <p role="status" className="mb-2 rounded-md bg-bg px-3 py-2 text-xs text-muted">{voiceStatus}</p>}
+        {parsedCommand && parsedCommand.kind !== "ask" && <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent/50 bg-accent/5 px-3 py-2 text-xs"><span>{parsedCommand.kind === "selectAsset" ? `Focus asset ${parsedCommand.asset}` : `Open ${parsedCommand.label}`}</span><button type="button" className="min-h-10 rounded-md bg-accent px-3 font-semibold text-on-accent" onClick={executeCommand}>Open view</button></div>}
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleSend();
+            if (parsedCommand?.kind === "ask") void handleSend(); else executeCommand();
           }}
           className="flex items-end gap-2"
         >
@@ -308,7 +341,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
             ref={composerRef}
             rows={2}
             aria-describedby="copilot-composer-help"
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); void handleSend(); } }}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); if (parsedCommand?.kind === "ask") void handleSend(); else executeCommand(); } }}
             aria-label="Message to AI Copilot"
             maxLength={4000}
             value={input}
@@ -316,16 +349,18 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
             placeholder="Ask about evidence, candidates, or next checks…"
             className="max-h-40 min-h-12 resize-none min-w-0 flex-1 rounded-lg border border-border bg-bg/90 px-3.5 py-2 text-sm leading-6 text-text placeholder-muted focus:border-accent focus:ring-1 focus:ring-accent/40 focus:outline-none transition-all"
           />
+          <button type="button" aria-label={listening ? "Stop recording" : "Start voice input"} aria-pressed={listening} title={listening ? "Stop recording" : "Start voice input"} onClick={() => void startListening()} className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${listening ? "border-suspect text-suspect" : "border-border text-muted hover:text-accent"}`}>{listening ? <MicOff size={17} /> : <Mic size={17} />}</button>
+          <button type="button" aria-label="Stop speaking" title="Stop speaking" onClick={stopSpeech} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:text-accent"><VolumeX size={17} /></button>
           <button
             type="submit"
-            disabled={!input.trim() || loading}
+            disabled={!input.trim() || loading || parsedCommand?.kind !== "ask"}
             aria-label="Send message"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-on-accent transition-all hover:bg-accent/90 disabled:opacity-40 shadow-sm"
           >
             <Send size={14} />
           </button>
         </form>
-        <p id="copilot-composer-help" className="mt-2 text-[11px] text-muted">Enter to send · Shift+Enter for a new line. Inferred origins need corroboration.</p>
+        <p id="copilot-composer-help" className="mt-2 text-[11px] text-muted">Review voice transcripts before sending. Enter to send · Shift+Enter for a new line. Voice actions stay inside the visible workspace.</p>
       </div>
     </div>
     </>

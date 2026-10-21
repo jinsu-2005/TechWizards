@@ -5,6 +5,9 @@ import { useLive } from "../store/live";
 
 import { playContainmentChime, playIncidentAlarm } from "../lib/audio";
 import { useUi } from "../store/ui";
+import { incidentBrief, speak, useVoice } from "../lib/voice";
+
+const narrated = new Set<string>();
 
 /** Connects the WebSocket once, feeds the store, and refreshes REST state on (re)connect. */
 export function useLiveStream(): void {
@@ -33,6 +36,14 @@ export function useLiveStream(): void {
             playContainmentChime(sound);
           }
           prevStatus = currStatus;
+        }
+        if (m.incident && useVoice.getState().incidentBriefings && (currStatus === "open" || currStatus === "localizing" || currStatus === "contained")) {
+          const key = `${m.mode}:${m.incident.id}:${currStatus === "contained" ? "contained" : "detected"}`;
+          if (!narrated.has(key)) {
+            narrated.add(key);
+            if (narrated.size > 100) narrated.clear();
+            void speak(incidentBrief(m.incident, m.mode)).catch(() => undefined);
+          }
         }
       },
       onState: (state) => {

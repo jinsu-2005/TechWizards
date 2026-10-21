@@ -1,4 +1,4 @@
-import { Activity, Bell, Boxes, ChartColumn, Database, FlaskConical, Search, ShieldCheck, Sparkles, Volume2, VolumeX } from "lucide-react";
+import { Activity, Bell, Boxes, ChartColumn, Database, FlaskConical, Search, Settings2, ShieldCheck, Sparkles, Volume2, VolumeX } from "lucide-react";
 import { navigate } from "../../lib/navigation";
 import { useUi } from "../../store/ui";
 import { ThemeSwitcher } from "./ThemeSwitcher";
@@ -11,6 +11,7 @@ const pages = [
   { href: "/sources", label: "Sources", icon: Database },
   { href: "/metrics", label: "Metrics", icon: ChartColumn },
   { href: "/lab", label: "Local lab", icon: FlaskConical },
+  { href: "/settings", label: "AI & Voice", icon: Settings2 },
 ];
 export function WorkspaceHeader({ current }: { current: string }) {
   const sound = useUi((s) => s.soundEnabled);
