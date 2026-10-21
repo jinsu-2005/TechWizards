@@ -12,7 +12,7 @@ from uuid import uuid4
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import authentication, copilot, investigation, lab, rest, voice, ws
+from app.api import authentication, copilot, investigation, lab, live_voice, rest, voice, ws
 from app.api.gateway import GatewayBoundary
 from app.api.live_attack import LiveAttackLauncher
 from app.api.security import RateLimiter
@@ -163,6 +163,8 @@ def create_app(
     application.state.hub = ws.Hub()
     application.state.settings = settings
     application.state.attack_limiter = RateLimiter(settings.attack_rate_per_min)
+    application.state.live_voice_limiter = RateLimiter(3)
+    application.state.live_voice_slots = asyncio.Semaphore(2)
     if not settings.api_key and not settings.auth_enabled:
         log.warning("AT_API_KEY is not set: POST /api/attack, /reset and /mode are open")
     application.state.reports_dir = settings.reports_dir
@@ -187,6 +189,7 @@ def create_app(
     application.include_router(ws.router)
     application.include_router(copilot.router)
     application.include_router(voice.router)
+    application.include_router(live_voice.router)
     application.include_router(investigation.router)
     application.include_router(lab.router)
     return application

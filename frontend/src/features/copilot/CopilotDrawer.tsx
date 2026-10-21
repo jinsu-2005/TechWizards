@@ -1,4 +1,4 @@
-import { Bot, Send, X, Wrench, RefreshCw, Plus, ArrowDown, FileSearch, GitBranch, BookOpen, ArrowUpRight, Mic, MicOff, Volume2, VolumeX, Settings2 } from "lucide-react";
+import { Bot, Send, X, Wrench, RefreshCw, Plus, ArrowDown, FileSearch, GitBranch, BookOpen, ArrowUpRight, Mic, MicOff, Volume2, VolumeX, Settings2, Radio } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { postCopilotChat, postIsolate } from "../../lib/api";
 import type { CopilotChatResponse, Incident, EvidenceEvent } from "../../lib/types";
@@ -11,6 +11,7 @@ import { useModalFocus } from "../../lib/useModalFocus";
 import { useVoice, parseVoiceCommand, speak, stopSpeech } from "../../lib/voice";
 import { startBrowserRecognition, startServerRecording } from "../../lib/voiceInput";
 import { navigate } from "../../lib/navigation";
+import { LiveVoicePanel } from "./LiveVoicePanel";
 
 interface Message {
   id: string;
@@ -57,12 +58,13 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
   const [isolating, setIsolating] = useState(false);
   const [listening, setListening] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState("");
+  const [liveVoiceOpen, setLiveVoiceOpen] = useState(false);
   const stopListening = useRef<(() => void) | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<AbortController | null>(null);
   useEffect(() => {
     setLoading(false);
-    return () => { requestRef.current?.abort(); stopListening.current?.(); stopListening.current = null; stopSpeech(); };
+    return () => { requestRef.current?.abort(); stopListening.current?.(); stopListening.current = null; stopSpeech(); setLiveVoiceOpen(false); };
   }, [scope, open]);
 
   const startListening = async () => {
@@ -72,7 +74,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
     const onError = (message: string) => { setVoiceStatus(message); setListening(false); stopListening.current = null; };
     const onEnd = () => { setListening(false); stopListening.current = null; };
     try {
-      stopListening.current = voice.transcriptionProvider === "openai"
+      stopListening.current = voice.transcriptionProvider === "gemini"
         ? await startServerRecording(onText, onError, onEnd)
         : startBrowserRecognition(onText, onError, onEnd);
     } catch (error) { onError(error instanceof Error ? error.message : "Microphone unavailable."); }
@@ -240,7 +242,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
             <p className="text-xs text-muted">Evidence, alternatives and next checks</p>
           </div>
         </div>
-        <div className="flex gap-1"><a href="/settings" onClick={() => setOpen(false)} className="copilot-icon-button" aria-label="AI and voice settings" title="AI and voice settings"><Settings2 size={17} /></a><button type="button" className="copilot-icon-button" aria-label="New conversation" title="New conversation" onClick={resetChat}><Plus size={17} /></button>
+        <div className="flex gap-1"><button type="button" className={`copilot-icon-button ${liveVoiceOpen ? "text-accent" : ""}`} aria-label="Toggle live voice chat" aria-pressed={liveVoiceOpen} title="Live voice chat" onClick={() => setLiveVoiceOpen((value) => !value)}><Radio size={17} /></button><a href="/settings" onClick={() => setOpen(false)} className="copilot-icon-button" aria-label="AI and voice settings" title="AI and voice settings"><Settings2 size={17} /></a><button type="button" className="copilot-icon-button" aria-label="New conversation" title="New conversation" onClick={resetChat}><Plus size={17} /></button>
         <button
           type="button"
           onClick={() => setOpen(false)}
@@ -252,6 +254,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
       </div>
 
       <div className="copilot-context"><span className="copilot-context-source">{latest?.mode?.toUpperCase() ?? "Workspace"}</span><span>{incident ? `Case ${incident.id.slice(0, 12)}…` : "General guidance"}{selectedAsset ? ` · ${selectedAsset}` : ""}</span><span className="text-muted">{latest?.mode === "sim" ? "Simulation only" : "Read-only advice"}{stale ? " · Stale" : ""}{replaying ? " · Replay" : ""}</span></div>
+      {liveVoiceOpen && <LiveVoicePanel />}
       {incident?.ambiguous && <p className="shrink-0 border-b border-border px-5 py-3 text-xs leading-5 text-suspect">Competing origins remain unresolved. Compare the evidence before assigning an origin.</p>}
 
       {/* Message Stream */}

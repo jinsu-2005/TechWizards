@@ -7,9 +7,12 @@ export type VoiceSettings = {
   incidentBriefings: boolean;
   rate: number;
   voiceURI: string;
-  speechProvider: "browser" | "openai";
-  transcriptionProvider: "browser" | "openai";
-  openaiVoice: string;
+  speechProvider: "browser" | "gemini";
+  transcriptionProvider: "browser" | "gemini";
+  geminiVoice: string;
+  geminiSpeechModel: string;
+  inputDeviceId: string;
+  outputDeviceId: string;
 };
 
 const defaults: VoiceSettings = {
@@ -17,15 +20,21 @@ const defaults: VoiceSettings = {
   incidentBriefings: false,
   rate: 1,
   voiceURI: "",
-  speechProvider: "browser",
-  transcriptionProvider: "browser",
-  openaiVoice: "coral",
+  speechProvider: "gemini",
+  transcriptionProvider: "gemini",
+  geminiVoice: "Kore",
+  geminiSpeechModel: "gemini-3.8-flash-lite-tts",
+  inputDeviceId: "",
+  outputDeviceId: "",
 };
 
 function savedSettings(): VoiceSettings {
   try {
     const saved = JSON.parse(localStorage.getItem("attacktrace.voice.v1") ?? "{}");
-    return { ...defaults, ...saved };
+    return { ...defaults, ...saved,
+      speechProvider: saved.speechProvider === "openai" ? "gemini" : (saved.speechProvider ?? defaults.speechProvider),
+      transcriptionProvider: saved.transcriptionProvider === "openai" ? "gemini" : (saved.transcriptionProvider ?? defaults.transcriptionProvider),
+    };
   } catch { return defaults; }
 }
 
@@ -36,7 +45,9 @@ export const useVoice = create<VoiceSettings & { update: (change: Partial<VoiceS
     localStorage.setItem("attacktrace.voice.v1", JSON.stringify({
       replySpeech: next.replySpeech, incidentBriefings: next.incidentBriefings,
       rate: next.rate, voiceURI: next.voiceURI, speechProvider: next.speechProvider,
-      transcriptionProvider: next.transcriptionProvider, openaiVoice: next.openaiVoice,
+      transcriptionProvider: next.transcriptionProvider, geminiVoice: next.geminiVoice,
+      geminiSpeechModel: next.geminiSpeechModel,
+      inputDeviceId: next.inputDeviceId, outputDeviceId: next.outputDeviceId,
     }));
     return next;
   }),
@@ -60,8 +71,8 @@ export async function speak(text: string, options = useVoice.getState()): Promis
   const short = conciseSpeech(text);
   if (!short) return;
   stopSpeech();
-  if (options.speechProvider === "openai") {
-    const blob = await synthesizeSpeech(short, options.openaiVoice);
+  if (options.speechProvider === "gemini") {
+    const blob = await synthesizeSpeech(short, options.geminiVoice, options.geminiSpeechModel);
     const audio = new Audio(URL.createObjectURL(blob));
     currentAudio = audio;
     audio.onended = () => { URL.revokeObjectURL(audio.src); if (currentAudio === audio) currentAudio = null; };
