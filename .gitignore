@@ -1,8 +1,13 @@
 .env
+/data/investigations.sqlite*
+/data/emulator_manifest.json
+/data/emulator_manifest.tmp
 __pycache__/
 .venv/
 .mypy_cache/
 .ruff_cache/
+backups/
+*service-account*.json
 .pytest_cache/
 *.egg-info/
 data/hai/*
@@ -27,3 +32,8 @@ submission/evidence/videos/*.webm
 /LIVE_PLAN.md
 /FIX_PLAN.md
 /AttackTrace_Master_Prompt.md
+deploy/gateway/.dev.vars*
+deploy/gateway/.wrangler/
+deploy/gateway/node_modules/
+graphify-out/cache/
+

@@ -1,0 +1,13 @@
+{
+  "auth": {
+    "authorizedDomains": ["localhost", "attacktrace-private-20261016.firebaseapp.com", "attacktrace-private-20261016.web.app", "attacktrace-console.jinsu-j2005.workers.dev"],
+    "providers": {
+      "anonymous": false,
+      "emailPassword": false,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "AttackTrace Private",
+        "supportEmail": "jinsu.j2005@gmail.com"
+      }
+    }
+  }
+}
