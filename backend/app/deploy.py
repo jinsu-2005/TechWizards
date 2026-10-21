@@ -15,18 +15,17 @@ class DeploymentError(ValueError):
 
 
 def validate(settings: Settings, root: Path) -> None:
-    if not settings.auth_enabled or not settings.auth_cookie_secure or settings.demo_mode:
-        raise DeploymentError(
-            "Cloud deployment requires authentication, Secure cookies and demo mode off"
-        )
-    if not settings.firebase_project_id or os.environ.get("FIREBASE_AUTH_EMULATOR_HOST"):
-        raise DeploymentError("Configure a real Firebase project without the Auth emulator")
-    if len(settings.gateway_secret.get_secret_value()) < 32:
-        raise DeploymentError("AT_GATEWAY_SECRET must contain at least 32 random characters")
-    if not settings.auth_members or "admin" not in settings.auth_members.values():
-        raise DeploymentError("Configure approved workspace members including an administrator")
-    if any(role not in {"admin", "analyst", "viewer"} for role in settings.auth_members.values()):
-        raise DeploymentError("Invalid workspace membership role")
+    if settings.auth_enabled:
+        if not settings.auth_cookie_secure or settings.demo_mode:
+            raise DeploymentError(
+                "Private deployment requires Secure cookies and demo mode off"
+            )
+        if not settings.firebase_project_id or os.environ.get("FIREBASE_AUTH_EMULATOR_HOST"):
+            raise DeploymentError("Configure a real Firebase project without the Auth emulator")
+        if not settings.auth_members or "admin" not in settings.auth_members.values():
+            raise DeploymentError("Configure approved workspace members including an administrator")
+        if any(role not in {"admin", "analyst", "viewer"} for role in settings.auth_members.values()):
+            raise DeploymentError("Invalid workspace membership role")
     if len(settings.cors_origins) != 1:
         raise DeploymentError("Configure exactly one public application origin")
     origin = settings.cors_origins[0]
@@ -99,7 +98,8 @@ def main() -> int:
         port = int(os.environ.get("PORT", "10000"))
         if not 1 <= port <= 65535:
             raise DeploymentError("PORT is invalid")
-        check_identity(settings.firebase_project_id)
+        if settings.auth_enabled:
+            check_identity(settings.firebase_project_id)
         prepare_storage(settings, root, Path("/app/models"))
     except DeploymentError as exc:
         print(f"Deployment preflight failed: {exc}", file=sys.stderr)

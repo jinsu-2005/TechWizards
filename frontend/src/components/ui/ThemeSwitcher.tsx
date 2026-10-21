@@ -62,25 +62,14 @@ export function ThemeSwitcher() {
             event.preventDefault(); setOpen(true);
           }
         }}
-        className={`flex min-h-10 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-all duration-150 ${
+        className={`utility-icon theme-trigger flex items-center gap-1 rounded-lg border transition-all duration-150 ${
           open
             ? "border-accent bg-accent/10 text-accent shadow-sm"
             : "border-border text-muted hover:border-border/80 hover:text-text"
         }`}
       >
-        <Palette size={13} className="shrink-0 text-accent" aria-hidden />
-        <span className="font-medium text-text">{activeTheme.name.split(" ")[0]}</span>
-        <div className="flex items-center -space-x-0.5">
-          <span
-            className="h-2 w-2 rounded-full border border-border shadow-xs"
-            style={{ backgroundColor: activeTheme.colors.accent }}
-          />
-          <span
-            className="h-2 w-2 rounded-full border border-border shadow-xs"
-            style={{ backgroundColor: activeTheme.colors.status }}
-          />
-        </div>
-        <ChevronDown size={12} className={`text-muted transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <Palette size={15} className="shrink-0 text-accent" aria-hidden />
+        <ChevronDown size={11} className={`text-muted transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (

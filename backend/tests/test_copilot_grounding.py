@@ -100,7 +100,30 @@ def test_provider_failure_keeps_honest_evidence_summary():
     inc = incident()
     result = engine.chat("Why?", snapshot(inc=inc), inc)
     assert result.model_used == "evidence-summary"
+    assert "AI model unavailable" in result.reply
     assert "Ranked hypotheses" in result.reply
+
+
+def test_rate_limited_text_model_switches_to_verified_fallback(monkeypatch):
+    from app.ai.models import ModelRouter
+
+    calls = []
+
+    class RateLimitedError(Exception):
+        code = 429
+
+    def generate_content(**kwargs):
+        calls.append(kwargs["model"])
+        if len(calls) == 1:
+            raise RateLimitedError("requests per minute exceeded")
+        return SimpleNamespace(text="Check the recorded PLC1 evidence.")
+
+    monkeypatch.setattr("app.explain.copilot_engine.model_router", ModelRouter())
+    engine = CopilotEngine(api_key="")
+    engine._client = SimpleNamespace(models=SimpleNamespace(generate_content=generate_content))
+    result = engine.chat("Why?", snapshot(inc=incident()), incident())
+    assert calls == ["gemini-3.8-flash", "gemini-3.5-flash-lite"]
+    assert result.model_used == "gemini-3.5-flash-lite"
 
 
 def test_request_limits_reject_excessive_or_privileged_history():
@@ -114,3 +137,32 @@ def test_request_limits_reject_excessive_or_privileged_history():
     ):
         with pytest.raises(ValidationError):
             CopilotChatRequest.model_validate({"message": "hello", **extra})
+
+
+def test_direct_assessment_leads_incident_response():
+    inc = incident()
+    response = _offline_expert_reply("What happened?", snapshot(inc=inc), inc)
+    assert response.reply.startswith("### Direct assessment")
+    assert f"Incident `{inc.id}` is currently in state" in response.reply
+
+
+def test_ranking_confidence_is_explicitly_labeled_as_hypothesis_not_proof():
+    inc = incident()
+    response = _offline_expert_reply("Who did this?", snapshot(inc=inc), inc)
+    assert "### Suspected origin" in response.reply
+    assert "ranking confidence is not proof of compromise" in response.reply
+    assert "Hypothesis `PLC1`" in response.reply
+
+
+def test_unsupported_path_propagation_claims_are_disclaimed():
+    from app.schemas import PathStep
+    inc = incident(
+        path=[
+            PathStep(id="LIT101", t=0.0, deviation=0.5),
+            PathStep(id="P101", t=1.5, deviation=0.3),
+        ]
+    )
+    response = _offline_expert_reply("Trace propagation", snapshot(inc=inc), inc)
+    assert "### Supporting observations" in response.reply
+    assert "Inferred sequence:" in response.reply
+    assert "not verified packet intrusion routing" in response.reply

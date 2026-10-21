@@ -21,7 +21,7 @@ async def bounded_chat(
     message: str,
     context: dict[str, Any],
     slots: asyncio.Semaphore,
-    timeout: float = 20,
+    timeout: float = 37,
 ) -> CopilotChatResponse:
     # A timeout or browser cancellation cannot terminate a running synchronous SDK call.
     # Keep its slot occupied until the underlying work actually finishes.
@@ -58,9 +58,9 @@ async def post_chat(body: CopilotChatRequest, request: Request) -> CopilotChatRe
         )
         is not None
     ):
-        raise HTTPException(429, "Copilot request limit reached; try again shortly")
+        raise HTTPException(429, "AI Pilot request limit reached; try again shortly")
     if state.copilot_slots.locked():
-        raise HTTPException(429, "Copilot busy; try again shortly")
+        raise HTTPException(429, "AI Pilot busy; try again shortly")
     store = journal(request)
     rt = active_runtime(request.app.state)
     latest = getattr(rt, "latest", None)
@@ -137,9 +137,9 @@ async def post_chat(body: CopilotChatRequest, request: Request) -> CopilotChatRe
             get_copilot_engine(request), body.message, context, state.copilot_slots
         )
     except TimeoutError:
-        result = CopilotEngine(api_key="").chat(body.message, **context)
-        result.reply += "\n\nModel request timed out. Showing the local evidence summary."
-        return result
+        return CopilotEngine(
+            api_key="", unavailable_reason="The model request timed out"
+        ).chat(body.message, **context)
 
 
 @router.get("/suggestions")

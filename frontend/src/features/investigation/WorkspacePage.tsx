@@ -48,14 +48,25 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
   const heading = page === "sources" ? "Data sources & coverage" : "Incident investigations";
   return (
     <main id="main-workspace" tabIndex={-1} className="content-page bg-bg">
-      <div className="page-container flex flex-col gap-5">
+      <div className="page-container flex flex-col gap-3 sm:gap-3.5">
         <WorkspaceHeader current={`/${page}`} />
         <div className="page-heading">
-          <div><h1 className="text-xl font-semibold">{heading}</h1><p className="mt-1 text-sm text-muted">{page === "sources" ? "Know where the readings come from and what they can establish." : "Compare hypotheses with the available evidence. Inferred paths are not verified intrusion routes."}</p></div>
-          <button aria-label="Refresh workspace" className={link} onClick={() => setRevision((v) => v + 1)}><RefreshCw className="inline" size={16} aria-hidden /><span className="ml-2 hidden sm:inline">Refresh</span></button>
+          <div className="page-heading-main">
+            <h1>{heading}</h1>
+            <span className="hidden sm:inline text-border">·</span>
+            <p className="page-heading-context">
+              <span className="font-mono text-xs uppercase px-1.5 py-0.5 rounded border border-border bg-surface text-text font-semibold">{mode?.toUpperCase() ?? "Unknown"}</span>
+              <span>{page === "sources" ? "Know where readings come from and what they establish." : "Compare hypotheses with available evidence."}</span>
+            </p>
+          </div>
+          <div className="page-heading-actions">
+            <button aria-label="Refresh workspace" className="page-heading-action" onClick={() => setRevision((v) => v + 1)}>
+              <RefreshCw size={14} aria-hidden />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
         {error && <div role="alert" className="rounded-lg border border-suspect/50 bg-suspect/10 p-3 text-sm text-suspect">{error} Previously received information may be stale.</div>}
-        <p className="source-context">Source <strong>{mode?.toUpperCase() ?? "Unknown"}</strong><span>Local project workspace</span></p>
         {page === "sources" ? <>
           <div className="source-cards">
             {[
@@ -89,7 +100,7 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
             </> : <p className="text-sm text-muted">{loading ? "Loading incident journal…" : error ? "Incident records are unavailable." : "No incidents in this source. Launch a simulation attack from the dashboard, then return here."}</p>}
           </aside>
           {loading && !incident ? <div role="status" className={card}>Loading investigations…</div> : incident ? <div className="flex min-w-0 flex-col gap-4">
-            <section className={card}><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-semibold">{incident.origin[0]?.id ?? "Unknown origin"} · Incident overview</h2><p className="mt-1 break-all font-mono text-xs text-muted">{incident.id}</p><p className="text-sm text-muted">{incident.status} · {incident.ambiguous ? "Competing origin hypotheses" : "Origin ranking available"}</p></div><div className="flex gap-2"><a href={reportUrl(incident.id)} className={link}>Export report</a><button className={link} onClick={() => useUi.getState().setCopilotOpen(true)}>Ask copilot</button></div></div><p className="mt-3 text-sm">{incident.explanation}</p></section>
+            <section className={card}><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-semibold">{incident.origin[0]?.id ?? "Unknown origin"} · Incident overview</h2><p className="mt-1 break-all font-mono text-xs text-muted">{incident.id}</p><p className="text-sm text-muted">{incident.status} · {incident.ambiguous ? "Competing origin hypotheses" : "Origin ranking available"}</p></div><div className="flex gap-2"><a href={reportUrl(incident.id)} className={link}>Export report</a><button className={link} onClick={() => useUi.getState().setCopilotOpen(true)}>Ask AI Pilot</button></div></div><p className="mt-3 text-sm">{incident.explanation}</p></section>
             <section className={card}><h2 className="font-semibold">Compare origin hypotheses</h2><p className="mt-1 text-xs text-muted">Confidence ranks candidates; it is not a verified probability of compromise. Contributions may differ from final ordering after tie rules.</p><div className="mobile-hypotheses mt-4">{incident.origin.map((candidate, rank) => <article key={candidate.id}><div className="flex items-center justify-between gap-3"><span className="font-mono font-semibold">{rank + 1}. {candidate.id}</span><strong className="font-mono text-accent">{(candidate.confidence * 100).toFixed(1)}%</strong></div><p className="mt-1 text-sm text-muted">{candidate.type} · inferred candidate</p><dl>{(["deviation", "onset", "causal"] as const).map((key) => <div key={key}><dt>{key === "causal" ? "Topology" : key === "deviation" ? "Deviation" : "Onset"}</dt><dd>{candidate.breakdown?.[key].toFixed(3) ?? "Not recorded"}</dd></div>)}</dl></article>)}</div><div className="mt-3 hidden overflow-x-auto md:block"><table className="w-full text-left text-sm"><thead className="border-b border-border text-muted"><tr>{["Candidate", "Type", "Confidence", "Deviation", "Onset", "Topology"].map((name) => <th key={name} className="p-2">{name}</th>)}</tr></thead><tbody>{incident.origin.map((candidate) => <tr key={candidate.id} className="border-b border-border last:border-0"><th className="p-2 font-mono font-medium">{candidate.id}</th><td className="p-2">{candidate.type}</td><td className="p-2 font-mono">{(candidate.confidence * 100).toFixed(1)}%</td>{(["deviation", "onset", "causal"] as const).map((key) => <td key={key} className="p-2 font-mono">{candidate.breakdown?.[key].toFixed(3) ?? "Not recorded"}</td>)}</tr>)}</tbody></table></div></section>
             <section className={card}><h2 className="font-semibold">Inferred process-effect timeline</h2><p className="mt-1 text-xs text-muted">Offsets are relative to the first anomalous onset, not proof of packet traversal.</p><ol className="mt-3 flex flex-wrap gap-2">{incident.path.map((step) => <li key={step.id} className="rounded-md border border-border bg-bg p-2 text-sm"><span className="font-mono">{step.id}</span><span className="ml-2 text-muted">+{step.t.toFixed(1)}s</span></li>)}</ol></section>
             <WorkflowPanel key={`${mode}:${incident.id}`} incidentId={incident.id} mode={mode ?? "unknown"} />

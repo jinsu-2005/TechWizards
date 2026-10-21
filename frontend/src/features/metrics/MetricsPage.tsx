@@ -128,9 +128,24 @@ export function MetricsPage() {
   const rows = useMemo(() => (load.state === "ready" ? f1Rows(load.metrics) : []), [load]);
 
   return (
-    <div className="metrics-page content-page page-container flex flex-col gap-5">
+    <div className="metrics-page content-page page-container flex flex-col gap-3 sm:gap-3.5">
       <WorkspaceHeader current="/metrics" />
-      <div className="page-heading"><div><h1>Benchmark evaluation &amp; telemetry metrics</h1><p>Recorded evaluations · results describe the tested datasets and scenarios.</p></div></div>
+      <div className="page-heading">
+        <div className="page-heading-main">
+          <h1>Benchmark evaluation &amp; telemetry metrics</h1>
+          <span className="hidden sm:inline text-border">·</span>
+          <p className="page-heading-context">
+            <span className="font-mono text-xs uppercase px-1.5 py-0.5 rounded border border-border bg-surface text-text font-semibold">GDN</span>
+            <span>Recorded evaluations across tested datasets and scenarios</span>
+          </p>
+        </div>
+        <div className="page-heading-actions">
+          <a href="/sources" className="page-heading-action">
+            <span>Model provenance</span>
+            <span aria-hidden>→</span>
+          </a>
+        </div>
+      </div>
       <main id="main-workspace" tabIndex={-1} className="flex min-h-0 flex-1 flex-col gap-2.5">
         <RobustnessPanel />
         {load.state === "loading" && <EmptyState icon={LoaderCircle} text="Loading Benchmark Metrics..." />}

@@ -59,6 +59,9 @@ export function conciseSpeech(markdown: string): string {
 }
 
 let currentAudio: HTMLAudioElement | null = null;
+let liveConversationActive = false;
+export function setLiveConversationActive(active: boolean): void { liveConversationActive = active; }
+export function isLiveConversationActive(): boolean { return liveConversationActive; }
 export function stopSpeech(): void {
   if (typeof window === "undefined") return;
   window.speechSynthesis?.cancel();

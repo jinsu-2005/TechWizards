@@ -1,6 +1,6 @@
 import { useFreshness } from "./useFreshness";
 import { useState } from "react";
-import { Columns2, Radar, Waypoints, WifiOff } from "lucide-react";
+import { Radar, Waypoints, WifiOff } from "lucide-react";
 import { CalibratingState } from "../components/ui/CalibratingState";
 import { EmptyState } from "../components/ui/EmptyState";
 import { IncidentToast } from "../components/ui/IncidentToast";
@@ -9,7 +9,6 @@ import { Panel } from "../components/ui/Panel";
 import { AttackConsole } from "../features/console/AttackConsole";
 import { ProcessWorkspace } from "../features/investigation/ProcessWorkspace";
 import { IncidentPanel } from "../features/incident/IncidentPanel";
-import { SplitView } from "../features/split/SplitView";
 import { Timeline } from "../features/timeline/Timeline";
 import { useLive } from "../store/live";
 import { useUi, type CenterView } from "../store/ui";
@@ -52,8 +51,6 @@ function Center({ live }: { live: boolean }) {
   const chosen = useUi((s) => s.view);
   const hai = useLive((s) => s.latest?.mode === "hai");
   const view = hai ? "graph" : chosen; // a dataset replay has no twin
-  const split = useUi((s) => s.split);
-  const activeIncident = useLive((s) => Boolean(s.latest?.incident && s.latest.incident.status !== "closed"));
   // LIVE while recording a clean baseline and training: nothing to draw yet, just the progress.
   const calibrating = useLive(
     (s) => s.latest?.mode === "live" && (s.status?.source?.calibration != null || s.status?.source?.state === "calibrating"),
@@ -67,20 +64,6 @@ function Center({ live }: { live: boolean }) {
   ) : (
     <ProcessWorkspace graph={view === "graph"} />
   );
-  if (split) {
-    return (
-      <Panel title="Split view" icon={Columns2} className="center-panel" actions={calibrating ? undefined : <ViewToggle />}>
-        <div className="flex h-full flex-col">
-          {/* Phase 14 C4: 42/58 (was 52/48) -- the mini-twin below needs more of the height
-              budget to clear 12px; see geometry.ts's VIEW.h trim for the other half of the fix. */}
-          <div className={`split-comparison shrink-0 overflow-auto border-b border-border ${activeIncident ? "split-active" : "split-empty"}`}>
-            {live && !calibrating ? <SplitView /> : <EmptyState icon={WifiOff} text="No signal" />}
-          </div>
-          <div className="min-h-0 flex-1">{body}</div>
-        </div>
-      </Panel>
-    );
-  }
   return (
     <Panel
       title={view === "twin" ? "Digital twin" : "Process graph"}

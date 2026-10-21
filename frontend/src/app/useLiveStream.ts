@@ -5,9 +5,10 @@ import { useLive } from "../store/live";
 
 import { playContainmentChime, playIncidentAlarm } from "../lib/audio";
 import { useUi } from "../store/ui";
-import { incidentBrief, speak, useVoice } from "../lib/voice";
+import { incidentBrief, isLiveConversationActive, speak, useVoice } from "../lib/voice";
 
 const narrated = new Set<string>();
+let lastBriefAt = 0;
 
 /** Connects the WebSocket once, feeds the store, and refreshes REST state on (re)connect. */
 export function useLiveStream(): void {
@@ -37,10 +38,11 @@ export function useLiveStream(): void {
           }
           prevStatus = currStatus;
         }
-        if (m.incident && useVoice.getState().incidentBriefings && (currStatus === "open" || currStatus === "localizing" || currStatus === "contained")) {
+        if (m.incident && useVoice.getState().incidentBriefings && !isLiveConversationActive() && document.visibilityState === "visible" && (currStatus === "open" || currStatus === "localizing" || currStatus === "contained")) {
           const key = `${m.mode}:${m.incident.id}:${currStatus === "contained" ? "contained" : "detected"}`;
-          if (!narrated.has(key)) {
+          if (!narrated.has(key) && Date.now() - lastBriefAt >= 45_000) {
             narrated.add(key);
+            lastBriefAt = Date.now();
             if (narrated.size > 100) narrated.clear();
             void speak(incidentBrief(m.incident, m.mode)).catch(() => undefined);
           }

@@ -138,11 +138,12 @@ function Details({ incident }: { incident: Incident }) {
           <button
             type="button"
             onClick={() => useUi.getState().setCopilotOpen(true)}
-            title="Ask AI Copilot for root-cause guidance and recovery SOP"
+            aria-label="Ask AI Pilot"
+            title="Ask AI Pilot for root-cause guidance and recovery SOP"
             className="flex h-8.5 items-center gap-1.5 rounded-md border border-accent/60 bg-accent/15 px-3 text-xs font-semibold text-accent shadow-xs transition-all hover:bg-accent/25 hover:border-accent active:scale-[0.98]"
           >
             <Sparkles size={13} aria-hidden />
-            <span>Ask AI</span>
+            <span>AI Pilot</span>
           </button>
         </div>
       </Section>
