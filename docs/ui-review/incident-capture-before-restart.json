@@ -1,0 +1,2648 @@
+{
+  "status": "captured",
+  "sha256": "d98612e9a1c1fe1deca5e711a2f119c5086bb4668038412c187fdc37def91236",
+  "payload": {
+    "schema_version": 1,
+    "incident_id": "inc_37a157d5a0794605837f770175682b98",
+    "session_id": "e6a6acfb67c34d13b9e60cff591df174",
+    "captured_at": 1792081428.2303598,
+    "sample_time": 1792081428.1047752,
+    "scope": "First observed incident emission; not necessarily attack onset",
+    "model": {
+      "kind": "mlp",
+      "runtime_id": "30b9db700e6f08f2d63c41999d7bf347c7704e8bc1a45e883020368285165d86",
+      "identity_scope": "Loaded weights, normalization, thresholds and scoring settings",
+      "weights_sha256": "afc79252ebf1def058ebaa4e99a4ebb433173dc26507b880d45b70220bded8fc",
+      "mean": [
+        49.98416807394469,
+        0.4284776718117028,
+        0.5997072802630409,
+        5.098318380906447,
+        0.7125216044680045,
+        49.91250675050797,
+        0.5137694003861961,
+        0.4285372046199764,
+        0.5136063459302768
+      ],
+      "sd": [
+        1.5694578222837192,
+        0.08653834067604456,
+        0.03127126404984528,
+        0.2582465649434492,
+        0.03252029259212398,
+        1.906997704753016,
+        0.10824087995705112,
+        0.08673440304984502,
+        0.10841781870404843
+      ],
+      "error_sd": [
+        0.12158592656715936,
+        0.032302006855257186,
+        0.06534928159301098,
+        0.18354601123157693,
+        0.10589033990500094,
+        0.09429548615954247,
+        0.02635595803574754,
+        0.0676370745555722,
+        0.05027230887785819
+      ],
+      "threshold": 2.515364295238487,
+      "node_thresholds": [
+        1.2917266076996277,
+        1.6776513694527326,
+        1.5763619336079302,
+        1.599001093372041,
+        1.446171553021889,
+        1.573651687969203,
+        1.947355332026714,
+        1.2649122179159065,
+        1.5017885760158447
+      ],
+      "window": 10,
+      "smoothing_alpha": 0.25,
+      "stuck_columns": [
+        0,
+        3,
+        4,
+        5
+      ],
+      "model_id": "899cbdfe8630d6478c540ef46204429d4790ec146da200db4a2891a6ac8dfc1f",
+      "trained_at": "2026-10-15T16:00:06.569962+00:00",
+      "recorded_samples": 600,
+      "sample_s": 0.5
+    },
+    "baseline": {
+      "kind": "IsolationForest and per-node 3-sigma",
+      "asset_ids": [
+        "LIT101",
+        "MV101",
+        "P101",
+        "FIT201",
+        "PIT301",
+        "LIT301",
+        "P301",
+        "PLC1",
+        "PLC2"
+      ],
+      "artifact_id": "f1c47e07d601b76cc32156216fbc88e51a398e5e",
+      "mean": [
+        49.86792856852214,
+        0.45849825236946345,
+        0.5969430341074864,
+        5.074189710617065,
+        0.7099752975006898,
+        50.06849885781606,
+        0.55002593913426,
+        0.45847549121826886,
+        0.5498944185053308
+      ],
+      "sd": [
+        1.455475174084964,
+        0.07285550864238408,
+        0.02903295564967912,
+        0.24989767194362175,
+        0.030063738404884313,
+        1.4826997667235462,
+        0.0875635917331526,
+        0.0730083703889306,
+        0.08810097606714681
+      ],
+      "sigma": 3
+    },
+    "source": {
+      "mode": "live",
+      "protocol": "modbus_tcp",
+      "host": "127.0.0.1",
+      "port": 5020,
+      "poll_s": 0.25,
+      "device_id": 1,
+      "source_fingerprint": "4d8f28b51c67c39b9410f8d3fc52974abe8caef61bf0c69aedae895a22a205cd",
+      "register_map": [
+        {
+          "tag": "LIT101",
+          "node_id": "LIT101",
+          "protocol": "modbus",
+          "table": "input",
+          "address": 0,
+          "type": "float32",
+          "scale": 1.0,
+          "unit": "%",
+          "access": "ro",
+          "min": 0.0,
+          "max": 100.0,
+          "role": "value"
+        },
+        {
+          "tag": "FIT201",
+          "node_id": "FIT201",
+          "protocol": "modbus",
+          "table": "input",
+          "address": 2,
+          "type": "float32",
+          "scale": 1.0,
+          "unit": "L/s",
+          "access": "ro",
+          "min": 0.0,
+          "max": 12.0,
+          "role": "value"
+        },
+        {
+          "tag": "PIT301",
+          "node_id": "PIT301",
+          "protocol": "modbus",
+          "table": "input",
+          "address": 4,
+          "type": "float32",
+          "scale": 1.0,
+          "unit": "bar",
+          "access": "ro",
+          "min": 0.0,
+          "max": 2.5,
+          "role": "value"
+        },
+        {
+          "tag": "LIT301",
+          "node_id": "LIT301",
+          "protocol": "modbus",
+          "table": "input",
+          "address": 6,
+          "type": "float32",
+          "scale": 1.0,
+          "unit": "%",
+          "access": "ro",
+          "min": 0.0,
+          "max": 100.0,
+          "role": "value"
+        },
+        {
+          "tag": "MV101",
+          "node_id": "MV101",
+          "protocol": "modbus",
+          "table": "input",
+          "address": 10,
+          "type": "float32",
+          "scale": 1.0,
+          "unit": "open",
+          "access": "ro",
+          "min": 0.0,
+          "max": 1.0,
+          "role": "value"
+        },
+        {
+          "tag": "P101",
+          "node_id": "P101",
+          "protocol": "modbus",
+          "table": "input",
+          "address": 12,
+          "type": "float32",
+          "scale": 1.0,
+          "unit": "speed",
+          "access": "ro",
+          "min": 0.0,
+          "max": 1.0,
+          "role": "value"
+        },
+        {
+          "tag": "P301",
+          "node_id": "P301",
+          "protocol": "modbus",
+          "table": "input",
+          "address": 14,
+          "type": "float32",
+          "scale": 1.0,
+          "unit": "speed",
+          "access": "ro",
+          "min": 0.0,
+          "max": 1.0,
+          "role": "value"
+        },
+        {
+          "tag": "PLC1",
+          "node_id": "PLC1",
+          "protocol": "modbus",
+          "table": "input",
+          "address": 20,
+          "type": "float32",
+          "scale": 1.0,
+          "unit": "out",
+          "access": "ro",
+          "min": 0.0,
+          "max": 1.0,
+          "role": "value"
+        },
+        {
+          "tag": "PLC2",
+          "node_id": "PLC2",
+          "protocol": "modbus",
+          "table": "input",
+          "address": 22,
+          "type": "float32",
+          "scale": 1.0,
+          "unit": "out",
+          "access": "ro",
+          "min": 0.0,
+          "max": 1.0,
+          "role": "value"
+        }
+      ],
+      "attestation": "Configured endpoint only; physical device identity unverified"
+    },
+    "topology": {
+      "nodes": [
+        {
+          "id": "LIT101",
+          "type": "sensor",
+          "label": "Tank T1 level",
+          "unit": "%",
+          "lo": 0.0,
+          "hi": 100.0
+        },
+        {
+          "id": "MV101",
+          "type": "actuator",
+          "label": "T1 inlet valve",
+          "unit": "open",
+          "lo": 0.0,
+          "hi": 1.0
+        },
+        {
+          "id": "P101",
+          "type": "actuator",
+          "label": "Transfer pump",
+          "unit": "speed",
+          "lo": 0.0,
+          "hi": 1.0
+        },
+        {
+          "id": "FIT201",
+          "type": "sensor",
+          "label": "Filter flow",
+          "unit": "L/s",
+          "lo": 0.0,
+          "hi": 12.0
+        },
+        {
+          "id": "PIT301",
+          "type": "sensor",
+          "label": "Filter pressure",
+          "unit": "bar",
+          "lo": 0.0,
+          "hi": 2.5
+        },
+        {
+          "id": "LIT301",
+          "type": "sensor",
+          "label": "Tank T2 level",
+          "unit": "%",
+          "lo": 0.0,
+          "hi": 100.0
+        },
+        {
+          "id": "P301",
+          "type": "actuator",
+          "label": "T2 outlet pump",
+          "unit": "speed",
+          "lo": 0.0,
+          "hi": 1.0
+        },
+        {
+          "id": "PLC1",
+          "type": "controller",
+          "label": "T1 controller",
+          "unit": "out",
+          "lo": 0.0,
+          "hi": 1.0
+        },
+        {
+          "id": "PLC2",
+          "type": "controller",
+          "label": "T2 controller",
+          "unit": "out",
+          "lo": 0.0,
+          "hi": 1.0
+        }
+      ],
+      "edges": [
+        {
+          "src": "LIT101",
+          "dst": "PLC1",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "LIT101",
+          "dst": "FIT201",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "LIT101",
+          "dst": "MV101",
+          "weight": 0.03381315305617114,
+          "kind": "learned"
+        },
+        {
+          "src": "LIT101",
+          "dst": "P101",
+          "weight": 0.33096727010681193,
+          "kind": "learned"
+        },
+        {
+          "src": "LIT101",
+          "dst": "PIT301",
+          "weight": 0.4729642620216764,
+          "kind": "learned"
+        },
+        {
+          "src": "LIT101",
+          "dst": "LIT301",
+          "weight": 0.0414074036736172,
+          "kind": "learned"
+        },
+        {
+          "src": "MV101",
+          "dst": "LIT101",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "MV101",
+          "dst": "P101",
+          "weight": 0.264545249811461,
+          "kind": "learned"
+        },
+        {
+          "src": "MV101",
+          "dst": "FIT201",
+          "weight": 0.11699180651558785,
+          "kind": "learned"
+        },
+        {
+          "src": "MV101",
+          "dst": "PIT301",
+          "weight": 0.2139787271340148,
+          "kind": "learned"
+        },
+        {
+          "src": "MV101",
+          "dst": "LIT301",
+          "weight": 0.03865248007166409,
+          "kind": "learned"
+        },
+        {
+          "src": "MV101",
+          "dst": "P301",
+          "weight": 0.08496000009647055,
+          "kind": "learned"
+        },
+        {
+          "src": "MV101",
+          "dst": "PLC1",
+          "weight": 0.5,
+          "kind": "learned"
+        },
+        {
+          "src": "MV101",
+          "dst": "PLC2",
+          "weight": 0.12128180699530262,
+          "kind": "learned"
+        },
+        {
+          "src": "P101",
+          "dst": "LIT101",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "P101",
+          "dst": "FIT201",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "P101",
+          "dst": "MV101",
+          "weight": 0.06355379792783462,
+          "kind": "learned"
+        },
+        {
+          "src": "P101",
+          "dst": "PIT301",
+          "weight": 0.5,
+          "kind": "learned"
+        },
+        {
+          "src": "P101",
+          "dst": "LIT301",
+          "weight": 0.06108322035162187,
+          "kind": "learned"
+        },
+        {
+          "src": "P101",
+          "dst": "P301",
+          "weight": 0.03381667034040834,
+          "kind": "learned"
+        },
+        {
+          "src": "P101",
+          "dst": "PLC1",
+          "weight": 0.08276652503685819,
+          "kind": "learned"
+        },
+        {
+          "src": "FIT201",
+          "dst": "PIT301",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "FIT201",
+          "dst": "LIT301",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "FIT201",
+          "dst": "LIT101",
+          "weight": 0.07029481588407412,
+          "kind": "learned"
+        },
+        {
+          "src": "FIT201",
+          "dst": "MV101",
+          "weight": 0.020003278668485284,
+          "kind": "learned"
+        },
+        {
+          "src": "FIT201",
+          "dst": "P101",
+          "weight": 0.0768339388198398,
+          "kind": "learned"
+        },
+        {
+          "src": "PIT301",
+          "dst": "LIT101",
+          "weight": 0.32388157740699136,
+          "kind": "learned"
+        },
+        {
+          "src": "PIT301",
+          "dst": "MV101",
+          "weight": 0.047692313703083695,
+          "kind": "learned"
+        },
+        {
+          "src": "PIT301",
+          "dst": "P101",
+          "weight": 0.23229960493185955,
+          "kind": "learned"
+        },
+        {
+          "src": "PIT301",
+          "dst": "FIT201",
+          "weight": 0.2247333940674493,
+          "kind": "learned"
+        },
+        {
+          "src": "PIT301",
+          "dst": "LIT301",
+          "weight": 0.04891923665662454,
+          "kind": "learned"
+        },
+        {
+          "src": "PIT301",
+          "dst": "PLC1",
+          "weight": 0.09878460773069223,
+          "kind": "learned"
+        },
+        {
+          "src": "LIT301",
+          "dst": "PIT301",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "LIT301",
+          "dst": "FIT201",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "LIT301",
+          "dst": "PLC2",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "LIT301",
+          "dst": "LIT101",
+          "weight": 0.05241332201419735,
+          "kind": "learned"
+        },
+        {
+          "src": "LIT301",
+          "dst": "MV101",
+          "weight": 0.03149555529150764,
+          "kind": "learned"
+        },
+        {
+          "src": "LIT301",
+          "dst": "P101",
+          "weight": 0.03382202327623066,
+          "kind": "learned"
+        },
+        {
+          "src": "LIT301",
+          "dst": "P301",
+          "weight": 0.03507792152073454,
+          "kind": "learned"
+        },
+        {
+          "src": "LIT301",
+          "dst": "PLC1",
+          "weight": 0.030337552640527884,
+          "kind": "learned"
+        },
+        {
+          "src": "P301",
+          "dst": "LIT301",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "P301",
+          "dst": "LIT101",
+          "weight": 0.025604880237658008,
+          "kind": "learned"
+        },
+        {
+          "src": "P301",
+          "dst": "MV101",
+          "weight": 0.11362281054528278,
+          "kind": "learned"
+        },
+        {
+          "src": "P301",
+          "dst": "P101",
+          "weight": 0.024822811780818136,
+          "kind": "learned"
+        },
+        {
+          "src": "P301",
+          "dst": "PIT301",
+          "weight": 0.02242025159002757,
+          "kind": "learned"
+        },
+        {
+          "src": "P301",
+          "dst": "PLC1",
+          "weight": 0.15551509121221452,
+          "kind": "learned"
+        },
+        {
+          "src": "P301",
+          "dst": "PLC2",
+          "weight": 0.5,
+          "kind": "learned"
+        },
+        {
+          "src": "PLC1",
+          "dst": "MV101",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "PLC1",
+          "dst": "P101",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "PLC1",
+          "dst": "LIT101",
+          "weight": 0.5,
+          "kind": "learned"
+        },
+        {
+          "src": "PLC1",
+          "dst": "FIT201",
+          "weight": 0.14627390383967198,
+          "kind": "learned"
+        },
+        {
+          "src": "PLC1",
+          "dst": "PIT301",
+          "weight": 0.19570355055924732,
+          "kind": "learned"
+        },
+        {
+          "src": "PLC1",
+          "dst": "LIT301",
+          "weight": 0.030438984075192802,
+          "kind": "learned"
+        },
+        {
+          "src": "PLC1",
+          "dst": "P301",
+          "weight": 0.047883529604039916,
+          "kind": "learned"
+        },
+        {
+          "src": "PLC1",
+          "dst": "PLC2",
+          "weight": 0.07438913372516251,
+          "kind": "learned"
+        },
+        {
+          "src": "PLC2",
+          "dst": "P301",
+          "weight": 1.0,
+          "kind": "static"
+        },
+        {
+          "src": "PLC2",
+          "dst": "MV101",
+          "weight": 0.07096578038238456,
+          "kind": "learned"
+        },
+        {
+          "src": "PLC2",
+          "dst": "LIT301",
+          "weight": 0.5,
+          "kind": "learned"
+        },
+        {
+          "src": "PLC2",
+          "dst": "PLC1",
+          "weight": 0.08290238000140561,
+          "kind": "learned"
+        }
+      ]
+    },
+    "localization_weights": {
+      "deviation": 0.6,
+      "onset": 0.2,
+      "causal": 0.2
+    },
+    "readings": [
+      {
+        "id": "LIT101",
+        "value": 25.047657012939453,
+        "score": 52.71323152649294,
+        "status": "origin",
+        "quality": "good",
+        "is_virtual": null
+      },
+      {
+        "id": "MV101",
+        "value": 0.8318512439727783,
+        "score": 22.67218955802839,
+        "status": "affected",
+        "quality": "good",
+        "is_virtual": null
+      },
+      {
+        "id": "P101",
+        "value": 0.23379462957382202,
+        "score": 37.19599863394102,
+        "status": "affected",
+        "quality": "good",
+        "is_virtual": null
+      },
+      {
+        "id": "FIT201",
+        "value": 2.0754635334014893,
+        "score": 12.500206023412705,
+        "status": "affected",
+        "quality": "good",
+        "is_virtual": null
+      },
+      {
+        "id": "PIT301",
+        "value": 0.454167902469635,
+        "score": 10.720845402209202,
+        "status": "affected",
+        "quality": "good",
+        "is_virtual": null
+      },
+      {
+        "id": "LIT301",
+        "value": 48.43563461303711,
+        "score": 0.8050628787295567,
+        "status": "normal",
+        "quality": "good",
+        "is_virtual": null
+      },
+      {
+        "id": "P301",
+        "value": 0.5798346996307373,
+        "score": 2.665551043236354,
+        "status": "suspect",
+        "quality": "good",
+        "is_virtual": null
+      },
+      {
+        "id": "PLC1",
+        "value": 1.0,
+        "score": 33.8650612393767,
+        "status": "affected",
+        "quality": "good",
+        "is_virtual": null
+      },
+      {
+        "id": "PLC2",
+        "value": 0.5671806931495667,
+        "score": 1.1672055639182097,
+        "status": "suspect",
+        "quality": "good",
+        "is_virtual": null
+      }
+    ],
+    "pre_event_readings": [
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081400.114432,
+        "received_at": 1792081400.1154258,
+        "payload": {
+          "value": 50.04625701904297,
+          "score": 0.4672999891659932,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081400.114432,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081400.114432,
+        "received_at": 1792081400.1179435,
+        "payload": {
+          "value": 0.37095361948013306,
+          "score": 0.48303371590406935,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081400.114432,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081400.114432,
+        "received_at": 1792081400.118944,
+        "payload": {
+          "value": 0.6028881072998047,
+          "score": 0.5715015503196259,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081400.114432,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081400.114432,
+        "received_at": 1792081400.118944,
+        "payload": {
+          "value": 5.044467926025391,
+          "score": 1.1737425560511627,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081400.114432,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081400.114432,
+        "received_at": 1792081400.1204522,
+        "payload": {
+          "value": 0.7185184359550476,
+          "score": 0.6835907431009467,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081400.114432,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081400.114432,
+        "received_at": 1792081400.1209834,
+        "payload": {
+          "value": 51.81147766113281,
+          "score": 0.5588645972169293,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081400.114432,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081400.114432,
+        "received_at": 1792081400.1209834,
+        "payload": {
+          "value": 0.6460012197494507,
+          "score": 1.1352630943459041,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081400.114432,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081400.114432,
+        "received_at": 1792081400.1223567,
+        "payload": {
+          "value": 0.3746170699596405,
+          "score": 0.5396545925837123,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081400.114432,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081400.114432,
+        "received_at": 1792081400.123369,
+        "payload": {
+          "value": 0.6443244218826294,
+          "score": 0.4467093134690503,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081400.114432,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081402.1244748,
+        "received_at": 1792081402.125359,
+        "payload": {
+          "value": 49.88926315307617,
+          "score": 0.7685293152786258,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081402.1244748,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081402.1244748,
+        "received_at": 1792081402.1273985,
+        "payload": {
+          "value": 0.3752356171607971,
+          "score": 0.6823996228789044,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081402.1244748,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081402.1244748,
+        "received_at": 1792081402.1283584,
+        "payload": {
+          "value": 0.5999724268913269,
+          "score": 0.9267184800676345,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081402.1244748,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081402.1244748,
+        "received_at": 1792081402.1293576,
+        "payload": {
+          "value": 5.141027450561523,
+          "score": 1.0229233949551373,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081402.1244748,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081402.1244748,
+        "received_at": 1792081402.1427708,
+        "payload": {
+          "value": 0.715539276599884,
+          "score": 0.5695756802039926,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081402.1244748,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081402.1244748,
+        "received_at": 1792081402.1437545,
+        "payload": {
+          "value": 51.480735778808594,
+          "score": 0.5303982861783522,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081402.1244748,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081402.1244748,
+        "received_at": 1792081402.1437545,
+        "payload": {
+          "value": 0.6440077424049377,
+          "score": 1.0079692610677702,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081402.1244748,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081402.1244748,
+        "received_at": 1792081402.144726,
+        "payload": {
+          "value": 0.3792550265789032,
+          "score": 0.7512091446125182,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081402.1244748,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081402.1244748,
+        "received_at": 1792081402.1457267,
+        "payload": {
+          "value": 0.6411939263343811,
+          "score": 0.5537118802105253,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081402.1244748,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081404.6060543,
+        "received_at": 1792081404.6066525,
+        "payload": {
+          "value": 49.88697814941406,
+          "score": 0.9095118895172196,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081404.6060543,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081404.6060543,
+        "received_at": 1792081404.6092205,
+        "payload": {
+          "value": 0.382670134305954,
+          "score": 0.8709925096579726,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081404.6060543,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081404.6060543,
+        "received_at": 1792081404.6092205,
+        "payload": {
+          "value": 0.5957571268081665,
+          "score": 1.123346402527375,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081404.6060543,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081404.6060543,
+        "received_at": 1792081404.6107256,
+        "payload": {
+          "value": 4.995774745941162,
+          "score": 1.1419525542556639,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081404.6060543,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081404.6060543,
+        "received_at": 1792081404.6107256,
+        "payload": {
+          "value": 0.7060683965682983,
+          "score": 0.6695219096321392,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081404.6060543,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081404.6060543,
+        "received_at": 1792081404.6107256,
+        "payload": {
+          "value": 51.19751739501953,
+          "score": 0.9138842440409298,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081404.6060543,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081404.6060543,
+        "received_at": 1792081404.6122403,
+        "payload": {
+          "value": 0.646289050579071,
+          "score": 0.548913356423375,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081404.6060543,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081404.6060543,
+        "received_at": 1792081404.613246,
+        "payload": {
+          "value": 0.3802782893180847,
+          "score": 0.8334164395069323,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081404.6060543,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081404.6060543,
+        "received_at": 1792081404.613246,
+        "payload": {
+          "value": 0.6402833461761475,
+          "score": 0.8529782637649916,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081404.6060543,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081406.6149879,
+        "received_at": 1792081406.616424,
+        "payload": {
+          "value": 49.5997314453125,
+          "score": 0.7309486088597783,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081406.6149879,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081406.6149879,
+        "received_at": 1792081406.6182024,
+        "payload": {
+          "value": 0.39236563444137573,
+          "score": 0.8133668339335791,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081406.6149879,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081406.6149879,
+        "received_at": 1792081406.6191964,
+        "payload": {
+          "value": 0.5951298475265503,
+          "score": 1.2808891379676919,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081406.6149879,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081406.6149879,
+        "received_at": 1792081406.6191964,
+        "payload": {
+          "value": 4.994699001312256,
+          "score": 0.8402438817910719,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081406.6149879,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081406.6149879,
+        "received_at": 1792081406.6201963,
+        "payload": {
+          "value": 0.7072729468345642,
+          "score": 0.6083582208065386,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081406.6149879,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081406.6149879,
+        "received_at": 1792081406.621241,
+        "payload": {
+          "value": 51.465965270996094,
+          "score": 0.867174128372279,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081406.6149879,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081406.6149879,
+        "received_at": 1792081406.621241,
+        "payload": {
+          "value": 0.647967517375946,
+          "score": 1.1808808720993287,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081406.6149879,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081406.6149879,
+        "received_at": 1792081406.6223812,
+        "payload": {
+          "value": 0.3902569115161896,
+          "score": 0.9033061023414283,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081406.6149879,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081406.6149879,
+        "received_at": 1792081406.6223812,
+        "payload": {
+          "value": 0.6528621315956116,
+          "score": 0.892239841508734,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081406.6149879,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081408.6189408,
+        "received_at": 1792081408.6189408,
+        "payload": {
+          "value": 49.52022933959961,
+          "score": 0.48328142007527225,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081408.6189408,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081408.6189408,
+        "received_at": 1792081408.6219451,
+        "payload": {
+          "value": 0.3953023850917816,
+          "score": 1.0142166780670916,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081408.6189408,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081408.6189408,
+        "received_at": 1792081408.6219451,
+        "payload": {
+          "value": 0.5910508632659912,
+          "score": 0.6712032412731245,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081408.6189408,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081408.6189408,
+        "received_at": 1792081408.622967,
+        "payload": {
+          "value": 5.1277618408203125,
+          "score": 1.2660766869763964,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081408.6189408,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081408.6189408,
+        "received_at": 1792081408.622967,
+        "payload": {
+          "value": 0.7080109715461731,
+          "score": 0.7761853329349928,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081408.6189408,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081408.6189408,
+        "received_at": 1792081408.624022,
+        "payload": {
+          "value": 51.05047607421875,
+          "score": 0.9168307278633105,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081408.6189408,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081408.6189408,
+        "received_at": 1792081408.624022,
+        "payload": {
+          "value": 0.6416284441947937,
+          "score": 0.9515369701653519,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081408.6189408,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081408.6189408,
+        "received_at": 1792081408.6249828,
+        "payload": {
+          "value": 0.3942713737487793,
+          "score": 0.6364748073596087,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081408.6189408,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081408.6189408,
+        "received_at": 1792081408.6249828,
+        "payload": {
+          "value": 0.6446728110313416,
+          "score": 0.9504470706444628,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081408.6189408,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081411.0981224,
+        "received_at": 1792081411.0992146,
+        "payload": {
+          "value": 49.93095779418945,
+          "score": 0.7842736770019572,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081411.0981224,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081411.0981224,
+        "received_at": 1792081411.1022184,
+        "payload": {
+          "value": 0.3936319351196289,
+          "score": 0.6647612397620991,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081411.0981224,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081411.0981224,
+        "received_at": 1792081411.1037545,
+        "payload": {
+          "value": 0.5987716317176819,
+          "score": 1.7857052847002648,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081411.0981224,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081411.0981224,
+        "received_at": 1792081411.1037545,
+        "payload": {
+          "value": 5.117864608764648,
+          "score": 1.4816798981678714,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081411.0981224,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081411.0981224,
+        "received_at": 1792081411.104771,
+        "payload": {
+          "value": 0.7050120830535889,
+          "score": 0.9217636679628674,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081411.0981224,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081411.0981224,
+        "received_at": 1792081411.1057653,
+        "payload": {
+          "value": 50.6735725402832,
+          "score": 0.535488070935818,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081411.0981224,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081411.0981224,
+        "received_at": 1792081411.1057653,
+        "payload": {
+          "value": 0.6425290107727051,
+          "score": 1.2421060385167482,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081411.0981224,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081411.0981224,
+        "received_at": 1792081411.1067672,
+        "payload": {
+          "value": 0.38389790058135986,
+          "score": 0.9220940946715611,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081411.0981224,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081411.0981224,
+        "received_at": 1792081411.1067672,
+        "payload": {
+          "value": 0.6377007961273193,
+          "score": 0.576492944796933,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081411.0981224,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081413.1171312,
+        "received_at": 1792081413.1171312,
+        "payload": {
+          "value": 49.80709457397461,
+          "score": 0.685750686495759,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081413.1171312,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081413.1171312,
+        "received_at": 1792081413.1202314,
+        "payload": {
+          "value": 0.39249587059020996,
+          "score": 0.8790815355535844,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081413.1171312,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081413.1171312,
+        "received_at": 1792081413.1222336,
+        "payload": {
+          "value": 0.5909066200256348,
+          "score": 1.1199919321946994,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081413.1171312,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081413.1171312,
+        "received_at": 1792081413.1222336,
+        "payload": {
+          "value": 4.94412899017334,
+          "score": 1.0968744906049666,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081413.1171312,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081413.1171312,
+        "received_at": 1792081413.1222336,
+        "payload": {
+          "value": 0.7068551778793335,
+          "score": 0.7303524406581189,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081413.1171312,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081413.1171312,
+        "received_at": 1792081413.123741,
+        "payload": {
+          "value": 50.920135498046875,
+          "score": 0.8989585068685955,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081413.1171312,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081413.1171312,
+        "received_at": 1792081413.124256,
+        "payload": {
+          "value": 0.6403806805610657,
+          "score": 1.382494684677861,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081413.1171312,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081413.1171312,
+        "received_at": 1792081413.1252918,
+        "payload": {
+          "value": 0.3888873755931854,
+          "score": 0.7550857842420493,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081413.1171312,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081413.1171312,
+        "received_at": 1792081413.1252918,
+        "payload": {
+          "value": 0.6479265093803406,
+          "score": 0.9602541258867475,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081413.1171312,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081415.125514,
+        "received_at": 1792081415.1263733,
+        "payload": {
+          "value": 49.62961196899414,
+          "score": 0.7103361229278677,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081415.125514,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081415.125514,
+        "received_at": 1792081415.1289127,
+        "payload": {
+          "value": 0.39275500178337097,
+          "score": 0.7721055386470248,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081415.125514,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081415.125514,
+        "received_at": 1792081415.130632,
+        "payload": {
+          "value": 0.5909366011619568,
+          "score": 1.3513288367150693,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081415.125514,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081415.125514,
+        "received_at": 1792081415.1316283,
+        "payload": {
+          "value": 5.053970813751221,
+          "score": 0.5837134280409814,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081415.125514,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081415.125514,
+        "received_at": 1792081415.132628,
+        "payload": {
+          "value": 0.7027578949928284,
+          "score": 0.9434992777312878,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081415.125514,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081415.125514,
+        "received_at": 1792081415.1341317,
+        "payload": {
+          "value": 50.51653289794922,
+          "score": 0.732003523976904,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081415.125514,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081415.125514,
+        "received_at": 1792081415.1341317,
+        "payload": {
+          "value": 0.6424517035484314,
+          "score": 1.4624058905341268,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081415.125514,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081415.125514,
+        "received_at": 1792081415.1351366,
+        "payload": {
+          "value": 0.39541876316070557,
+          "score": 0.7511179895114442,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081415.125514,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081415.125514,
+        "received_at": 1792081415.1351366,
+        "payload": {
+          "value": 0.6383128762245178,
+          "score": 0.7732940336014208,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081415.125514,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081417.1254582,
+        "received_at": 1792081417.1264362,
+        "payload": {
+          "value": 49.699275970458984,
+          "score": 0.4179163469248952,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081417.1254582,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081417.1254582,
+        "received_at": 1792081417.1284342,
+        "payload": {
+          "value": 0.3912819027900696,
+          "score": 0.7485008220030347,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081417.1254582,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081417.1254582,
+        "received_at": 1792081417.130969,
+        "payload": {
+          "value": 0.5937966704368591,
+          "score": 0.8068020778588472,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081417.1254582,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081417.1254582,
+        "received_at": 1792081417.130969,
+        "payload": {
+          "value": 5.0761613845825195,
+          "score": 0.5436512644547936,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081417.1254582,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081417.1254582,
+        "received_at": 1792081417.131969,
+        "payload": {
+          "value": 0.7109873294830322,
+          "score": 1.1480459516929924,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081417.1254582,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081417.1254582,
+        "received_at": 1792081417.131969,
+        "payload": {
+          "value": 50.547603607177734,
+          "score": 1.3789664758804736,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081417.1254582,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081417.1254582,
+        "received_at": 1792081417.1333697,
+        "payload": {
+          "value": 0.6407613158226013,
+          "score": 1.5602719704763697,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081417.1254582,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081417.1254582,
+        "received_at": 1792081417.1338778,
+        "payload": {
+          "value": 0.39446187019348145,
+          "score": 0.5394998700939674,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081417.1254582,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081417.1254582,
+        "received_at": 1792081417.1348865,
+        "payload": {
+          "value": 0.6409686207771301,
+          "score": 1.435996345973686,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081417.1254582,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081419.6272357,
+        "received_at": 1792081419.6281168,
+        "payload": {
+          "value": 49.78635025024414,
+          "score": 0.4544488185655673,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081419.6272357,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081419.6272357,
+        "received_at": 1792081419.630118,
+        "payload": {
+          "value": 0.3917495608329773,
+          "score": 0.7765742379017426,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081419.6272357,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081419.6272357,
+        "received_at": 1792081419.6311185,
+        "payload": {
+          "value": 0.5968554019927979,
+          "score": 0.8984855434401264,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081419.6272357,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081419.6272357,
+        "received_at": 1792081419.632115,
+        "payload": {
+          "value": 5.0445780754089355,
+          "score": 0.4436054322027658,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081419.6272357,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081419.6272357,
+        "received_at": 1792081419.632115,
+        "payload": {
+          "value": 0.7081782817840576,
+          "score": 0.6533236964709673,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081419.6272357,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081419.6272357,
+        "received_at": 1792081419.6331136,
+        "payload": {
+          "value": 50.037086486816406,
+          "score": 0.5229082362897508,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081419.6272357,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081419.6272357,
+        "received_at": 1792081419.6331136,
+        "payload": {
+          "value": 0.629451334476471,
+          "score": 0.9203369004105905,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081419.6272357,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081419.6272357,
+        "received_at": 1792081419.6341162,
+        "payload": {
+          "value": 0.39332348108291626,
+          "score": 0.5271484646958139,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081419.6272357,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081419.6272357,
+        "received_at": 1792081419.6353343,
+        "payload": {
+          "value": 0.6266887187957764,
+          "score": 0.5196979732087207,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081419.6272357,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081422.1199398,
+        "received_at": 1792081422.120446,
+        "payload": {
+          "value": 49.84745788574219,
+          "score": 0.7617470338801035,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081422.1199398,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081422.1199398,
+        "received_at": 1792081422.122453,
+        "payload": {
+          "value": 0.39790889620780945,
+          "score": 0.6298682559459217,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081422.1199398,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081422.1199398,
+        "received_at": 1792081422.125962,
+        "payload": {
+          "value": 0.587574303150177,
+          "score": 0.9246782298468932,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081422.1199398,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081422.1199398,
+        "received_at": 1792081422.1267445,
+        "payload": {
+          "value": 4.9953131675720215,
+          "score": 0.8463886753786464,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081422.1199398,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081422.1199398,
+        "received_at": 1792081422.1267445,
+        "payload": {
+          "value": 0.7042776942253113,
+          "score": 0.7815820078903247,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081422.1199398,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081422.1199398,
+        "received_at": 1792081422.1278987,
+        "payload": {
+          "value": 49.52067947387695,
+          "score": 0.5132701109048333,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081422.1199398,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081422.1199398,
+        "received_at": 1792081422.1288583,
+        "payload": {
+          "value": 0.6194198131561279,
+          "score": 0.8659019549744273,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081422.1199398,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081422.1199398,
+        "received_at": 1792081422.1288583,
+        "payload": {
+          "value": 0.3931072950363159,
+          "score": 0.7368995038659447,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081422.1199398,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081422.1199398,
+        "received_at": 1792081422.1298592,
+        "payload": {
+          "value": 0.6102010011672974,
+          "score": 0.4254689023087534,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081422.1199398,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081424.1241066,
+        "received_at": 1792081424.1251123,
+        "payload": {
+          "value": 49.499385833740234,
+          "score": 0.5848474945138585,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081424.1241066,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081424.1241066,
+        "received_at": 1792081424.1271179,
+        "payload": {
+          "value": 0.4014495313167572,
+          "score": 0.5073553693267673,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081424.1241066,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081424.1241066,
+        "received_at": 1792081424.1281176,
+        "payload": {
+          "value": 0.5903727412223816,
+          "score": 0.6193523048253916,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081424.1241066,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081424.1241066,
+        "received_at": 1792081424.1281176,
+        "payload": {
+          "value": 5.059154987335205,
+          "score": 0.6587049383516349,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081424.1241066,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081424.1241066,
+        "received_at": 1792081424.129115,
+        "payload": {
+          "value": 0.7024915814399719,
+          "score": 0.6739998125511055,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081424.1241066,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081424.1241066,
+        "received_at": 1792081424.130115,
+        "payload": {
+          "value": 49.53081512451172,
+          "score": 1.112932209922819,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081424.1241066,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081424.1241066,
+        "received_at": 1792081424.130115,
+        "payload": {
+          "value": 0.60378098487854,
+          "score": 1.0688383336320573,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081424.1241066,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081424.1241066,
+        "received_at": 1792081424.1311152,
+        "payload": {
+          "value": 0.4051222503185272,
+          "score": 0.6468158115763102,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081424.1241066,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081424.1241066,
+        "received_at": 1792081424.1311152,
+        "payload": {
+          "value": 0.6080254912376404,
+          "score": 1.1700382093495485,
+          "status": "suspect",
+          "quality": "good",
+          "source_time": 1792081424.1241066,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT101",
+        "observed_at": 1792081426.607101,
+        "received_at": 1792081426.609025,
+        "payload": {
+          "value": 49.5680046081543,
+          "score": 0.705660421336108,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081426.607101,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "MV101",
+        "observed_at": 1792081426.607101,
+        "received_at": 1792081426.611028,
+        "payload": {
+          "value": 0.4107048213481903,
+          "score": 0.6658605625407523,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081426.607101,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P101",
+        "observed_at": 1792081426.607101,
+        "received_at": 1792081426.612528,
+        "payload": {
+          "value": 0.5888331532478333,
+          "score": 1.051566775440712,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081426.607101,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "FIT201",
+        "observed_at": 1792081426.607101,
+        "received_at": 1792081426.614033,
+        "payload": {
+          "value": 4.991497039794922,
+          "score": 0.795138138401164,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081426.607101,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PIT301",
+        "observed_at": 1792081426.607101,
+        "received_at": 1792081426.615038,
+        "payload": {
+          "value": 0.7056196928024292,
+          "score": 0.8776463307211722,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081426.607101,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "LIT301",
+        "observed_at": 1792081426.607101,
+        "received_at": 1792081426.615038,
+        "payload": {
+          "value": 48.75516128540039,
+          "score": 0.7899754011614487,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081426.607101,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "P301",
+        "observed_at": 1792081426.607101,
+        "received_at": 1792081426.616544,
+        "payload": {
+          "value": 0.5885801911354065,
+          "score": 1.2523306822538198,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081426.607101,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC1",
+        "observed_at": 1792081426.607101,
+        "received_at": 1792081426.616544,
+        "payload": {
+          "value": 0.4055219292640686,
+          "score": 0.7364212378632726,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081426.607101,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      },
+      {
+        "asset_id": "PLC2",
+        "observed_at": 1792081426.607101,
+        "received_at": 1792081426.6175516,
+        "payload": {
+          "value": 0.5804234743118286,
+          "score": 0.8312026159777456,
+          "status": "normal",
+          "quality": "good",
+          "source_time": 1792081426.607101,
+          "clock": "Unix seconds; source sample timestamp and receipt timestamp",
+          "classification": "observation",
+          "unit_source": "/api/topology"
+        }
+      }
+    ],
+    "initial_assessment": {
+      "id": "inc_37a157d5a0794605837f770175682b98",
+      "status": "localizing",
+      "detected_at": 1792081428.1128092,
+      "origin": [
+        {
+          "id": "LIT101",
+          "type": "sensor",
+          "confidence": 0.544547212260889,
+          "breakdown": {
+            "deviation": 0.6,
+            "onset": 0.1,
+            "causal": 0.16534428712804405
+          },
+          "weights": {
+            "deviation": 0.6,
+            "onset": 0.2,
+            "causal": 0.2
+          }
+        },
+        {
+          "id": "PLC1",
+          "type": "controller",
+          "confidence": 0.43085980981433536,
+          "breakdown": {
+            "deviation": 0.5508256308022046,
+            "onset": 0.1,
+            "causal": 0.2
+          },
+          "weights": {
+            "deviation": 0.6,
+            "onset": 0.2,
+            "causal": 0.2
+          }
+        },
+        {
+          "id": "MV101",
+          "type": "actuator",
+          "confidence": 0.021644450016499908,
+          "breakdown": {
+            "deviation": 0.42079817954986404,
+            "onset": 0.1,
+            "causal": 0.14458336193711008
+          },
+          "weights": {
+            "deviation": 0.6,
+            "onset": 0.2,
+            "causal": 0.2
+          }
+        }
+      ],
+      "path": [
+        {
+          "id": "P101",
+          "t": 0.0,
+          "deviation": 0.20609370892368345
+        },
+        {
+          "id": "LIT101",
+          "t": 16.0,
+          "deviation": 1.0
+        },
+        {
+          "id": "PLC1",
+          "t": 16.0,
+          "deviation": 0.9180427180036743
+        },
+        {
+          "id": "MV101",
+          "t": 16.0,
+          "deviation": 0.7013302992497734
+        },
+        {
+          "id": "FIT201",
+          "t": 16.0,
+          "deviation": 0.4962160328527185
+        },
+        {
+          "id": "PIT301",
+          "t": 16.0,
+          "deviation": 0.5645210287964659
+        }
+      ],
+      "path_edges": [
+        [
+          "P101",
+          "LIT101"
+        ],
+        [
+          "LIT101",
+          "PLC1"
+        ],
+        [
+          "PLC1",
+          "MV101"
+        ],
+        [
+          "MV101",
+          "LIT101"
+        ],
+        [
+          "LIT101",
+          "FIT201"
+        ],
+        [
+          "FIT201",
+          "PIT301"
+        ]
+      ],
+      "explanation": "Origin LIT101 (sensor) \u00b7 spoof low \u2192 PLC1 \u2192 MV101 \u2192 T1 overflow risk",
+      "action": "Isolate LIT101 \u00b7 PLC1 \u2192 manual",
+      "mitre": "T0856",
+      "mitre_name": "Spoof Reporting Message",
+      "baseline_alarms": [
+        "LIT101",
+        "MV101",
+        "P101",
+        "FIT201",
+        "PIT301",
+        "PLC1"
+      ],
+      "mode": "live",
+      "ambiguous": true,
+      "contained_at": null,
+      "time_to_contain_s": null,
+      "virtual_active": null
+    },
+    "limits": "Reported readings only. No raw packets or physical attestation. Prior observations sampled every 2 seconds, up to 30 seconds/5000 rows."
+  },
+  "record_url": "/api/investigations/inc_37a157d5a0794605837f770175682b98/capture"
+}

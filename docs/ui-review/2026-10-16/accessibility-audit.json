@@ -1,0 +1,58 @@
+[
+  {
+    "page": "monitoring",
+    "client": 305,
+    "scroll": 305,
+    "skipFocus": "main-workspace",
+    "unnamedControls": [],
+    "width": 320
+  },
+  {
+    "page": "alerts",
+    "client": 305,
+    "scroll": 305,
+    "skipFocus": "main-workspace",
+    "unnamedControls": [],
+    "width": 320
+  },
+  {
+    "page": "assets",
+    "client": 305,
+    "scroll": 305,
+    "skipFocus": "main-workspace",
+    "unnamedControls": [],
+    "width": 320
+  },
+  {
+    "page": "investigations",
+    "client": 305,
+    "scroll": 305,
+    "skipFocus": "main-workspace",
+    "unnamedControls": [],
+    "width": 320
+  },
+  {
+    "page": "sources",
+    "client": 305,
+    "scroll": 305,
+    "skipFocus": "main-workspace",
+    "unnamedControls": [],
+    "width": 320
+  },
+  {
+    "page": "metrics",
+    "client": 305,
+    "scroll": 305,
+    "skipFocus": "main-workspace",
+    "unnamedControls": [],
+    "width": 320
+  },
+  {
+    "page": "lab",
+    "client": 305,
+    "scroll": 305,
+    "skipFocus": "main-workspace",
+    "unnamedControls": [],
+    "width": 320
+  }
+]

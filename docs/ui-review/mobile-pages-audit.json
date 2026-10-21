@@ -1,0 +1,38 @@
+[
+  {
+    "overflow": false,
+    "path": "/alerts",
+    "rows": 11,
+    "width": 390
+  },
+  {
+    "overflow": false,
+    "path": "/assets",
+    "rows": 51,
+    "width": 390
+  },
+  {
+    "overflow": false,
+    "path": "/sources",
+    "rows": 5,
+    "width": 390
+  },
+  {
+    "overflow": false,
+    "path": "/investigations",
+    "rows": 3,
+    "width": 390
+  },
+  {
+    "overflow": false,
+    "path": "/metrics",
+    "rows": 17,
+    "width": 390
+  },
+  {
+    "overflow": false,
+    "path": "/lab",
+    "rows": 0,
+    "width": 390
+  }
+]

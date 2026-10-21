@@ -1,0 +1,23 @@
+{
+  "status": {
+    "source_fingerprint": "4d8f28b51c67c39b9410f8d3fc52974abe8caef61bf0c69aedae895a22a205cd",
+    "fingerprint_scope": "Configured endpoint, polling cadence and register map; not physical device attestation",
+    "model_loaded": false,
+    "model_id": null,
+    "trained_at": null,
+    "recorded_samples": null,
+    "sample_s": null,
+    "active_model": null,
+    "calibration": {
+      "stage": "collecting",
+      "collected_samples": 364,
+      "target_samples": 600,
+      "skipped_samples": 0,
+      "elapsed_s": 181.48936533927917,
+      "remaining_s": 118.0,
+      "blockers": [],
+      "notice": "Saved model has no matching source/register-map fingerprint; recalibration required."
+    }
+  },
+  "saved_samples": 352
+}

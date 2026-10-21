@@ -1,0 +1,634 @@
+[
+  {
+    "page": "monitoring",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "alerts",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "assets",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "investigations",
+    "bodyScroll": 375,
+    "client": 375,
+    "height": 812,
+    "scroll": 375,
+    "width": 375
+  },
+  {
+    "page": "sources",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "metrics",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "lab",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "monitoring",
+    "stage": "tablet-768",
+    "bodyScroll": 753,
+    "client": 753,
+    "height": 1024,
+    "scroll": 753,
+    "width": 768
+  },
+  {
+    "page": "alerts",
+    "stage": "tablet-768",
+    "bodyScroll": 768,
+    "client": 768,
+    "height": 1024,
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "page": "assets",
+    "stage": "tablet-768",
+    "bodyScroll": 753,
+    "client": 753,
+    "height": 1024,
+    "scroll": 753,
+    "width": 768
+  },
+  {
+    "page": "investigations",
+    "stage": "tablet-768",
+    "bodyScroll": 753,
+    "client": 753,
+    "height": 1024,
+    "scroll": 753,
+    "width": 768
+  },
+  {
+    "page": "sources",
+    "stage": "tablet-768",
+    "bodyScroll": 753,
+    "client": 753,
+    "height": 1024,
+    "scroll": 753,
+    "width": 768
+  },
+  {
+    "page": "metrics",
+    "stage": "tablet-768",
+    "bodyScroll": 753,
+    "client": 753,
+    "height": 1024,
+    "scroll": 753,
+    "width": 768
+  },
+  {
+    "page": "lab",
+    "stage": "tablet-768",
+    "bodyScroll": 753,
+    "client": 753,
+    "height": 1024,
+    "scroll": 753,
+    "width": 768
+  },
+  {
+    "page": "monitoring",
+    "stage": "phone-320",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "alerts",
+    "stage": "phone-320",
+    "bodyScroll": 323,
+    "client": 305,
+    "height": 740,
+    "scroll": 322,
+    "width": 320
+  },
+  {
+    "page": "assets",
+    "stage": "phone-320",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "investigations",
+    "stage": "phone-320",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "sources",
+    "stage": "phone-320",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "metrics",
+    "stage": "phone-320",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "lab",
+    "stage": "phone-320",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "monitoring",
+    "stage": "phone-320-final",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "alerts",
+    "stage": "phone-320-final",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "assets",
+    "stage": "phone-320-final",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "investigations",
+    "stage": "phone-320-final",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "sources",
+    "stage": "phone-320-final",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "metrics",
+    "stage": "phone-320-final",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "lab",
+    "stage": "phone-320-final",
+    "bodyScroll": 305,
+    "client": 305,
+    "height": 740,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "page": "monitoring",
+    "stage": "phone-375-final",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "alerts",
+    "stage": "phone-375-final",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "assets",
+    "stage": "phone-375-final",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "investigations",
+    "stage": "phone-375-final",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "sources",
+    "stage": "phone-375-final",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "metrics",
+    "stage": "phone-375-final",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "lab",
+    "stage": "phone-375-final",
+    "bodyScroll": 360,
+    "client": 360,
+    "height": 812,
+    "scroll": 360,
+    "width": 375
+  },
+  {
+    "page": "monitoring",
+    "stage": "laptop-1366",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "monitoring",
+    "stage": "laptop-1366",
+    "bodyScroll": 1366,
+    "client": 1366,
+    "height": 768,
+    "scroll": 1366,
+    "width": 1366
+  },
+  {
+    "page": "alerts",
+    "stage": "laptop-1366",
+    "bodyScroll": 1366,
+    "client": 1366,
+    "height": 768,
+    "scroll": 1366,
+    "width": 1366
+  },
+  {
+    "page": "assets",
+    "stage": "laptop-1366",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "investigations",
+    "stage": "laptop-1366",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "sources",
+    "stage": "laptop-1366",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "metrics",
+    "stage": "laptop-1366",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "lab",
+    "stage": "laptop-1366",
+    "bodyScroll": 1366,
+    "client": 1366,
+    "height": 768,
+    "scroll": 1366,
+    "width": 1366
+  },
+  {
+    "page": "monitoring",
+    "stage": "desktop-1024",
+    "bodyScroll": 1009,
+    "client": 1009,
+    "height": 768,
+    "scroll": 1009,
+    "width": 1024
+  },
+  {
+    "page": "alerts",
+    "stage": "desktop-1024",
+    "bodyScroll": 1024,
+    "client": 1024,
+    "height": 768,
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "page": "assets",
+    "stage": "desktop-1024",
+    "bodyScroll": 1009,
+    "client": 1009,
+    "height": 768,
+    "scroll": 1009,
+    "width": 1024
+  },
+  {
+    "page": "investigations",
+    "stage": "desktop-1024",
+    "bodyScroll": 1009,
+    "client": 1009,
+    "height": 768,
+    "scroll": 1009,
+    "width": 1024
+  },
+  {
+    "page": "sources",
+    "stage": "desktop-1024",
+    "bodyScroll": 1009,
+    "client": 1009,
+    "height": 768,
+    "scroll": 1009,
+    "width": 1024
+  },
+  {
+    "page": "metrics",
+    "stage": "desktop-1024",
+    "bodyScroll": 1009,
+    "client": 1009,
+    "height": 768,
+    "scroll": 1009,
+    "width": 1024
+  },
+  {
+    "page": "lab",
+    "stage": "desktop-1024",
+    "bodyScroll": 1009,
+    "client": 1009,
+    "height": 768,
+    "scroll": 1009,
+    "width": 1024
+  },
+  {
+    "page": "monitoring",
+    "stage": "wide-1920",
+    "bodyScroll": 1920,
+    "client": 1920,
+    "height": 1080,
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "page": "alerts",
+    "stage": "wide-1920",
+    "bodyScroll": 1920,
+    "client": 1920,
+    "height": 1080,
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "page": "assets",
+    "stage": "wide-1920",
+    "bodyScroll": 1905,
+    "client": 1905,
+    "height": 1080,
+    "scroll": 1905,
+    "width": 1920
+  },
+  {
+    "page": "investigations",
+    "stage": "wide-1920",
+    "bodyScroll": 1905,
+    "client": 1905,
+    "height": 1080,
+    "scroll": 1905,
+    "width": 1920
+  },
+  {
+    "page": "sources",
+    "stage": "wide-1920",
+    "bodyScroll": 1905,
+    "client": 1905,
+    "height": 1080,
+    "scroll": 1905,
+    "width": 1920
+  },
+  {
+    "page": "metrics",
+    "stage": "wide-1920",
+    "bodyScroll": 1905,
+    "client": 1905,
+    "height": 1080,
+    "scroll": 1905,
+    "width": 1920
+  },
+  {
+    "page": "lab",
+    "stage": "wide-1920",
+    "bodyScroll": 1920,
+    "client": 1920,
+    "height": 1080,
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "page": "monitoring",
+    "stage": "landscape-844",
+    "bodyScroll": 829,
+    "client": 829,
+    "height": 390,
+    "scroll": 829,
+    "width": 844
+  },
+  {
+    "page": "alerts",
+    "stage": "landscape-844",
+    "bodyScroll": 829,
+    "client": 829,
+    "height": 390,
+    "scroll": 829,
+    "width": 844
+  },
+  {
+    "page": "assets",
+    "stage": "landscape-844",
+    "bodyScroll": 829,
+    "client": 829,
+    "height": 390,
+    "scroll": 829,
+    "width": 844
+  },
+  {
+    "page": "investigations",
+    "stage": "landscape-844",
+    "bodyScroll": 829,
+    "client": 829,
+    "height": 390,
+    "scroll": 829,
+    "width": 844
+  },
+  {
+    "page": "sources",
+    "stage": "landscape-844",
+    "bodyScroll": 829,
+    "client": 829,
+    "height": 390,
+    "scroll": 829,
+    "width": 844
+  },
+  {
+    "page": "metrics",
+    "stage": "landscape-844",
+    "bodyScroll": 829,
+    "client": 829,
+    "height": 390,
+    "scroll": 829,
+    "width": 844
+  },
+  {
+    "page": "lab",
+    "stage": "landscape-844",
+    "bodyScroll": 829,
+    "client": 829,
+    "height": 390,
+    "scroll": 829,
+    "width": 844
+  },
+  {
+    "page": "monitoring",
+    "stage": "laptop-1366-final",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "alerts",
+    "stage": "laptop-1366-final",
+    "bodyScroll": 1366,
+    "client": 1366,
+    "height": 768,
+    "scroll": 1366,
+    "width": 1366
+  },
+  {
+    "page": "assets",
+    "stage": "laptop-1366-final",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "investigations",
+    "stage": "laptop-1366-final",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "sources",
+    "stage": "laptop-1366-final",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "metrics",
+    "stage": "laptop-1366-final",
+    "bodyScroll": 1351,
+    "client": 1351,
+    "height": 768,
+    "scroll": 1351,
+    "width": 1366
+  },
+  {
+    "page": "lab",
+    "stage": "laptop-1366-final",
+    "bodyScroll": 1366,
+    "client": 1366,
+    "height": 768,
+    "scroll": 1366,
+    "width": 1366
+  }
+]

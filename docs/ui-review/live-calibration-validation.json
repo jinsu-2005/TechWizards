@@ -1,0 +1,35 @@
+{
+  "verified_at": "2026-10-15T15:40:06.657342+00:00",
+  "status_after_backend_restart": {
+    "mode": "live",
+    "hai_available": true,
+    "detector_active": "mlp",
+    "uptime_s": 0.27478837966918945,
+    "source": {
+      "mode": "live",
+      "connected": true,
+      "protocol": "modbus",
+      "state": "connected",
+      "latency_ms_p50": 1.8132000000150583,
+      "latency_ms_p95": 1.8132000000150583,
+      "samples_per_s": 0.9,
+      "dropped": 0,
+      "reason": null,
+      "progress": null,
+      "calibration": null
+    },
+    "live_available": true,
+    "live_reason": null
+  },
+  "training": {
+    "active": "mlp",
+    "init": "sim-weights",
+    "recorded_samples": 600,
+    "train_samples": 480,
+    "val_samples": 120,
+    "train_seconds": 1.715446949005127
+  },
+  "nominal_recording_seconds": 300,
+  "background_mode_switch": "Switched LIVE -> HAI -> LIVE during recording; progress continued",
+  "scope": "local Modbus emulator"
+}

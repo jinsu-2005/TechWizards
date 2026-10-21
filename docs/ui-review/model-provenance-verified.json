@@ -1,0 +1,13 @@
+{
+  "source_fingerprint": "4d8f28b51c67c39b9410f8d3fc52974abe8caef61bf0c69aedae895a22a205cd",
+  "fingerprint_scope": "Configured endpoint, polling cadence and register map; not physical device attestation",
+  "model_loaded": true,
+  "model_id": "899cbdfe8630d6478c540ef46204429d4790ec146da200db4a2891a6ac8dfc1f",
+  "trained_at": "2026-10-15T16:00:06.569962+00:00",
+  "recorded_samples": 600,
+  "sample_s": 0.5,
+  "active_model": "mlp",
+  "validation_samples": 120,
+  "validation_mse": 0.009439277111377957,
+  "calibration": null
+}

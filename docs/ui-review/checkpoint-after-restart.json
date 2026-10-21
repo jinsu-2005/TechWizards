@@ -1,0 +1,22 @@
+{
+  "mode": "live",
+  "connected": true,
+  "protocol": "modbus",
+  "state": "calibrating",
+  "latency_ms_p50": 1.1736999999811815,
+  "latency_ms_p95": 1.1736999999811815,
+  "samples_per_s": 0.9,
+  "dropped": 0,
+  "reason": null,
+  "progress": 0.5866666666666667,
+  "calibration": {
+    "stage": "collecting",
+    "collected_samples": 352,
+    "target_samples": 600,
+    "skipped_samples": 1,
+    "elapsed_s": 0.06214570999145508,
+    "remaining_s": 124.0,
+    "blockers": [],
+    "notice": "Resumed saved baseline; gaps are excluded from model windows."
+  }
+}

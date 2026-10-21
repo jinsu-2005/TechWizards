@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AttackTrace — visual review</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#0b1016;color:#e7edf5}body{max-width:1600px;margin:auto;padding:24px}h1{font-size:30px;letter-spacing:-.04em}p{color:#b5c2d1;line-height:1.6;max-width:85ch}a{color:#8cb7ff}button,select{font:inherit;background:#172333;color:#e7edf5;border:1px solid #415571;border-radius:6px;padding:10px;cursor:pointer}button[aria-pressed=true]{background:#2858ad}nav{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}figure{margin:0;border:1px solid #29394b;border-radius:10px;overflow:hidden;background:#101923}figcaption{padding:12px;color:#b5c2d1}img{display:block;width:100%;height:auto}#comparison{max-height:78vh;overflow:auto}#comparison img{min-width:700px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:16px}.phones img{max-height:650px;object-fit:contain;object-position:top}.themes img{aspect-ratio:1.5;object-fit:cover;object-position:top}h2{margin-top:40px;font-size:21px}small{color:#b5c2d1}a:focus-visible,button:focus-visible{outline:3px solid #8cb7ff;outline-offset:3px}
+</style>
+<h1>AttackTrace / visual review</h1>
+<p>Actual screenshots, a generated design reference, and the implemented interface. The concept informed hierarchy and spacing; illustrative readings and physical relationships were not copied. <a href="REVIEW.md">Read findings and validation</a> · <a href="IMAGE_PROMPT.md">Generation prompt</a></p>
+<nav aria-label="Comparison view"><button data-src="before-desktop.jpg" aria-pressed="false">Before</button><button data-src="design-reference.png" aria-pressed="false">Generated reference</button><button data-src="after-desktop.jpg" aria-pressed="true">Implemented</button></nav>
+<figure><div id="comparison"><a id="original" href="after-desktop.jpg"><img id="hero" src="after-desktop.jpg" alt="Implemented AttackTrace desktop interface"></a></div><figcaption id="caption">Actual implementation · HAI process selection. Click image to inspect the original capture.</figcaption></figure>
+<h2>Calibration and evaluation follow-up</h2><p>Resumable calibration, model provenance and measured baseline comparison. <a href="../IMPLEMENTATION_DELIVERY.md">Delivery notes and limits</a></p><div class="grid" id="delivery"></div>
+<h2>Saved incident evidence</h2><p>Immutable model and baseline references, first-observed readings, mobile investigation and incident-scoped Copilot. <a href="../INCIDENT_EVIDENCE_DELIVERY.md">Results, verification and remaining checks</a></p><div class="grid" id="incident-evidence"></div>
+<h2>Phone layouts and Copilot</h2><p>The selected process reflows vertically. Supporting pages use document scrolling and tables retain their own horizontal scroll regions.</p><div class="grid phones" id="phones"></div>
+<h2>Nine themes</h2><p>Theme review captures from the implementation iteration. Data and selected process vary between screenshots.</p><div class="grid themes" id="themes"></div>
+<h2>Simulator and expanded investigation</h2><div class="grid" id="extra"></div>
+<script>
+const captions={'before-desktop.jpg':'Actual starting interface · dense graph and crowded controls.','design-reference.png':'AI-generated visual reference · illustrative data, not a running product.','after-desktop.jpg':'Actual implementation · HAI process selection. Click image to inspect the original capture.'};
+document.querySelectorAll('button[data-src]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('button[data-src]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));hero.src=button.dataset.src;hero.alt=captions[button.dataset.src];original.href=hero.src;caption.textContent=captions[button.dataset.src]}));
+function cards(id,items){for(const [file,label] of items){const figure=document.createElement('figure'),link=document.createElement('a'),img=document.createElement('img'),cap=document.createElement('figcaption');link.href=file;img.src=file;img.alt=label;img.loading='lazy';cap.textContent=label;link.append(img);figure.append(link,cap);document.getElementById(id).append(figure)}}
+cards('phones',[['after-mobile.jpg','390px · responsive process graph'],['after-copilot-mobile.jpg','390px · Copilot and visible composer'],...['alerts','assets','sources','investigations','metrics','lab'].map(x=>['after-mobile-'+x+'.jpg','390px · '+x])]);
+cards('themes',['cyber','titanium','obsidian','scada-emerald','solar-flare','abyssal-blue','crimson-protocol','quantum-violet','monochrome-stealth'].map(x=>['theme-'+x+'.jpg',x.replaceAll('-',' ')]));
+cards('extra',[['after-sim-launch.jpg','SIM · active test incident and Launch control'],['after-expanded-inspector.jpg','Expanded workspace · asset evidence inspector']]);
+cards('delivery',[['sources-provenance.jpg','Current model and baseline provenance'],['baseline-comparison.jpg','Measured baseline comparison — simulation scope'],['metrics-native-chart.jpg','Native SVG chart with semantic values'],['sources-provenance-mobile.jpg','Sources at 390px'],['baseline-comparison-mobile.jpg','Baseline results at 390px']]);
+cards('incident-evidence',[['incident-evidence-desktop.jpg','Saved case · model, baseline and first readings'],['incident-evidence-mobile.jpg','390px · keyboard-focusable reading comparison'],['incident-copilot-mobile.jpg','390px · wrapped evidence references and visible composer']]);
+</script>
+</html>
