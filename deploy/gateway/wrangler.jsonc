@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "attacktrace-console",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-01-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "PUBLIC_ORIGIN": "https://attacktrace-console.jinsu-j2005.workers.dev",
+    "FRONTEND_ORIGIN": "https://YOUR-VERCEL-PROJECT.vercel.app",
+    "BACKEND_ORIGIN": "https://YOUR-RENDER-SERVICE.onrender.com"
+  }
+}
