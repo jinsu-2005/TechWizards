@@ -103,7 +103,10 @@ def render_report(inc: Incident, impact: Impact | None, mode: str, generated_at:
     contained_at = getattr(inc, "contained_at", None)
     if inc.status == "contained" and contained_at is not None:
         after = float(contained_at) - inc.detected_at
-        para(f"Contained {_utc(float(contained_at))} ({after:.0f} s after detection).")
+        msg = f"Contained {_utc(float(contained_at))} ({after:.0f} s after detection)."
+        if inc.virtual_active:
+            msg += " Virtual Sensor Self-Healing engaged."
+        para(msg)
     elif inc.status == "closed":
         para("Closed after 30 s without alerts. No isolate action recorded.")
     else:
