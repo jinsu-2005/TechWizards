@@ -1,6 +1,7 @@
-import { ArrowLeft, FileX, LoaderCircle } from "lucide-react";
+import { BarChart3, FileX, LoaderCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "../../components/ui/EmptyState";
+import { WorkspaceHeader } from "../../components/ui/WorkspaceHeader";
 import {
   f1Rows,
   parseMetrics,
@@ -10,15 +11,17 @@ import {
   type Metrics,
 } from "../../lib/metrics";
 import { MetricsChart } from "./MetricsChart";
+import { RobustnessPanel } from "./RobustnessPanel";
+import { BaselineComparison } from "./BaselineComparison";
 
 type Load = { state: "loading" } | { state: "missing" } | { state: "ready"; metrics: Metrics };
 
 function Card({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded border border-border bg-surface p-3">
-      <span className="text-xs uppercase tracking-wide text-muted">{label}</span>
-      <span className="font-mono text-2xl font-medium">{value}</span>
-      <span className="h-4 font-mono text-xs text-muted">{sub ?? ""}</span>
+    <div className="flex flex-col gap-1.5 rounded-lg border border-border/70 bg-surface p-3.5 shadow-sm  transition-all duration-200 hover:border-accent/40 hover:shadow-md">
+      <span className="text-xs font-mono uppercase tracking-wider text-muted font-medium">{label}</span>
+      <span className="font-mono text-2xl font-bold tracking-tight text-text">{value}</span>
+      <span className="min-h-4 font-mono text-xs text-muted">{sub ?? ""}</span>
     </div>
   );
 }
@@ -30,18 +33,18 @@ function Cards({ m }: { m: Metrics }) {
   const iso = m.isolation?.isolate_top1;
   const amb = m.ambiguity;
   return (
-    <div className={`grid gap-2 ${iso && amb ? "grid-cols-7" : "grid-cols-5"}`}>
-      <Card label="F1" value={a.f1.toFixed(2)} sub={`Baseline ${b.f1.toFixed(2)}`} />
-      <Card label="Top-1" value={pct(loc.top1)} sub={loc.baseline ? `Baseline ${pct(loc.baseline.top1)}` : undefined} />
-      <Card label="Top-3" value={pct(loc.top3)} sub={loc.baseline ? `Baseline ${pct(loc.baseline.top3)}` : undefined} />
-      <Card label="Time to localize" value={ttl === null ? "–" : `${ttl.toFixed(1)} s`} />
+    <div className={`grid gap-2.5 ${iso && amb ? "grid-cols-2 md:grid-cols-3 2xl:grid-cols-7" : "grid-cols-2 md:grid-cols-3 xl:grid-cols-5"}`}>
+      <Card label="F1 Score" value={a.f1.toFixed(2)} sub={`Baseline ${b.f1.toFixed(2)}`} />
+      <Card label="Top-1 Origin" value={pct(loc.top1)} sub={loc.baseline ? `Baseline ${pct(loc.baseline.top1)}` : undefined} />
+      <Card label="Top-3 Candidates" value={pct(loc.top3)} sub={loc.baseline ? `Baseline ${pct(loc.baseline.top3)}` : undefined} />
+      <Card label="Localization Speed" value={ttl === null ? "–" : `${ttl.toFixed(1)} s`} sub="Mean time to localize" />
       <Card
-        label="False alarms"
+        label="False Alarms"
         value={`${a.false_alarm_per_hour.toFixed(1)} /h`}
         sub={`Baseline ${b.false_alarm_per_hour.toFixed(1)} /h`}
       />
-      {iso && <Card label="Contained" value={pct(iso.success_rate)} sub={`${iso.contained} of ${iso.n} isolated`} />}
-      {amb && <Card label="Ambiguous" value={pct(amb.ambiguous_rate)} sub={`${amb.n_ambiguous} of ${amb.n_incidents} incidents`} />}
+      {iso && <Card label="Containment Rate" value={pct(iso.success_rate)} sub={`${iso.contained} of ${iso.n} isolated`} />}
+      {amb && <Card label="Ambiguity Rate" value={pct(amb.ambiguous_rate)} sub={`${amb.n_ambiguous} of ${amb.n_incidents} flagged`} />}
     </div>
   );
 }
@@ -54,7 +57,7 @@ function HaiCards({ h }: { h: HaiMetrics }) {
       <h2 className="font-mono text-xs uppercase tracking-wide text-muted">
         HAI · {h.files.join(", ")} · {h.active_model}
       </h2>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
         <Card label="F1" value={a.f1.toFixed(2)} sub={`Adjusted ${a.f1_point_adjusted.toFixed(2)} · Baseline ${b.f1.toFixed(2)}`} />
         <Card
           label="Attacks detected"
@@ -93,7 +96,7 @@ function LiveCards({ l }: { l: LiveEvalMetrics }) {
       <h2 className="font-mono text-xs uppercase tracking-wide text-muted">
         Live · {l.n_attacks} attacks · {l.n_clean_runs} clean runs
       </h2>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
         <Card label="F1" value={l.detection.f1.toFixed(2)} sub={`P ${l.detection.precision.toFixed(2)} · R ${l.detection.recall.toFixed(2)}`} />
         <Card label="Top-1 / Top-3" value={`${pct(l.localization.top1)} / ${pct(l.localization.top3)}`} />
         <Card label="Latency" value={`${l.latency_ms.p50.toFixed(0)} ms`} sub={`p95 ${l.latency_ms.p95.toFixed(0)} ms`} />
@@ -125,24 +128,35 @@ export function MetricsPage() {
   const rows = useMemo(() => (load.state === "ready" ? f1Rows(load.metrics) : []), [load]);
 
   return (
-    <div className="flex h-full min-w-[1280px] flex-col gap-1 p-1">
-      <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-2">
-        <a href="/" className="flex items-center gap-1 text-xs text-muted transition-colors duration-150 hover:text-text">
-          <ArrowLeft size={14} aria-hidden />
-          Dashboard
-        </a>
-        <h1 className="text-sm font-semibold tracking-tight">Metrics</h1>
-      </header>
-      <main className="flex min-h-0 flex-1 flex-col gap-2 p-1">
-        {load.state === "loading" && <EmptyState icon={LoaderCircle} text="Loading" />}
-        {load.state === "missing" && <EmptyState icon={FileX} text="Run make eval" />}
+    <div className="metrics-page content-page page-container flex flex-col gap-5">
+      <WorkspaceHeader current="/metrics" />
+      <div className="page-heading"><div><h1>Benchmark evaluation &amp; telemetry metrics</h1><p>Recorded evaluations · results describe the tested datasets and scenarios.</p></div></div>
+      <main id="main-workspace" tabIndex={-1} className="flex min-h-0 flex-1 flex-col gap-2.5">
+        <RobustnessPanel />
+        {load.state === "loading" && <EmptyState icon={LoaderCircle} text="Loading Benchmark Metrics..." />}
+        {load.state === "missing" && <EmptyState icon={FileX} text="No benchmark results yet. Run an evaluation to populate this page." />}
         {load.state === "ready" && (
           <>
             <Cards m={load.metrics} />
             {load.metrics.hai && <HaiCards h={load.metrics.hai} />}
             {load.metrics.live && <LiveCards l={load.metrics.live} />}
-            <section aria-label="F1 by scenario" className="min-h-0 flex-1 rounded border border-border bg-surface p-3">
-              <MetricsChart rows={rows} />
+            <BaselineComparison />
+            <section
+              aria-label="F1 by scenario"
+              className="flex min-h-[360px] flex-1 flex-col rounded-lg border border-border/70 bg-surface p-4  shadow-sm"
+            >
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
+                <div className="flex items-center gap-2">
+                  <BarChart3 size={15} className="text-accent" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+                    Detection F1 Performance vs Baseline by Threat Scenario
+                  </span>
+                </div>
+                <span className="font-mono text-xs text-muted">Higher is better (Max 1.00)</span>
+              </div>
+              <div className="min-h-[300px] flex-1">
+                <MetricsChart rows={rows} />
+              </div>
             </section>
           </>
         )}
