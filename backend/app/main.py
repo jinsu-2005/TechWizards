@@ -4,13 +4,16 @@ import asyncio
 import contextlib
 import json
 import logging
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from uuid import uuid4
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import rest, ws
+from app.api import authentication, copilot, investigation, lab, rest, ws
+from app.api.gateway import GatewayBoundary
 from app.api.live_attack import LiveAttackLauncher
 from app.api.security import RateLimiter
 from app.config import Settings, get_settings
@@ -26,6 +29,7 @@ from app.engine import Engine
 from app.engine_hai import HaiEngine
 from app.graph import load_graph
 from app.live.runtime import LiveRuntime, build_live_runtime
+from app.soc import SocStore
 
 log = logging.getLogger("attacktrace")
 
@@ -100,9 +104,20 @@ def create_app(
     live_runtime: LiveRuntime | None = None,
 ) -> FastAPI:
     settings = get_settings()
+    if settings.auth_enabled and os.environ.get("FIREBASE_AUTH_EMULATOR_HOST"):
+        raise ValueError("Private authentication cannot use unsigned emulator tokens")
+    if (
+        settings.auth_enabled
+        and not settings.auth_cookie_secure
+        and settings.host not in {"localhost", "127.0.0.1", "::1"}
+    ):
+        raise ValueError("Private server authentication requires Secure cookies")
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        settings.soc_db.parent.mkdir(parents=True, exist_ok=True)
+        app.state.soc = SocStore(":memory:" if engine is not None else str(settings.soc_db))
+        app.state.session_id = uuid4().hex
         app.state.engine = engine or await asyncio.to_thread(build_engine, settings)
         app.state.hai = hai_engine
         if hai_engine is None and engine is None:  # production start: look for HAI data too
@@ -119,7 +134,14 @@ def create_app(
             if run_loop
             else None
         )
+        integrity_task = (
+            asyncio.create_task(lab.observe_integrity(app.state)) if engine is None else None
+        )
         yield
+        if integrity_task:
+            integrity_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await integrity_task
         if task:
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
@@ -128,12 +150,20 @@ def create_app(
             await app.state.live.stop()
         if app.state.live_attacker is not None:
             await app.state.live_attacker.close()
+        if getattr(app.state, "lab_proxy", None) is not None:
+            await app.state.lab_proxy.stop()
+        app.state.soc.close()
 
     application = FastAPI(title="AttackTrace", version="0.1.0", lifespan=lifespan)
+
+    @application.get("/api/health")
+    def health() -> dict[str, str]:
+        return {"status": "ok"}
+
     application.state.hub = ws.Hub()
     application.state.settings = settings
     application.state.attack_limiter = RateLimiter(settings.attack_rate_per_min)
-    if not settings.api_key:
+    if not settings.api_key and not settings.auth_enabled:
         log.warning("AT_API_KEY is not set: POST /api/attack, /reset and /mode are open")
     application.state.reports_dir = settings.reports_dir
     application.state.hai_dir = settings.hai_dir
@@ -148,8 +178,16 @@ def create_app(
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    application.middleware("http")(authentication.protect)
+    application.add_middleware(
+        GatewayBoundary, secret=settings.gateway_secret.get_secret_value()
+    )
+    application.include_router(authentication.router)
     application.include_router(rest.router)
     application.include_router(ws.router)
+    application.include_router(copilot.router)
+    application.include_router(investigation.router)
+    application.include_router(lab.router)
     return application
 
 

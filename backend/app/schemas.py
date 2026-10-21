@@ -4,7 +4,7 @@ FROZEN after Phase 4 — mirrored by frontend/src/lib/types.ts. Changing a field
 meaning needs explicit approval.
 """
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -25,6 +25,7 @@ class NodeState(BaseModel):
     score: float  # smoothed normalized forecast error
     status: NodeStatus
     quality: Quality | None = None  # Phase 13: LIVE data quality; None in SIM and HAI
+    is_virtual: bool | None = None  # True when virtual sensor self-healing estimation is active
 
 
 class AlertInfo(BaseModel):
@@ -84,6 +85,7 @@ class Incident(BaseModel):
     ambiguous: bool = False  # Phase 11: top-1 and top-2 confidence are too close to trust one
     contained_at: float | None = None  # unix time the isolate action took effect (SIM only)
     time_to_contain_s: float | None = None  # plant seconds from the isolate action to containment
+    virtual_active: bool | None = None  # True when virtual sensor self-healing estimation is active
 
 
 class Impact(BaseModel):
@@ -109,6 +111,17 @@ class LiveMessage(BaseModel):
 SourceState = Literal["connected", "stale", "connecting", "down", "calibrating"]
 
 
+class CalibrationInfo(BaseModel):
+    stage: Literal["collecting", "blocked", "training", "failed"]
+    collected_samples: int
+    target_samples: int
+    skipped_samples: int
+    elapsed_s: float
+    remaining_s: float | None = None
+    blockers: list[str] = []
+    notice: str | None = None
+
+
 class SourceInfo(BaseModel):
     """Where the data comes from and how healthy that link is (Phase 13)."""
 
@@ -122,6 +135,7 @@ class SourceInfo(BaseModel):
     dropped: int = 0
     reason: str | None = None  # why it is not connected, or which tags are faulty
     progress: float | None = None  # 0..1 while state is "calibrating"
+    calibration: CalibrationInfo | None = None
 
 
 class TagHealth(BaseModel):
@@ -186,3 +200,27 @@ class TopologyEdge(BaseModel):
 class Topology(BaseModel):
     nodes: list[TopologyNode]
     edges: list[TopologyEdge]
+
+
+# ---------------------------------------------------------------------------------- Copilot
+class CopilotTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=2000)
+
+
+class CopilotChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=4000)
+    incident_id: str | None = Field(default=None, max_length=128)
+    history: list[CopilotTurn] = Field(default_factory=list, max_length=12)
+    asset_id: str | None = Field(default=None, max_length=128)
+    as_of: float | None = Field(default=None, gt=0, allow_inf_nan=False)
+
+
+class CopilotChatResponse(BaseModel):
+    reply: str
+    suggestions: list[str] = Field(default_factory=list)
+    action_recommended: str | None = None
+    action_node: str | None = None
+    mitre_id: str | None = None
+    model_used: str = "evidence-summary"
+    evidence: list[dict[str, Any]] = Field(default_factory=list)

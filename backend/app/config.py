@@ -5,7 +5,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, SecretStr
 
 ENV_PREFIX = "AT_"
 
@@ -37,6 +37,11 @@ class Settings(BaseModel):
     gate_margin: float = 0.21
     # Demo protection (Phase 11): empty key = write endpoints open (local dev and tests).
     api_key: str = ""
+    auth_enabled: bool = False
+    firebase_project_id: str = ""
+    auth_cookie_secure: bool = True
+    auth_members: dict[str, str] = {}  # verified email -> viewer, analyst or admin
+    gateway_secret: SecretStr = SecretStr("")  # shared only by edge gateway and backend
     demo_mode: bool = True  # False: attack endpoints answer 403
     attack_rate_per_min: int = 10
     # Phase 14 B4: rate-limit identity is the socket peer unless a trusted reverse proxy sets
@@ -58,8 +63,9 @@ class Settings(BaseModel):
     live_block_gap: int = 8  # tags closer than this many registers share one read
     live_backoff_base_s: float = 0.25
     live_backoff_max_s: float = 5.0
-    live_train_min: float = 20.0  # minutes of clean traffic recorded for the LIVE detector
+    live_train_min: float = Field(default=5.0, ge=5, le=120, allow_inf_nan=False)
     live_db: Path = Path("../data/live_incidents.sqlite")  # LIVE incidents survive a restart
+    soc_db: Path = Path("../data/investigations.sqlite")
     live_include_bad_quality: bool = False  # True: stale/missing/out-of-range tags are scored too
     # Attacker tool (Phase 13 Part D): extra allowed write targets, beyond loopback and the
     # docker-compose service name, as a comma-separated list. Empty by default.
@@ -72,7 +78,7 @@ def _from_env() -> dict[str, object]:
         raw = os.environ.get(ENV_PREFIX + name.upper())
         if raw is None:
             continue
-        values[name] = json.loads(raw) if name == "cors_origins" else raw
+        values[name] = json.loads(raw) if name in {"cors_origins", "auth_members"} else raw
     return values
 
 
