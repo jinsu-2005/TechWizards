@@ -1,85 +1,41 @@
-import { ChartColumn, Columns2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Columns2, Database } from "lucide-react";
+import { useState } from "react";
 import { ModeToggle } from "../components/ui/ModeToggle";
 import { SourcePill } from "../components/ui/SourcePill";
 import { StatusPill } from "../components/ui/StatusPill";
+import { WorkspaceHeader } from "../components/ui/WorkspaceHeader";
 import { getTopology, setMode as postMode } from "../lib/api";
-import { latencyMs, pillKind } from "../lib/pill";
+import { pillKind } from "../lib/pill";
 import type { Mode } from "../lib/types";
 import { useLive } from "../store/live";
 import { useUi } from "../store/ui";
 
-function useClock(): string {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  return now.toLocaleTimeString("en-GB", { hour12: false });
-}
-
+const SOURCE_NAMES = { sim: "Local simulation", hai: "HAI dataset replay", live: "Modbus monitoring" };
 export function TopBar() {
   const conn = useLive((s) => s.conn);
   const latest = useLive((s) => s.latest);
   const status = useLive((s) => s.status);
-  const setStatus = useLive((s) => s.setStatus);
-  const setTopology = useLive((s) => s.setTopology);
-  const clear = useLive((s) => s.clear);
   const split = useUi((s) => s.split);
   const toggleSplit = useUi((s) => s.toggleSplit);
-  const clock = useClock();
-  const live = conn === "live" && latest !== null;
-  const latency = live ? latencyMs(latest.t, Date.now()) : null;
-
-  const change = (m: Mode) => {
-    postMode(m)
-      .then(async (s) => {
-        setStatus(s);
-        clear(); // the old mode's history does not belong on the new timeline
-        setTopology(await getTopology());
-      })
-      .catch(() => undefined);
+  const [changing, setChanging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const mode = latest?.mode ?? status?.mode ?? "sim";
+  const calibrating = mode === "live" && (status?.source?.calibration != null || status?.source?.state === "calibrating");
+  const flagged = latest?.nodes.filter((n) => n.status !== "normal").length ?? 0;
+  const change = async (next: Mode) => {
+    if (changing) return;
+    setChanging(true); setError(null);
+    try {
+      const result = await postMode(next);
+      useLive.getState().setStatus(result); useUi.getState().selectAsset(null);
+      useLive.getState().clear(); useLive.getState().setTopology(await getTopology());
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to change the source. Try again."); }
+    finally { setChanging(false); }
   };
-
-  return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-2">
-      <h1 className="text-sm font-semibold tracking-tight">AttackTrace</h1>
-      <ModeToggle
-        mode={latest?.mode ?? status?.mode ?? "sim"}
-        haiAvailable={status?.hai_available ?? false}
-        liveAvailable={status?.live_available ?? false}
-        liveReason={status?.live_reason}
-        onChange={change}
-      />
-      <StatusPill kind={pillKind(conn, latest)} />
-      {latest?.mode === "live" && status?.source && <SourcePill source={status.source} />}
-      <button
-        type="button"
-        aria-pressed={split}
-        aria-label="Split view"
-        onClick={toggleSplit}
-        title="Baseline vs AttackTrace"
-        className={`flex h-6 items-center gap-1 rounded border px-2 text-xs transition-colors duration-150 ${
-          split ? "border-accent text-accent" : "border-border text-muted hover:text-text"
-        }`}
-      >
-        <Columns2 size={14} aria-hidden />
-        Split
-      </button>
-      <a
-        href="/metrics"
-        className="flex h-6 items-center gap-1 rounded border border-border px-2 text-xs text-muted transition-colors duration-150 hover:text-text"
-      >
-        <ChartColumn size={14} aria-hidden />
-        Metrics
-      </a>
-      <div className="ml-auto flex items-center gap-3 font-mono text-xs text-muted">
-        <span title="Detector">{status?.detector_active ?? "–"}</span>
-        <span title="Latency" className="w-14 text-right">
-          {latency === null ? "–" : `${latency} ms`}
-        </span>
-        <time className="text-text">{clock}</time>
-      </div>
-    </header>
-  );
+  return <div className="monitoring-header"><WorkspaceHeader current="/" />
+    <div className="monitoring-heading"><div><h1>Process monitoring</h1><p>{latest ? `${latest.nodes.length} assets · ${flagged} flagged readings` : "Connecting to the process"} · {SOURCE_NAMES[mode]}</p></div>{calibrating ? <span role="status" className="text-sm text-muted">Baseline in progress</span> : <StatusPill kind={pillKind(conn, latest)} />}</div>
+    <div className="source-toolbar"><div className="source-selector" aria-busy={changing}><span className="source-label">Data source</span><ModeToggle mode={mode} haiAvailable={status?.hai_available ?? false} liveAvailable={status?.live_available ?? false} liveReason={status?.live_reason} onChange={(next) => { void change(next); }} />{changing && <span role="status" className="text-xs text-muted">Switching…</span>}</div>
+      <div className="source-actions">{mode === "live" && status?.source && <SourcePill source={status.source} />}<a href="/sources" className="toolbar-action"><Database size={14} aria-hidden />Source details</a><button type="button" aria-pressed={split} aria-label="Split view" title="Compare baseline with AttackTrace" onClick={toggleSplit} className="toolbar-action"><Columns2 size={14} aria-hidden />Compare baseline</button><span className="detector-label">Model <strong>{status?.detector_active?.toUpperCase() ?? "Pending"}</strong></span></div>
+    </div>{error && <p role="alert" className="rounded-md border border-origin/40 bg-origin/10 p-3 text-sm text-origin">{error}</p>}
+  </div>;
 }
