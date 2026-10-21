@@ -1,6 +1,5 @@
 """Bounded, opt-in OpenAI speech bridge. API credentials never reach the browser."""
 
-import asyncio
 import os
 
 import httpx

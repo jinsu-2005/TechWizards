@@ -101,7 +101,7 @@ def check_origin(origin: str | None, settings: Any) -> None:
 
 
 def required_role(path: str) -> str:
-    if path == "/api/copilot/chat":
+    if path == "/api/copilot/chat" or path.startswith("/api/voice/"):
         return "viewer"
     if path.endswith("/workflow"):
         return "analyst"

@@ -12,7 +12,7 @@ from uuid import uuid4
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import authentication, copilot, investigation, lab, rest, ws
+from app.api import authentication, copilot, investigation, lab, rest, voice, ws
 from app.api.gateway import GatewayBoundary
 from app.api.live_attack import LiveAttackLauncher
 from app.api.security import RateLimiter
@@ -186,6 +186,7 @@ def create_app(
     application.include_router(rest.router)
     application.include_router(ws.router)
     application.include_router(copilot.router)
+    application.include_router(voice.router)
     application.include_router(investigation.router)
     application.include_router(lab.router)
     return application
