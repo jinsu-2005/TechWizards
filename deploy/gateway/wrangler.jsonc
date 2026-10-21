@@ -7,7 +7,7 @@
   "preview_urls": false,
   "vars": {
     "PUBLIC_ORIGIN": "https://attacktrace-console.jinsu-j2005.workers.dev",
-    "FRONTEND_ORIGIN": "https://YOUR-VERCEL-PROJECT.vercel.app",
-    "BACKEND_ORIGIN": "https://YOUR-RENDER-SERVICE.onrender.com"
+    "FRONTEND_ORIGIN": "https://tech-wizards-attacktrace.vercel.app",
+    "BACKEND_ORIGIN": "https://techwizards.onrender.com"
   }
 }

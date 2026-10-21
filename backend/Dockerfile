@@ -17,8 +17,9 @@ RUN python -m pip install --no-cache-dir --upgrade 'pip>=26.2' \
  && pip install --no-cache-dir .
 COPY backend/models ./models
 RUN useradd --uid 10001 --create-home attacktrace \
- && mkdir -p /data/live /reports \
- && chown -R attacktrace:attacktrace /app /data/live /reports
+ && mkdir -p /data /data/live /reports \
+ && chown -R attacktrace:attacktrace /app /data /reports
 USER attacktrace
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+
