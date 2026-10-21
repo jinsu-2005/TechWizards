@@ -1,6 +1,6 @@
 import type { NodeState, TopologyNode } from "../../lib/types";
 import { Pump, Tank, Valve } from "./Equipment";
-import { ANCHOR, FILTER, TANKS, TEXT, anchorOf } from "./geometry";
+import { ANCHOR, FILTER, TANKS, anchorOf } from "./geometry";
 import { NodeBadge } from "./NodeBadge";
 
 interface Props {
@@ -39,19 +39,132 @@ export function Equipment({ nodes, topo, ageByNode }: Props) {
           status={lit301.status}
         />
       )}
+      {/* Industrial Multimedia Pressure Vessel Filter */}
+      <defs>
+        <linearGradient id="vessel-body-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="var(--surface)" stopOpacity={0.95} />
+          <stop offset="30%" stopColor="var(--border)" stopOpacity={0.4} />
+          <stop offset="70%" stopColor="var(--surface)" stopOpacity={0.9} />
+          <stop offset="100%" stopColor="var(--bg)" stopOpacity={0.95} />
+        </linearGradient>
+        <linearGradient id="media-bed-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#0284c7" stopOpacity={0.25} />
+          <stop offset="40%" stopColor="#0d9488" stopOpacity={0.35} />
+          <stop offset="100%" stopColor="#d97706" stopOpacity={0.3} />
+        </linearGradient>
+      </defs>
+
+      {/* Structural Support Legs */}
+      <rect x={FILTER.x + 14} y={FILTER.y + FILTER.h - 4} width={8} height={12} rx={1.5} fill="var(--border)" />
+      <rect x={FILTER.x + FILTER.w - 22} y={FILTER.y + FILTER.h - 4} width={8} height={12} rx={1.5} fill="var(--border)" />
+
+      {/* Main Cylindrical Shell */}
       <rect
         x={FILTER.x}
-        y={FILTER.y}
+        y={FILTER.y + 12}
         width={FILTER.w}
-        height={FILTER.h}
+        height={FILTER.h - 24}
         rx={6}
-        fill="var(--bg)"
-        stroke="var(--muted)"
-        strokeOpacity={0.6}
-        strokeWidth={2}
+        fill="url(#vessel-body-grad)"
+        stroke="var(--border)"
+        strokeWidth={1.5}
+        className="shadow-lg"
       />
-      <text x={FILTER.x + 8} y={FILTER.y + FILTER.h - 8} className="fill-text font-mono" fontSize={TEXT}>
-        Filter
+
+      {/* Top Elliptical Head (Domed Cap) */}
+      <ellipse
+        cx={FILTER.x + FILTER.w / 2}
+        cy={FILTER.y + 12}
+        rx={FILTER.w / 2}
+        ry={12}
+        fill="var(--surface)"
+        stroke="var(--border)"
+        strokeWidth={1.5}
+      />
+      {/* Top Air Relief Valve & Manway */}
+      <rect x={FILTER.x + FILTER.w / 2 - 6} y={FILTER.y - 4} width={12} height={8} rx={2} fill="var(--border)" />
+      <circle cx={FILTER.x + FILTER.w / 2} cy={FILTER.y - 4} r={3} fill="var(--accent)" fillOpacity={0.8} />
+
+      {/* Bottom Elliptical Head (Domed Base) */}
+      <ellipse
+        cx={FILTER.x + FILTER.w / 2}
+        cy={FILTER.y + FILTER.h - 12}
+        rx={FILTER.w / 2}
+        ry={12}
+        fill="var(--surface)"
+        stroke="var(--border)"
+        strokeWidth={1.5}
+      />
+
+      {/* Internal Multi-Layer Filtration Media Bed */}
+      <rect
+        x={FILTER.x + 4}
+        y={FILTER.y + 20}
+        width={FILTER.w - 8}
+        height={FILTER.h - 40}
+        rx={4}
+        fill="url(#media-bed-grad)"
+        stroke="var(--border)"
+        strokeWidth={0.8}
+        strokeDasharray="2 3"
+      />
+
+      {/* Media Bed Stratification Lines */}
+      <line x1={FILTER.x + 6} y1={FILTER.y + 36} x2={FILTER.x + FILTER.w - 6} y2={FILTER.y + 36} stroke="var(--border)" strokeWidth={0.8} strokeDasharray="3 3" />
+      <line x1={FILTER.x + 6} y1={FILTER.y + 54} x2={FILTER.x + FILTER.w - 6} y2={FILTER.y + 54} stroke="var(--border)" strokeWidth={0.8} strokeDasharray="3 3" />
+
+      {/* Inner Inspection Sightglass & Flow Turbine */}
+      <circle
+        cx={FILTER.x + FILTER.w / 2}
+        cy={FILTER.y + 44}
+        r={17}
+        fill="var(--bg)"
+        fillOpacity={0.85}
+        stroke="var(--accent)"
+        strokeWidth={1.2}
+      />
+      <g
+        className="spin"
+        style={{
+          transformOrigin: `${FILTER.x + FILTER.w / 2}px ${FILTER.y + 44}px`,
+          animationDuration: "5s",
+        }}
+      >
+        {[0, 60, 120, 180, 240, 300].map((deg) => (
+          <path
+            key={deg}
+            d={`M${FILTER.x + FILTER.w / 2} ${FILTER.y + 44} Q${FILTER.x + FILTER.w / 2 + 5} ${FILTER.y + 37} ${FILTER.x + FILTER.w / 2} ${FILTER.y + 30}`}
+            stroke="var(--accent)"
+            strokeOpacity={0.8}
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            fill="none"
+            transform={`rotate(${deg} ${FILTER.x + FILTER.w / 2} ${FILTER.y + 44})`}
+          />
+        ))}
+      </g>
+      <circle cx={FILTER.x + FILTER.w / 2} cy={FILTER.y + 44} r={3.5} fill="var(--accent)" />
+
+      {/* Differential Pressure Tag Pill */}
+      <rect
+        x={FILTER.x + 8}
+        y={FILTER.y + FILTER.h - 26}
+        width={FILTER.w - 16}
+        height={16}
+        rx={3}
+        fill="var(--surface)"
+        fillOpacity={0.9}
+        stroke="var(--border)"
+        strokeWidth={0.8}
+      />
+      <text
+        x={FILTER.x + FILTER.w / 2}
+        y={FILTER.y + FILTER.h - 15}
+        textAnchor="middle"
+        className="fill-text font-mono font-semibold"
+        fontSize={9}
+      >
+        FIL-01 · FILTER
       </text>
       {mv && <Valve at={ANCHOR.MV101} open={truth(mv)} status={mv.status} />}
       {p101 && <Pump at={ANCHOR.P101} speed={truth(p101)} status={p101.status} />}

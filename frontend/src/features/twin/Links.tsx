@@ -19,14 +19,15 @@ export function Links({ nodes, incident }: Props) {
           <g key={l.id}>
             {l.kind === "pipe" ? (
               <>
-                <path d={l.d} stroke="var(--border)" strokeWidth={9} fill="none" strokeLinecap="butt" />
+                <path d={l.d} stroke="var(--accent)" strokeWidth={11} strokeOpacity={0.08} fill="none" strokeLinecap="round" />
+                <path d={l.d} stroke="var(--border)" strokeWidth={7} fill="none" strokeLinecap="round" />
                 <path
                   d={l.d}
                   className={dur === null ? "" : "flow"}
                   stroke="var(--accent)"
-                  strokeOpacity={dur === null ? 0.12 : 0.9}
-                  strokeWidth={3}
-                  strokeDasharray="3 9"
+                  strokeOpacity={dur === null ? 0.2 : 0.9}
+                  strokeWidth={2.5}
+                  strokeDasharray="4 8"
                   fill="none"
                   style={dur === null ? undefined : { animationDuration: `${dur}s` }}
                 />
@@ -35,7 +36,7 @@ export function Links({ nodes, incident }: Props) {
               <path
                 d={l.d}
                 stroke="var(--muted)"
-                strokeOpacity={0.5}
+                strokeOpacity={0.4}
                 strokeWidth={1}
                 strokeDasharray="4 4"
                 fill="none"
@@ -47,10 +48,13 @@ export function Links({ nodes, incident }: Props) {
                 pathLength={1}
                 className="attack-pulse"
                 stroke="var(--origin)"
-                strokeWidth={4}
+                strokeWidth={5}
                 strokeLinecap="round"
                 fill="none"
-                style={{ animationDelay: `${Math.min(delay, 6)}s` }}
+                style={{
+                  animationDelay: `${Math.min(delay, 6)}s`,
+                  filter: "drop-shadow(0 0 5px var(--origin))",
+                }}
               />
             )}
           </g>

@@ -1,11 +1,8 @@
 import type { NodeState, PathStep } from "../../lib/types";
 import { clamp01 } from "../../lib/format";
 
-// Phase 14 C4: h was 520, but all content (badges, tanks, the filter) sits within y ~13-400, so
-// the bottom ~120 units were pure unused margin. Trimming it to 400 raises the split-view
-// mini-twin's effective scale with no coordinate changes (nothing below y=400 ever existed) --
-// verified empirically across 1280x800, 1366x768, 1440x900 and 1920x1080.
-export const VIEW = { w: 900, h: 400 } as const;
+// Leave room below the pump badges for readable process-stage captions.
+export const VIEW = { w: 900, h: 440 } as const;
 
 /** SVG text size in view units: the twin is drawn at 0.74x at the narrowest layout (1280 px), so
  *  16.5 units render at about 12 px there. */
