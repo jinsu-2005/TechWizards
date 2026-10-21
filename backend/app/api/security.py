@@ -44,6 +44,10 @@ def require_key(request: Request) -> None:
     ONLY for loopback-bound local development with demo mode on; anything else -- a non-loopback
     AT_HOST, or AT_DEMO_MODE off -- fails closed (503) instead of silently staying open."""
     settings = request.app.state.settings
+    if settings.auth_enabled:
+        if not getattr(request.state, "principal", None):
+            raise HTTPException(401, "Sign in required")
+        return
     key = settings.api_key
     if not key:
         if _is_loopback(settings.host) and settings.demo_mode:
