@@ -28,7 +28,7 @@ export function MagnitudeField({ input, value, onChange, className }: Props) {
               aria-pressed={value === v}
               onClick={() => onChange(v)}
               className={`h-7 flex-1 rounded-sm font-mono text-xs transition-colors duration-150 ${
-                value === v ? "bg-accent text-bg" : "text-muted hover:text-text"
+                value === v ? "bg-accent text-on-accent" : "text-muted hover:text-text"
               }`}
             >
               {v === 1 ? input.on : input.off}

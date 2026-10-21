@@ -14,7 +14,7 @@ export function NodeScores() {
           <svg width={14} height={14} viewBox="-7 -7 14 14" aria-label={STATUS_LABEL[n.status]} role="img">
             <StatusGlyph status={n.status} cx={0} cy={0} />
           </svg>
-          <span className="w-16">{n.id}</span>
+          <span className="min-w-0 flex-1 truncate" title={n.id}>{n.id}</span>
           <span className="ml-auto text-muted">{n.score.toFixed(2)}</span>
         </div>
       ))}
