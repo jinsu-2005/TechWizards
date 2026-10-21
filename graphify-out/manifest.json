@@ -1068,10 +1068,10 @@
     "semantic_hash": "75b58542f3ec5a0a9da93ce76ee96975"
   },
   "frontend/src/lib/ws.ts": {
-    "mtime": 1791966065.2051382,
-    "seen": 1791968294.4791114,
-    "ast_hash": "8dfa39e06616b038c17c2174179821a7",
-    "semantic_hash": "8dfa39e06616b038c17c2174179821a7"
+    "mtime": 1792603537.856671,
+    "seen": 1792604457.758552,
+    "ast_hash": "856d8bec95078fa07a10e83cb236a735",
+    "semantic_hash": ""
   },
   "frontend/src/main.tsx": {
     "mtime": 1792603233.3970928,
@@ -1896,10 +1896,10 @@
     "semantic_hash": "5516ab1dee7a240c10d1ade833dd049a"
   },
   "frontend/vercel.json": {
-    "mtime": 1792126025.3790882,
-    "seen": 1792578452.955185,
-    "ast_hash": "2353125025a61a8d9d6ddb78ce9aca03",
-    "semantic_hash": "2353125025a61a8d9d6ddb78ce9aca03"
+    "mtime": 1792603522.799792,
+    "seen": 1792604457.758552,
+    "ast_hash": "7a5a8490272d134ce718809f055fdbf9",
+    "semantic_hash": ""
   },
   "scripts/backup-journal.py": {
     "mtime": 1792126516.234875,
@@ -1944,9 +1944,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1792571089.4846256,
-    "seen": 1792571329.2433488,
-    "ast_hash": "82b3b5dc4b03572f12e10fbf87d3fabd",
+    "mtime": 1792604976.0852985,
+    "seen": 1792604995.7784073,
+    "ast_hash": "42b69bd480d3b1f9b3237ea4fe209c13",
     "semantic_hash": ""
   },
   "config/tagmap.yaml": {
@@ -3456,9 +3456,9 @@
     "semantic_hash": "2d3ebd77939643b7d31f21b88328525c"
   },
   "frontend/src/features/copilot/LiveVoicePanel.tsx": {
-    "mtime": 1792594922.771455,
-    "seen": 1792603274.688855,
-    "ast_hash": "aec8c176e22f5fe3c39d077a9f4ec321",
+    "mtime": 1792603562.300457,
+    "seen": 1792604457.758552,
+    "ast_hash": "ee851012f32596ef1ba7f41a492b1dda",
     "semantic_hash": ""
   },
   "docs/ai-pilot-concept.png": {
@@ -3519,6 +3519,144 @@
     "mtime": 1792594984.6707625,
     "seen": 1792603274.6893878,
     "ast_hash": "073348521b21e076bc4f5f420d8f03fe",
+    "semantic_hash": ""
+  },
+  "backend/models/detector.json": {
+    "mtime": 1791966873.672619,
+    "seen": 1792604457.758552,
+    "ast_hash": "68cbdb776768fec5d8ba390440f56c99",
+    "semantic_hash": ""
+  },
+  "backend/models/graph.json": {
+    "mtime": 1791966850.2032695,
+    "seen": 1792604457.758552,
+    "ast_hash": "5d7519d4a57d4e8822aaa7123c6b9851",
+    "semantic_hash": ""
+  },
+  "backend/models/hai/detector.json": {
+    "mtime": 1792067849.9394982,
+    "seen": 1792604457.758552,
+    "ast_hash": "7f1b06d524d6797164e3621dc36eb4fd",
+    "semantic_hash": ""
+  },
+  "backend/models/hai/graph.json": {
+    "mtime": 1792067784.6382158,
+    "seen": 1792604457.758552,
+    "ast_hash": "b6eaffb54cf055c185a948724c1a447c",
+    "semantic_hash": ""
+  },
+  "backend/models/live/calibration.json": {
+    "mtime": 1792080004.9890215,
+    "seen": 1792604457.758552,
+    "ast_hash": "05d776d21f3faa7e2967df139e91660d",
+    "semantic_hash": ""
+  },
+  "backend/models/live/detector.json": {
+    "mtime": 1792080006.5699623,
+    "seen": 1792604457.758552,
+    "ast_hash": "bf6efb713e05474eef0191ab26e3b312",
+    "semantic_hash": ""
+  },
+  "backend/models/live/graph.json": {
+    "mtime": 1792080004.9935336,
+    "seen": 1792604457.758552,
+    "ast_hash": "5d7519d4a57d4e8822aaa7123c6b9851",
+    "semantic_hash": ""
+  },
+  "models/detector.json": {
+    "mtime": 1792603495.3604205,
+    "seen": 1792604457.758552,
+    "ast_hash": "40a171e07501267cc7cf00c44eeaf2a4",
+    "semantic_hash": ""
+  },
+  "models/graph.json": {
+    "mtime": 1792603471.3859706,
+    "seen": 1792604457.758552,
+    "ast_hash": "5d7519d4a57d4e8822aaa7123c6b9851",
+    "semantic_hash": ""
+  },
+  "reports/baseline-comparison/20min/live/detector.json": {
+    "mtime": 1792079747.9523382,
+    "seen": 1792604457.758552,
+    "ast_hash": "fcdc0bb8ad6deb2fd255d11efa85695f",
+    "semantic_hash": ""
+  },
+  "reports/baseline-comparison/20min/live/graph.json": {
+    "mtime": 1792079747.3148997,
+    "seen": 1792604457.758552,
+    "ast_hash": "5d7519d4a57d4e8822aaa7123c6b9851",
+    "semantic_hash": ""
+  },
+  "reports/baseline-comparison/5min/live/detector.json": {
+    "mtime": 1792079738.650316,
+    "seen": 1792604457.758552,
+    "ast_hash": "6feaeb360e472e331350aab8bba1e695",
+    "semantic_hash": ""
+  },
+  "reports/baseline-comparison/5min/live/graph.json": {
+    "mtime": 1792079735.8061895,
+    "seen": 1792604457.758552,
+    "ast_hash": "5d7519d4a57d4e8822aaa7123c6b9851",
+    "semantic_hash": ""
+  },
+  "reports/baseline_comparison.json": {
+    "mtime": 1792079755.718875,
+    "seen": 1792604457.758552,
+    "ast_hash": "78ace6ad344ce1e815ff12953f83b254",
+    "semantic_hash": ""
+  },
+  "reports/gateway-dry-run/index.js": {
+    "mtime": 1792126154.5290787,
+    "seen": 1792604457.758552,
+    "ast_hash": "a449a4f4d2727d249b9d3d6e42e1262f",
+    "semantic_hash": ""
+  },
+  "reports/gateway-npm-audit.json": {
+    "mtime": 1792126368.7011654,
+    "seen": 1792604457.758552,
+    "ast_hash": "78591e477409412c0f62530a9972efb9",
+    "semantic_hash": ""
+  },
+  "reports/local_layer_validation.json": {
+    "mtime": 1792081148.0888255,
+    "seen": 1792604457.758552,
+    "ast_hash": "c1ed6e6c5e19e3687ab98621c8e38e0a",
+    "semantic_hash": ""
+  },
+  "reports/metrics.json": {
+    "mtime": 1792067970.7905147,
+    "seen": 1792604457.758552,
+    "ast_hash": "00621c74c4664f6aca3e3f39e7602b4d",
+    "semantic_hash": ""
+  },
+  "reports/npm-audit.json": {
+    "mtime": 1792125240.3837292,
+    "seen": 1792604457.758552,
+    "ast_hash": "8b13d22fcdded6184898a0e3db977021",
+    "semantic_hash": ""
+  },
+  "reports/python-dependency-audit.json": {
+    "mtime": 1792125513.1149561,
+    "seen": 1792604457.758552,
+    "ast_hash": "efa29f7fcc25049299758ef9f6d2a320",
+    "semantic_hash": ""
+  },
+  "reports/robustness.json": {
+    "mtime": 1792081156.9117258,
+    "seen": 1792604457.758552,
+    "ast_hash": "ff07e2262aec59910e4b90bc33c2ddbf",
+    "semantic_hash": ""
+  },
+  "reports/soc_smoke.json": {
+    "mtime": 1792059098.651978,
+    "seen": 1792604457.758552,
+    "ast_hash": "fb40480f01d939f98aece0c0adccf18d",
+    "semantic_hash": ""
+  },
+  "reports/gateway-dry-run/README.md": {
+    "mtime": 1792126154.5197482,
+    "seen": 1792604457.758552,
+    "ast_hash": "837c3722969110a7b906b6494ac27a3f",
     "semantic_hash": ""
   }
 }
