@@ -2,14 +2,17 @@
 
 import json
 import time
-from typing import Any
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.security import limit_attacks, require_demo, require_key
 from app.data.hai import hai_paths
 from app.engine import Engine
+from app.engine_hai import HaiEngine
+from app.live.runtime import LiveRuntime
 from app.report import render_report
 from app.runtime import active_runtime
 from app.schemas import (
@@ -94,6 +97,54 @@ def get_topology(request: Request) -> Topology:
     return active_runtime(request.app.state).topology()
 
 
+@router.post("/live/calibration/restart", dependencies=[Depends(require_key)])
+def restart_live_calibration(request: Request) -> SourceInfo:
+    live = cast(LiveRuntime | None, request.app.state.live)
+    if live is None:
+        raise HTTPException(status_code=404, detail="LIVE is not configured")
+    try:
+        live.restart_calibration()
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return live.source_info()
+
+
+@router.get("/live/model")
+def live_model(request: Request) -> dict[str, Any]:
+    live = cast(LiveRuntime | None, request.app.state.live)
+    if live is None:
+        raise HTTPException(404, "LIVE is not configured")
+    return live.provenance()
+
+
+class HaiPlaybackRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    speed: float | None = Field(default=None, ge=1, le=20, allow_inf_nan=False)
+    paused: bool | None = None
+
+
+@router.get("/hai/replay")
+def get_hai_replay(request: Request) -> dict[str, object]:
+    hai = cast(HaiEngine | None, request.app.state.hai)
+    if hai is None:
+        raise HTTPException(status_code=503, detail="HAI replay is not ready")
+    return hai.replay_info()
+
+
+@router.post("/hai/replay", dependencies=[Depends(require_key)])
+def control_hai_replay(body: HaiPlaybackRequest, request: Request) -> dict[str, object]:
+    if request.app.state.mode != "hai":
+        raise HTTPException(status_code=409, detail="Select HAI mode before controlling playback")
+    hai = cast(HaiEngine | None, request.app.state.hai)
+    if hai is None:
+        raise HTTPException(status_code=503, detail="HAI replay is not ready")
+    if body.speed is not None:
+        hai.speed = body.speed
+    if body.paused is not None:
+        hai.paused = body.paused
+    return hai.replay_info()
+
+
 @router.post(
     "/attack", dependencies=[Depends(require_key), Depends(require_demo), Depends(limit_attacks)]
 )
@@ -112,7 +163,32 @@ async def post_attack(body: AttackRequest, request: Request) -> AttackResponse:
 
 @router.post("/isolate", dependencies=[Depends(require_key)], response_model=IsolateResponse)
 def post_isolate(body: IsolateRequest, request: Request) -> IsolateResponse | JSONResponse:
+    from app.api.investigation import journal
+
+    store = journal(request)
+    mode = request.app.state.mode
+    saved = store.detail(body.incident_id, mode)
+
+    def record(category: str, **payload: Any) -> None:
+        if saved:
+            store.event(
+                mode,
+                saved["session_id"],
+                category,
+                {"node_id": body.node_id, **payload},
+                body.incident_id,
+                body.node_id,
+            )
+
+    record(
+        "response_requested",
+        actor=getattr(request.state, "principal", {}).get(
+            "uid", "Local analyst (not authenticated)"
+        ),
+        action="simulation isolation",
+    )
     if request.app.state.mode == "live":  # advisory only: AttackTrace never writes to the plant
+        record("response_rejected", reason="live-read-only")
         inc = next(
             (i for i in active_runtime(request.app.state).incidents if i.id == body.incident_id),
             None,
@@ -127,15 +203,20 @@ def post_isolate(body: IsolateRequest, request: Request) -> IsolateResponse | JS
             },
         )
     if request.app.state.mode == "hai":
+        record("response_rejected", reason="dataset replay")
         raise HTTPException(
             status_code=409, detail="Isolation is not available in HAI mode: the data is a replay"
         )
     accepted, reason = _engine(request).isolate(body.incident_id, body.node_id)
+    record("response_accepted" if accepted else "response_rejected", reason=reason)
     return IsolateResponse(accepted=accepted, reason=reason)
 
 
 @router.post("/reset", dependencies=[Depends(require_key)])
 def post_reset(request: Request) -> Status:
+    from app.api.investigation import journal
+
+    journal(request)
     active_runtime(request.app.state).reset()
     return _status(request)
 
@@ -152,13 +233,22 @@ def get_live_health(request: Request) -> list[TagHealth]:
 
 @router.get("/incidents")
 def get_incidents(request: Request) -> list[Incident]:
-    return list(reversed(active_runtime(request.app.state).incidents))  # newest first
+    from app.api.investigation import journal
+
+    return journal(request).incidents(request.app.state.mode)
 
 
 @router.get("/incidents/{incident_id}/report.pdf")
 def get_incident_report(incident_id: str, request: Request) -> Response:
     rt = active_runtime(request.app.state)
     inc = next((i for i in rt.incidents if i.id == incident_id), None)
+    if inc is None:
+        from app.api.investigation import journal
+
+        inc = next(
+            (i for i in journal(request).incidents(request.app.state.mode) if i.id == incident_id),
+            None,
+        )
     if inc is None:
         raise HTTPException(status_code=404, detail="Incident not found")
     impact = getattr(rt, "incident_impact", {}).get(incident_id)
