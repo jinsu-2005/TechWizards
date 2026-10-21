@@ -19,6 +19,7 @@ export interface NodeState {
   score: number;
   status: NodeStatus;
   quality?: Quality | null; // Phase 13: LIVE data quality; absent in SIM and HAI
+  is_virtual?: boolean | null; // True when virtual sensor self-healing estimation is active
 }
 
 export interface AlertInfo {
@@ -73,6 +74,7 @@ export interface Incident {
   ambiguous?: boolean; // Phase 11: top-1 and top-2 confidence too close to trust one
   contained_at?: number | null; // unix time the isolate action took effect (SIM only)
   time_to_contain_s?: number | null; // plant seconds from the isolate action to containment
+  virtual_active?: boolean | null; // True when virtual sensor self-healing estimation is active
 }
 
 export interface Impact {
@@ -108,6 +110,16 @@ export interface SourceInfo {
   dropped?: number;
   reason?: string | null; // why it is not connected, or which tags are faulty
   progress?: number | null; // 0..1 while calibrating
+  calibration?: {
+    stage: "collecting" | "blocked" | "training" | "failed";
+    collected_samples: number;
+    target_samples: number;
+    skipped_samples: number;
+    elapsed_s: number;
+    remaining_s?: number | null;
+    blockers: string[];
+    notice?: string | null;
+  } | null;
 }
 
 export interface TagHealth {
@@ -116,6 +128,20 @@ export interface TagHealth {
   quality: Quality;
   age_ms: number | null;
   last_value: number | null;
+}
+
+export interface LiveModelInfo {
+  source_fingerprint: string;
+  fingerprint_scope: string;
+  model_loaded: boolean;
+  model_id: string | null;
+  trained_at: string | null;
+  recorded_samples: number | null;
+  sample_s: number | null;
+  active_model: string | null;
+  validation_samples?: number | null;
+  validation_mse?: number | null;
+  calibration: NonNullable<SourceInfo["calibration"]> | null;
 }
 
 export interface Status {
@@ -168,4 +194,54 @@ export interface IsolateRequest {
 export interface IsolateResponse {
   accepted: boolean; // applied; containment is reported later by incident.status
   reason?: string | null;
+}
+
+export interface CopilotChatRequest {
+  message: string;
+  incident_id?: string | null;
+  history?: { role: "user" | "assistant"; content: string }[];
+  asset_id?: string | null;
+  as_of?: number | null;
+}
+
+export interface CopilotChatResponse {
+  reply: string;
+  suggestions: string[];
+  action_recommended?: string | null;
+  action_node?: string | null;
+  mitre_id?: string | null;
+  model_used: string;
+  evidence?: EvidenceEvent[];
+}
+
+export interface EvidenceEvent {
+  id: string; incident_id: string | null; mode: Mode; session: string;
+  asset_id: string | null; observed_at: number; received_at: number;
+  category: string; payload: Record<string, unknown>; record_url: string;
+}
+export interface InvestigationDetail {
+  incident: Incident; session_id: string; updated_at: number; is_current?: boolean;
+  workflow: { acknowledged?: boolean; severity?: string; state?: string };
+  events: EvidenceEvent[]; retention: string;
+  context_events?: EvidenceEvent[];
+  layer_hypotheses?: { category: string; candidate_id: string; asset_id: string; result: string; explanation: string; scope: string; event_ids: string[] }[];
+  related_incidents?: { id: string; reason: string }[];
+  capture?: IncidentCapture;
+}
+
+export interface IncidentCapture {
+  status: "captured" | "not_captured" | "integrity_error" | "not_available_at_selected_time";
+  reason?: string;
+  sha256?: string;
+  record_url?: string;
+  payload?: {
+    captured_at: number; sample_time: number; scope: string; limits: string;
+    model: { kind: string; runtime_id: string; model_id?: string; trained_at?: string; recorded_samples?: number; sample_s?: number; threshold: number };
+    baseline: { kind: string; artifact_id: string; asset_ids: string[]; mean: number[]; sd: number[]; sigma: number };
+    source: { mode: Mode; host?: string; port?: number; protocol?: string; file?: string; source_fingerprint?: string; attestation?: string };
+    topology: Topology;
+    readings: Omit<NodeState, "truth">[];
+    pre_event_readings: unknown[];
+    initial_assessment: Incident;
+  };
 }

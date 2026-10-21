@@ -4,26 +4,42 @@ export type CenterView = "twin" | "graph";
 
 interface UiState {
   view: CenterView;
+  selectedAsset: string | null;
+  selectAsset: (id: string | null) => void;
   /** Baseline vs AttackTrace side by side, replacing the twin/graph pane. */
   split: boolean;
   /** One-line notice (e.g. "Demo locked"); cleared by the toast after a few seconds. */
   notice: { text: string; id: number } | null;
+  /** Audio alarm toggle. */
+  soundEnabled: boolean;
+  /** AI Industrial Copilot slide-out drawer state. */
+  copilotOpen: boolean;
   setView: (v: CenterView) => void;
   toggleSplit: () => void;
   notify: (text: string) => void;
   clearNotice: () => void;
+  toggleSound: () => void;
+  setCopilotOpen: (open: boolean) => void;
+  toggleCopilot: () => void;
 }
 
 let noticeId = 0;
 
 export const useUi = create<UiState>((set) => ({
   view: "twin",
+  selectedAsset: null,
+  selectAsset: (selectedAsset) => set({ selectedAsset }),
   split: false,
   notice: null,
+  soundEnabled: true,
+  copilotOpen: false,
   setView: (view) => set({ view }),
   toggleSplit: () => set((s) => ({ split: !s.split })),
   notify: (text) => set({ notice: { text, id: ++noticeId } }),
   clearNotice: () => set({ notice: null }),
+  toggleSound: () => set((s) => ({ soundEnabled: !s.soundEnabled })),
+  setCopilotOpen: (copilotOpen) => set({ copilotOpen }),
+  toggleCopilot: () => set((s) => ({ copilotOpen: !s.copilotOpen })),
 }));
 
 /** Shows `Demo locked` for an API 401/403; returns true when it did. */
