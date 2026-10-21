@@ -10,6 +10,7 @@ from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import cast
+from uuid import uuid4
 
 import numpy as np
 from numpy.typing import NDArray
@@ -77,6 +78,7 @@ class HaiEngine:
         self.graph = loaded.graph
         self.detector_kind: str | None = loaded.kind
         self.speed = min(MAX_SPEED, max(MIN_SPEED, settings.hai_speed))
+        self.paused = False
         self._clock = clock
         self._started = clock()
         self._weights = Weights(settings.w_deviation, settings.w_onset, settings.w_causal)
@@ -88,6 +90,7 @@ class HaiEngine:
 
     # ------------------------------------------------------------------ lifecycle
     def _init_state(self) -> None:
+        self.session_id = uuid4().hex
         self.loaded.detector.reset()
         self._pos = self._start  # next row of the replay file to consume
         self._carry = 0.0  # fractional rows owed by the replay speed
@@ -104,6 +107,22 @@ class HaiEngine:
         self.incidents = []
         self.latest = None
         self._init_state()
+
+    def replay_info(self) -> dict[str, object]:
+        """Recording offsets, not original wall timestamps or dataset attack labels."""
+        return {
+            "dataset": "HAI 20.07",
+            "file": self.replay.name,
+            "position": self._pos,
+            "start": self._start,
+            "total": len(self.replay.x),
+            "sample_hz": SAMPLE_HZ,
+            "speed": self.speed,
+            "paused": self.paused,
+            "features": len(self.loaded.features),
+            "processes": sorted({process_of(n) for n in self.loaded.features}),
+            "model": self.detector_kind,
+        }
 
     @property
     def uptime_s(self) -> float:
@@ -143,7 +162,8 @@ class HaiEngine:
         return self._run >= PERSIST
 
     def step_sample(self) -> LiveMessage:
-        self._carry += self.speed * self.settings.ws_period_s * SAMPLE_HZ
+        if not self.paused:
+            self._carry += self.speed * self.settings.ws_period_s * SAMPLE_HZ
         rows = int(self._carry)
         self._carry -= rows
         alerting = self._run >= PERSIST
@@ -216,7 +236,7 @@ class HaiEngine:
         origin, path, edges, text, action = self._analysis(alert_k)
         return Incident(
             mode="hai",
-            id=base.id if base else f"inc_{len(self.incidents) + 1:03d}",
+            id=base.id if base else f"inc_{uuid4().hex}",
             status=base.status if base else "localizing",
             detected_at=base.detected_at if base else self._clock(),
             origin=origin,
