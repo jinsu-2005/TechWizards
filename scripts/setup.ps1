@@ -4,7 +4,10 @@ $RepoRoot = Split-Path -Parent $PSScriptRoot
 
 Push-Location (Join-Path $RepoRoot "backend")
 try {
-    py -3.11 -m venv .venv
+    if (-not (Test-Path .venv)) {
+        try { py -3.11 -m venv .venv } catch { python -m venv .venv }
+    }
+    & .\.venv\Scripts\python.exe -m pip install --upgrade 'pip>=26.2'
     & .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 } finally {
     Pop-Location
