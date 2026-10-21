@@ -14,7 +14,6 @@ frontend/test-results
 frontend/playwright-report
 data/hai
 data/live
-reports
 submission/screenshots
 submission/evidence
 __pycache__

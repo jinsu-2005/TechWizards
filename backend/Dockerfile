@@ -16,6 +16,7 @@ RUN python -m pip install --no-cache-dir --upgrade 'pip>=26.2' \
  && pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
  && pip install --no-cache-dir .
 COPY backend/models ./models
+COPY reports /reports
 RUN useradd --uid 10001 --create-home attacktrace \
  && mkdir -p /data /data/live /reports \
  && chown -R attacktrace:attacktrace /app /data /reports
