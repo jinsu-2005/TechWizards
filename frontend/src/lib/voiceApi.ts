@@ -1,6 +1,6 @@
 import { csrfHeaders } from "./csrf";
 
-const KEY = (import.meta.env.VITE_API_KEY as string | undefined) ?? "";
+const KEY = (import.meta.env.VITE_API_KEY as string | undefined) || "change-me-demo-key";
 const headers = () => ({ ...csrfHeaders(), ...(KEY ? { "x-api-key": KEY } : {}) });
 async function check(response: Response): Promise<Response> {
   if (response.ok) return response;

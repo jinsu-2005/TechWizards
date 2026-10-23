@@ -240,7 +240,14 @@ def create_app(
             await embedded_emu.stop()
         app.state.soc.close()
 
+    logging.getLogger("pymodbus").setLevel(logging.WARNING)
+
     application = FastAPI(title="AttackTrace", version="0.1.0", lifespan=lifespan)
+
+    @application.get("/")
+    @application.head("/")
+    def root() -> dict[str, str]:
+        return {"service": "AttackTrace API", "status": "ok"}
 
     @application.get("/api/health")
     def health() -> dict[str, str]:

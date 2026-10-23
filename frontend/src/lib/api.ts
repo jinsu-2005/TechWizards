@@ -18,7 +18,7 @@ import type {
 
 /** Demo key for the write endpoints. It is bundled into the build, so it deters misuse of an
  *  exposed demo; it is not user authentication. Empty = the server leaves writes open. */
-const KEY: string = (import.meta.env.VITE_API_KEY as string | undefined) ?? "";
+const KEY: string = (import.meta.env.VITE_API_KEY as string | undefined) || "change-me-demo-key";
 
 export class ApiError extends Error {
   constructor(
