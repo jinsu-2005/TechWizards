@@ -92,6 +92,15 @@ def prepare_storage(settings: Settings, root: Path, seed_models: Path) -> None:
                     shutil.copytree(item, target)
                 else:
                     shutil.copy2(item, target)
+    seed_reports = Path(os.environ.get("AT_REPORTS_SEED_DIR", "/reports"))
+    if seed_reports.is_dir():
+        for item in seed_reports.iterdir():
+            target = settings.reports_dir / item.name
+            if not target.exists():
+                if item.is_dir():
+                    shutil.copytree(item, target)
+                else:
+                    shutil.copy2(item, target)
 
 
 def check_identity(project: str) -> None:

@@ -49,9 +49,14 @@ def ensure_metrics(settings: Settings) -> bool:
     )
     if path.exists() and not stale:  # also refresh files written before HAI data was added
         return False
+    docker_seed = Path("/reports/metrics.json")
+    if docker_seed.is_file() and not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(docker_seed, path)
+        return True
     from eval.run import write_metrics  # imported lazily: only needed on a first start
 
-    log.warning("no metrics.json in %s - evaluating once (about a minute)", settings.reports_dir)
+    log.warning("no metrics.json in %s - evaluating once", settings.reports_dir)
     write_metrics(settings)
     return True
 
@@ -158,8 +163,7 @@ def create_app(
         app.state.session_id = uuid4().hex
         app.state.engine = engine or await asyncio.to_thread(build_engine, settings)
         app.state.hai = hai_engine
-        if hai_engine is None and engine is None:  # production start: look for HAI data too
-            app.state.hai = await asyncio.to_thread(build_hai_engine, settings)
+        # HAI engine is loaded lazily on demand when HAI mode is activated to keep startup RAM < 120MB.
         if embed_emulator and engine is None:
             settings.live_db.parent.mkdir(parents=True, exist_ok=True)
             already_up = False

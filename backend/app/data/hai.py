@@ -8,6 +8,7 @@ import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -64,12 +65,32 @@ class HaiData:
 READ_ATTEMPTS = 4
 
 
+import gc
+
+
 def _read_csv(path: Path, features: list[str] | None = None) -> pd.DataFrame:
     """read_csv with retries: a 35 MB gzip read through a Docker Desktop bind mount once failed
     with OSError 14 (Bad address) and succeeded on the next attempt."""
     selected = set(features) | set(LABELS) if features is not None else None
+    dtypes: dict[str, Any] | None = None
+    if features is not None:
+        dtypes = {col: np.float32 for col in features}
+        for lbl in LABELS:
+            dtypes[lbl] = np.int8
     for attempt in range(1, READ_ATTEMPTS + 1):
         try:
+            if features is not None:
+                # Chunked reading to avoid memory spike on 512MB RAM environments
+                chunks = []
+                for chunk in pd.read_csv(
+                    path,
+                    sep=";",
+                    usecols=selected.__contains__ if selected else None,
+                    dtype=dtypes,
+                    chunksize=50_000,
+                ):
+                    chunks.append(chunk)
+                return pd.concat(chunks, ignore_index=True)
             return pd.read_csv(
                 path, sep=";", usecols=selected.__contains__ if selected else None
             )
@@ -86,7 +107,10 @@ def _read(path: Path, features: list[str] | None) -> tuple[list[str], HaiFile]:
     attack = df["attack"].to_numpy(np.int8) if "attack" in df else np.zeros(len(df), np.int8)
     flags = [df[c].to_numpy(np.int8) if c in df else np.zeros(len(df), np.int8) for c in LABELS[1:]]
     name = path.name.removesuffix(".gz").removesuffix(".csv")
-    return cols, HaiFile(name, df[cols].to_numpy(np.float64), attack, np.stack(flags, axis=1))
+    x = df[cols].to_numpy(np.float64)
+    del df
+    gc.collect()
+    return cols, HaiFile(name, x, attack, np.stack(flags, axis=1))
 
 
 def load_hai_replay(hai_dir: Path, file_name: str, features: tuple[str, ...]) -> HaiFile:

@@ -48,9 +48,9 @@
     "semantic_hash": "c6712e990ac9d217cc8ca1b085bd3700"
   },
   "backend/app/api/rest.py": {
-    "mtime": 1792763674.0732172,
-    "seen": 1792764074.4399457,
-    "ast_hash": "831ad0706bcb28f790f411731f959c62",
+    "mtime": 1792768433.115556,
+    "seen": 1792768680.297509,
+    "ast_hash": "5aaa4e4eed21fa04968988144bf98b06",
     "semantic_hash": ""
   },
   "backend/app/api/security.py": {
@@ -90,9 +90,9 @@
     "semantic_hash": "0e034ef7efcdd31065e300b4caf8209a"
   },
   "backend/app/data/hai.py": {
-    "mtime": 1792763714.9963634,
-    "seen": 1792764074.4399457,
-    "ast_hash": "b1a4629f7a85998d95f07aa2b3a41d50",
+    "mtime": 1792768257.4878776,
+    "seen": 1792768680.297509,
+    "ast_hash": "918e602832228a6236c4be00e22e7a53",
     "semantic_hash": ""
   },
   "backend/app/data/simdata.py": {
@@ -258,9 +258,9 @@
     "semantic_hash": "1fae0b664cdf20a958d5c814a8da93e3"
   },
   "backend/app/main.py": {
-    "mtime": 1792767036.5247416,
-    "seen": 1792767116.9366925,
-    "ast_hash": "7186a5e14db0e1c284701c141a8f63a4",
+    "mtime": 1792768580.5768075,
+    "seen": 1792768680.297509,
+    "ast_hash": "95fb1b12cc83f0736c8c8fe4be4724fd",
     "semantic_hash": ""
   },
   "backend/app/propagate/__init__.py": {
@@ -1404,9 +1404,9 @@
     "semantic_hash": "d897ec5579106088f6671e071faf087e"
   },
   "backend/app/deploy.py": {
-    "mtime": 1792766795.6939151,
-    "seen": 1792767116.9366925,
-    "ast_hash": "8aa2827b27d57a7d13964c33a25eae6c",
+    "mtime": 1792768320.4911358,
+    "seen": 1792768680.297509,
+    "ast_hash": "4fcfd2433b09934e123ac4eae14274ac",
     "semantic_hash": ""
   },
   "backend/app/explain/copilot_engine.py": {

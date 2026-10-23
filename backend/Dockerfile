@@ -2,7 +2,7 @@
 # the attacker module: LIVE mode's POST /api/attack writes to the emulator through it.
 FROM python:3.11-slim
 WORKDIR /app
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app MALLOC_TRIM_THRESHOLD_=100000
 COPY backend/pyproject.toml ./
 COPY backend/app ./app
 COPY backend/eval ./eval

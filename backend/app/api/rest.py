@@ -1,7 +1,9 @@
 """REST endpoints (§5.9). The engine lives on `app.state.engine`."""
 
 import json
+import os
 import time
+from pathlib import Path
 from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -54,13 +56,25 @@ def _source(state: Any) -> SourceInfo:
     return SourceInfo(mode="sim", connected=True, protocol="internal", state="connected")
 
 
+def _hai_available(state: Any) -> bool:
+    if getattr(state, "hai", None) is not None:
+        return True
+    hai_dir = getattr(state, "hai_dir", None)
+    if hai_dir and hai_paths(hai_dir):
+        return True
+    seed_raw = os.environ.get("AT_HAI_SEED_DIR")
+    if seed_raw and hai_paths(Path(seed_raw)):
+        return True
+    return False
+
+
 def _status(request: Request) -> Status:
     state = request.app.state
     rt = active_runtime(state)
     live_ok, live_reason = _live_availability(state)
     return Status(
         mode=state.mode,
-        hai_available=state.hai is not None,
+        hai_available=_hai_available(state),
         detector_active=rt.detector_kind,
         uptime_s=rt.uptime_s,
         source=_source(state),
@@ -79,7 +93,14 @@ def set_mode(body: ModeRequest, request: Request) -> Status:
     state = request.app.state
     if body.mode == "hai":
         if not hai_paths(state.hai_dir):
-            raise HTTPException(status_code=409, detail="HAI data not available")
+            seed_raw = os.environ.get("AT_HAI_SEED_DIR")
+            if seed_raw and hai_paths(Path(seed_raw)):
+                state.hai_dir = Path(seed_raw)
+            else:
+                raise HTTPException(status_code=409, detail="HAI data not available")
+        if state.hai is None:
+            from app.main import build_hai_engine
+            state.hai = build_hai_engine(state.settings)
         if state.hai is None:
             raise HTTPException(status_code=503, detail="HAI models not ready")
         if state.mode != "hai":
