@@ -30,26 +30,26 @@ AttackTrace is deployed and operational across three coordinated cloud tiers:
 | Domain | Technologies & Libraries | Key Application & Role |
 | :--- | :--- | :--- |
 | **Frontend Framework** | **React 18 / 19**, **TypeScript 5.9**, **Vite 8** | High-performance reactive UI, strict typing, sub-second HMR builds |
-| **State & Flow** | **Zustand 5**, **@xyflow/react 12** | Centralized telemetry buffer, dynamic 2D directed causal graph layout |
-| **Visuals & Charts** | **Apache ECharts 6**, **Framer Motion 14**, **Tailwind CSS 4** | Real-time multi-sensor timeline sparklines, fluid liquid physics, micro-animations |
+| **State & Flow** | **Zustand 5**, **@xyflow/react 12** | Centralized telemetry buffer, dynamic 2D directed causal graph with ambient particle flows |
+| **Visuals & Charts** | **Apache ECharts 6**, **Framer Motion 14**, **Tailwind CSS 4** | Streaming multi-sensor timeline sparklines, live range gauges, fluid liquid physics |
 | **Audio Synthesis** | **Web Audio API** (Browser-Native) | Zero-dependency 800/600 Hz warble sirens and major-chord containment chimes |
 | **Backend Framework** | **Python 3.11+**, **FastAPI 0.115+**, **Uvicorn**, **Starlette** | High-throughput asynchronous REST endpoints and 2 Hz telemetry WebSocket hub |
 | **Data Validation** | **Pydantic v2.8+** | Strict request/response schemas, fail-closed runtime settings validation |
-| **GenAI & Voice** | **Google Gemini API** (`google-genai 2.25+`) | `gemini-3.8-live` (bidirectional audio), `gemini-3.8-flash` & `gemini-3.5-flash-lite` |
+| **GenAI & Voice** | **Google Gemini API** (`google-genai 2.25+`) | `gemini-3.8-live` (bidirectional audio), `gemini-3.8-flash` & `gemini-3.5-flash-lite`, voice action parser |
 | **Graph Neural Network** | **PyTorch 2.3+** (CPU-Optimized) | Graph Deviation Network (GDN) forecaster with graph attention mechanisms |
 | **Machine Learning** | **scikit-learn 1.5+**, **NumPy 1.26+**, **SciPy 1.13+**, **NetworkX 3.3+** | Isolation Forest baseline, EWMA filtering, causal graph topological traversal |
 | **Industrial Protocol** | **PyModbus 3.15+**, **PyYAML 6.0** | Non-blocking Modbus TCP polling (sub-2ms), software PLC register emulator |
 | **Databases** | **SQLite (WAL Mode)** | Persistent forensic audit logs, immutable incident captures, case investigations |
 | **Cloud Hosting** | **Vercel** (Edge CDN) + **Render** (Docker Web Service) | Serverless frontend hosting paired with auto-healing containerized backend |
 | **Edge Gateway** | **Cloudflare Workers** (Wrangler) | Single-origin reverse proxy unifying domains with enterprise CSP & HSTS |
-| **Testing & Quality** | **Vitest 5**, **Playwright 1.63**, **Pytest 8.2**, **Ruff**, **Mypy** | End-to-end browser tests, paired-evidence checks, strict static type validation |
-| **Architecture Graph** | **Graphify** | Persistent 2,879-node knowledge graph with automated AST symbol extraction |
+| **Testing & Quality** | **Vitest 5 (152 tests)**, **Playwright 1.63**, **Pytest 8.2**, **Ruff**, **Mypy** | End-to-end browser tests, paired-evidence checks, strict static type validation |
+| **Architecture Graph** | **Graphify** | Persistent 2,895-node knowledge graph with automated AST symbol extraction |
 
 ---
 
 ## 🏛 5-Layer System Architecture (Graphify Mapped)
 
-*Architectural map extracted by **Graphify** across 2,879 nodes, 9,036 edges, and 128 community clusters.*
+*Architectural map extracted by **Graphify** across 2,895 nodes, 9,137 edges, and 127 community clusters.*
 
 ```mermaid
 flowchart TD
@@ -57,12 +57,13 @@ flowchart TD
     direction TB
     MainApp["App.tsx / main.tsx<br/><i>Entry point, routing & layout</i>"]
     TwinView["TwinView.tsx<br/><i>Digital Twin (SVG, liquid dynamics)</i>"]
-    GraphView["GraphView.tsx<br/><i>Causal Graph (@xyflow/react)</i>"]
+    GraphView["GraphView.tsx<br/><i>Causal Graph (@xyflow/react + ambient particles)</i>"]
     IncidentPanel["IncidentPanel.tsx<br/><i>Origin rank, confidence & actions</i>"]
     SplitView["SplitView.tsx<br/><i>AttackTrace vs Baseline flood</i>"]
     AttackConsole["AttackConsole.tsx<br/><i>Scenario selection & triggers</i>"]
-    Timeline["Timeline.tsx<br/><i>ECharts real-time sparklines</i>"]
+    Timeline["Timeline.tsx<br/><i>ECharts real-time sparklines & scrub</i>"]
     AIPilot["CopilotDrawer.tsx / LiveVoicePanel.tsx<br/><i>AI Pilot Signal Room & Gemini Live Voice</i>"]
+    SocPage["SocPage.tsx / WorkspacePage.tsx<br/><i>SOC triage, Asset Inventory & Investigations</i>"]
     ZustandStore["live.ts & ui.ts<br/><i>Global Zustand stores & buffer</i>"]
     WSClient["ws.ts & api.ts<br/><i>WebSocket & REST client</i>"]
   end
@@ -153,7 +154,10 @@ flowchart TD
 | **Attack Console** | [`frontend/src/features/console/AttackConsole.tsx`](frontend/src/features/console/AttackConsole.tsx) | Operator console for launching 5 attack scenarios (offset, ramp, freeze, scale, replay). |
 | **AI Pilot (Signal Room)** | [`frontend/src/features/copilot/CopilotDrawer.tsx`](frontend/src/features/copilot/CopilotDrawer.tsx) | Full-height responsive investigation drawer with evidence grounding and numbered triage paths. |
 | **Live Voice Panel** | [`frontend/src/features/copilot/LiveVoicePanel.tsx`](frontend/src/features/copilot/LiveVoicePanel.tsx) | Real-time bidirectional voice assistant interface with stateful orbit/waveform visualization. |
-| **Telemetry Timeline** | [`frontend/src/features/timeline/Timeline.tsx`](frontend/src/features/timeline/Timeline.tsx) | ECharts streaming sparklines with time scrubbing and pause/resume controls. |
+| **Operator Action Parser** | [`frontend/src/lib/pilotActions.ts`](frontend/src/lib/pilotActions.ts) | Client-side intent parser executing conversational voice/text actions with user confirmation. |
+| **SOC & Asset Inventory** | [`frontend/src/features/investigation/SocPage.tsx`](frontend/src/features/investigation/SocPage.tsx) | Real-time triage queue, dense asset inventory with live range gauges, and local lab simulation. |
+| **Investigation Journal** | [`frontend/src/features/investigation/WorkspacePage.tsx`](frontend/src/features/investigation/WorkspacePage.tsx) | Case investigation journal with 5-layer verification matrix and causal sequence stepper (`▶`). |
+| **Telemetry Timeline** | [`frontend/src/features/timeline/Timeline.tsx`](frontend/src/features/timeline/Timeline.tsx) | Streaming multi-sensor sparklines with historical time-scrubbing and pause/resume controls. |
 | **Metrics Dashboard** | [`frontend/src/features/metrics/MetricsPage.tsx`](frontend/src/features/metrics/MetricsPage.tsx) | Benchmark tables for F1 score, Top-1/Top-3 localization accuracy, and Modbus latency. |
 | **Zustand Store** | [`frontend/src/store/live.ts`](frontend/src/store/live.ts) | Centralized state store managing telemetry buffer, active incidents, and connection health. |
 | **WebSocket Client** | [`frontend/src/lib/ws.ts`](frontend/src/lib/ws.ts) | Resilient WebSocket connection to `/ws/live` with automatic reconnection and fallback. |
@@ -322,27 +326,30 @@ npm run dev
 
 ## 🎮 Interactive Live Demo Script
 
-1. **Verify Baseline State**: Open the dashboard. Top right status pill reads **Normal** (green).
-2. **Enable Audio**: Click the **Speaker** icon in the header to activate Web Audio synthesis.
+1. **Verify Baseline State**: Open the dashboard. Top right status pill reads **Normal** (green). Ambient SVG particles flow along healthy process graph edges.
+2. **Enable Audio**: Click the **Speaker** icon in the header to activate Web Audio synthesis (dual-frequency warble siren & major-chord containment chime).
 3. **Launch an Attack**:
-   - In the **Attack Console** (left pane), select **Sensor offset**.
-   - Target **LIT101** with Magnitude `-25%`.
-   - Click **Launch**.
+   - **Via GUI**: In the **Attack Console** (left pane), select **Sensor offset**, target **LIT101** with Magnitude `-25%`, and click **Launch**.
+   - **Via AI Pilot Voice/Text**: Open **AI Pilot**, speak or type *"Launch sensor offset on LIT101 at -25%"*, and confirm the action card.
 4. **Observe Real-Time Detection**:
-   - Within seconds, an audible dual-frequency warble siren (800 Hz / 600 Hz) triggers and the panel border pulses red.
+   - Within seconds, an audible dual-frequency warble siren (800 Hz / 600 Hz) triggers and the panel pulses red.
    - The **Incident Panel** highlights `LIT101` as the Top-1 origin candidate with a high confidence score.
-   - Attack propagation traces toward pumps `P101`, `P301`, and Tank 2.
+   - Dynamic glowing threat propagation waves trace along downstream causal edges toward pumps `P101`, `P301`, and Tank 2.
 5. **Engage AI Pilot (Signal Room)**:
-   - Click **AI Pilot** in the top bar.
    - Ask: *"Why was LIT101 identified as the origin?"* or *"What physical damage will occur?"*
-   - Or start **Live Voice** to conduct a hands-free conversational inquiry with Gemini.
+   - Or start **Live Voice** to conduct hands-free conversational triage with Gemini.
+   - Command: *"Switch data source to live"* or *"Reset the simulator"* for instant automated execution.
 6. **Activate Self-Healing**:
    - Click **Isolate LIT101** in the incident panel or inside the AI Pilot drawer.
-   - A major-chord containment chime sounds.
-   - LIT101 receives a cyan **VIRTUAL** badge.
-   - The virtual sensor prediction takes over pump regulation, smoothly returning Tank 1 to equilibrium.
-7. **Export Forensics**:
-   - Click the **PDF Report** icon in the incident card to download an audit summary.
+   - A major-chord containment chime sounds and LIT101 receives a cyan **VIRTUAL** badge.
+   - Closed-loop virtual sensor prediction takes over pump regulation, smoothly restoring Tank 1 to setpoint equilibrium.
+7. **Navigate Modernized SOC Workspaces**:
+   - **Security Alerts (`/alerts`)**: High-density incident triage table with one-click acknowledgment and containment.
+   - **Asset Inventory (`/assets`)**: Visual sensor and actuator cards with real-time operational range gauges and Modbus register maps.
+   - **Investigations (`/investigations`)**: Step-by-step causal timeline steppers (`▶`), origin hypothesis comparison, and analyst notes.
+   - **Metrics & Benchmarks (`/metrics`)**: Primary KPI cards and side-by-side GDN vs Baseline comparison charts.
+8. **Export Forensics**:
+   - Click the **PDF Report** icon in the incident card to download an audit summary certificate.
 
 ---
 
