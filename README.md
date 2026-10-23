@@ -25,6 +25,63 @@ AttackTrace is deployed and operational across three coordinated cloud tiers:
 
 ---
 
+## 🖼 Visual Interface Showcase
+
+<table width="100%">
+  <tr>
+    <td width="50%" align="center">
+      <b>Digital Twin &amp; Industrial Hydraulic Monitoring</b><br/>
+      <img src="docs/screenshots/01-digital-twin-monitoring.png" alt="Digital Twin Monitoring" width="100%"/>
+    </td>
+    <td width="50%" align="center">
+      <b>Causal Graph with Ambient Telemetry Particles</b><br/>
+      <img src="docs/screenshots/02-causal-graph-ambient.png" alt="Causal Graph Ambient Particles" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <b>Attack Simulation &amp; Real-Time Incident Propagation</b><br/>
+      <img src="docs/screenshots/03-attack-simulation-incident.png" alt="Attack Detection &amp; Propagation" width="100%"/>
+    </td>
+    <td width="50%" align="center">
+      <b>AI Pilot Signal Room &amp; Gemini Live Voice Assistant</b><br/>
+      <img src="docs/screenshots/04-ai-pilot-drawer.png" alt="AI Pilot Signal Room" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <b>Security Alerts Queue &amp; Operational Triage</b><br/>
+      <img src="docs/screenshots/05-security-alerts-triage.png" alt="Security Alerts Queue" width="100%"/>
+    </td>
+    <td width="50%" align="center">
+      <b>Asset Inventory with Live Telemetry Range Gauges</b><br/>
+      <img src="docs/screenshots/06-asset-inventory-cards.png" alt="Asset Inventory Cards with Gauges" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <b>Investigation Journal with Causal Sequence Stepper</b><br/>
+      <img src="docs/screenshots/08-investigations-workbench.png" alt="Investigation Journal &amp; Causal Stepper" width="100%"/>
+    </td>
+    <td width="50%" align="center">
+      <b>Threat Metrics &amp; Side-by-Side GDN Baseline Comparison</b><br/>
+      <img src="docs/screenshots/09-threat-metrics-evaluation.png" alt="Threat Metrics &amp; Baseline" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <b>Modbus Ingestion Pipeline &amp; Verification Matrix</b><br/>
+      <img src="docs/screenshots/10-data-sources-pipeline.png" alt="Modbus Ingestion Pipeline" width="100%"/>
+    </td>
+    <td width="50%" align="center">
+      <b>Local Lab Attack Simulation &amp; Controller Integrity</b><br/>
+      <img src="docs/screenshots/11-local-lab-simulation.png" alt="Local Lab Simulation" width="100%"/>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 🛠 Technology Stack
 
 | Domain | Technologies & Libraries | Key Application & Role |
