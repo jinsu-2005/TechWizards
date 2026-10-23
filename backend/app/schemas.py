@@ -149,6 +149,7 @@ class TagHealth(BaseModel):
 class Status(BaseModel):
     mode: Mode
     hai_available: bool
+    hai_reason: str | None = None  # why HAI is not available (e.g. cloud memory limits)
     detector_active: str | None  # "gdn" | "mlp" | None when no model is loaded
     uptime_s: float
     source: SourceInfo | None = None  # Phase 13

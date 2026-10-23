@@ -56,25 +56,36 @@ def _source(state: Any) -> SourceInfo:
     return SourceInfo(mode="sim", connected=True, protocol="internal", state="connected")
 
 
-def _hai_available(state: Any) -> bool:
+def _hai_disabled_reason() -> str | None:
+    if os.environ.get("RENDER", "").lower() in {"true", "1"} or os.environ.get("AT_DISABLE_HAI", "").lower() in {"true", "1"}:
+        return "Backend memory exceeded: HAI requires ≥1GB RAM (disabled on 512MB cloud instance). Run locally on desktop/laptop for full replay."
+    return None
+
+
+def _hai_availability(state: Any) -> tuple[bool, str | None]:
+    disabled = _hai_disabled_reason()
+    if disabled is not None:
+        return False, disabled
     if getattr(state, "hai", None) is not None:
-        return True
+        return True, None
     hai_dir = getattr(state, "hai_dir", None)
     if hai_dir and hai_paths(hai_dir):
-        return True
+        return True, None
     seed_raw = os.environ.get("AT_HAI_SEED_DIR")
     if seed_raw and hai_paths(Path(seed_raw)):
-        return True
-    return False
+        return True, None
+    return False, "HAI dataset files not found"
 
 
 def _status(request: Request) -> Status:
     state = request.app.state
     rt = active_runtime(state)
     live_ok, live_reason = _live_availability(state)
+    hai_ok, hai_reason = _hai_availability(state)
     return Status(
         mode=state.mode,
-        hai_available=_hai_available(state),
+        hai_available=hai_ok,
+        hai_reason=hai_reason,
         detector_active=rt.detector_kind,
         uptime_s=rt.uptime_s,
         source=_source(state),
@@ -92,17 +103,17 @@ def get_status(request: Request) -> Status:
 def set_mode(body: ModeRequest, request: Request) -> Status:
     state = request.app.state
     if body.mode == "hai":
-        if not hai_paths(state.hai_dir):
-            seed_raw = os.environ.get("AT_HAI_SEED_DIR")
-            if seed_raw and hai_paths(Path(seed_raw)):
-                state.hai_dir = Path(seed_raw)
-            else:
-                raise HTTPException(status_code=409, detail="HAI data not available")
+        hai_ok, hai_reason = _hai_availability(state)
+        if not hai_ok:
+            raise HTTPException(status_code=409, detail=hai_reason or "HAI data not available")
         if state.hai is None:
             from app.main import build_hai_engine
             state.hai = build_hai_engine(state.settings)
         if state.hai is None:
-            raise HTTPException(status_code=503, detail="HAI models not ready")
+            raise HTTPException(
+                status_code=503,
+                detail=hai_reason or "HAI models not ready",
+            )
         if state.mode != "hai":
             state.hai.reset()  # every switch starts the replay from its beginning
     if body.mode == "live":

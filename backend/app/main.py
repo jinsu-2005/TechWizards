@@ -74,6 +74,9 @@ def safe_ensure_metrics(settings: Settings) -> bool:
 def build_hai_engine(settings: Settings) -> HaiEngine | None:
     """HAI replay engine when HAI files are present. Never raises: a failure just leaves HAI
     mode unavailable (the API answers 503) and SIM running."""
+    if os.environ.get("RENDER", "").lower() in {"true", "1"} or os.environ.get("AT_DISABLE_HAI", "").lower() in {"true", "1"}:
+        log.info("HAI engine loading bypassed on 512MB cloud host to prevent OOM")
+        return None
     if not hai_paths(settings.hai_dir):
         seed_raw = os.environ.get("AT_HAI_SEED_DIR")
         if seed_raw and hai_paths(Path(seed_raw)):

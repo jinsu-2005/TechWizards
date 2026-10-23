@@ -29,6 +29,13 @@ export function TopBar() {
 
   const change = async (next: Mode) => {
     if (changing || next === mode) return;
+    if (next === "hai" && !status?.hai_available) {
+      setError(
+        status?.hai_reason ??
+          "Backend memory exceeded: HAI mode requires ≥1GB RAM and is disabled on the 512MB cloud instance. Run AttackTrace locally on your machine for full replay."
+      );
+      return;
+    }
     setChanging(true);
     setError(null);
     try {
@@ -38,7 +45,15 @@ export function TopBar() {
       useLive.getState().clear();
       useLive.getState().setTopology(await getTopology());
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to change the source. Try again.");
+      const msg = cause instanceof Error ? cause.message : "Unable to change the source. Try again.";
+      if (next === "hai" && (msg.includes("502") || msg.toLowerCase().includes("memory") || msg.toLowerCase().includes("gateway") || msg.toLowerCase().includes("exceeded"))) {
+        setError(
+          status?.hai_reason ??
+            "Backend memory exceeded: HAI dataset replay requires ≥1GB RAM and is disabled on this 512MB hosted instance. Run locally on your machine for full replay."
+        );
+      } else {
+        setError(msg);
+      }
     } finally {
       setChanging(false);
     }
@@ -59,6 +74,7 @@ export function TopBar() {
               <ModeToggle
                 mode={mode}
                 haiAvailable={status?.hai_available ?? false}
+                haiReason={status?.hai_reason}
                 liveAvailable={status?.live_available ?? false}
                 liveReason={status?.live_reason}
                 onChange={(next) => { void change(next); }}
@@ -78,8 +94,8 @@ export function TopBar() {
                 className="compact-source-select"
               >
                 <option value="sim">SIM · Simulation</option>
-                <option value="hai" disabled={!status?.hai_available}>
-                  HAI · Dataset replay {!status?.hai_available ? "(unavailable)" : ""}
+                <option value="hai">
+                  HAI · Dataset replay {!status?.hai_available ? "(memory limit · click for info)" : ""}
                 </option>
                 <option value="live" disabled={!status?.live_available}>
                   LIVE · Connected monitoring {!status?.live_available ? `(${status?.live_reason ?? "unavailable"})` : ""}

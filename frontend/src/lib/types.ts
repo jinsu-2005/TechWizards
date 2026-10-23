@@ -147,6 +147,7 @@ export interface LiveModelInfo {
 export interface Status {
   mode: Mode;
   hai_available: boolean;
+  hai_reason?: string | null;
   detector_active: string | null;
   uptime_s: number;
   source?: SourceInfo | null; // Phase 13
