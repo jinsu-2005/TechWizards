@@ -43,9 +43,24 @@ export function Timeline() {
   };
 
   return (
-    <Panel title="Timeline" icon={History} className="h-full" actions={<div className="timeline-legend"><span><i className="timeline-key-reported" />Reported</span>{physical && <span><i className="timeline-key-physical" />Physical</span>}</div>}>
+    <Panel
+      title="Timeline"
+      icon={History}
+      className="h-full"
+      headerExtra={
+        <div className="flex items-center gap-2">
+          <span className="hidden sm:inline-block h-3.5 w-px bg-border/60" aria-hidden />
+          <ReplayControls />
+        </div>
+      }
+      actions={
+        <div className="timeline-legend">
+          <span><i className="timeline-key-reported" />Reported</span>
+          {physical && <span><i className="timeline-key-physical" />Physical</span>}
+        </div>
+      }
+    >
       <div className="timeline-body">
-        <ReplayControls />
         <div className="timeline-chart">
           <div className="timeline-axis" aria-hidden>
             {axis.filter((tick, index) => tick.label === "Latest" || axis.findIndex((item) => item.label === tick.label) === index).map((tick) => <span key={tick.position} className={tick.label === "Latest" ? "timeline-axis-latest" : "timeline-axis-offset"} style={{ left: `${tick.position}%`, transform: tick.position === 0 ? undefined : tick.position === 100 ? "translateX(-100%)" : "translateX(-50%)" }}>{tick.label}</span>)}
