@@ -1,20 +1,5 @@
 # Creates paid services only when explicitly applied in a Render account. No automatic deploys.
 services:
-  - type: pserv
-    name: attacktrace-emulator
-    runtime: docker
-    region: singapore
-    plan: starter
-    dockerContext: .
-    dockerfilePath: ./plant_emulator/Dockerfile
-    autoDeployTrigger: "off"
-    envVars:
-      - key: EMU_HOST
-        value: 0.0.0.0
-      - key: EMU_PORT
-        value: "5020"
-      - key: EMU_HEALTH_PORT
-        value: "8081"
   - type: web
     name: attacktrace-api
     runtime: docker
@@ -61,12 +46,13 @@ services:
         value: /var/data/reports
       - key: AT_HAI_DIR
         value: /var/data/hai
+      - key: AT_HAI_SEED_DIR
+        value: /app/hai-seed
+      - key: AT_EMBED_EMULATOR
+        value: "true"
       - key: AT_LIVE_TAGMAP
         value: /app/config/tagmap.yaml
       - key: AT_LIVE_HOST
-        fromService:
-          type: pserv
-          name: attacktrace-emulator
-          property: host
+        value: 127.0.0.1
       - key: AT_LIVE_PORT
         value: "5020"

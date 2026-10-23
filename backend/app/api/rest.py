@@ -60,7 +60,7 @@ def _status(request: Request) -> Status:
     live_ok, live_reason = _live_availability(state)
     return Status(
         mode=state.mode,
-        hai_available=bool(hai_paths(state.hai_dir)),
+        hai_available=state.hai is not None,
         detector_active=rt.detector_kind,
         uptime_s=rt.uptime_s,
         source=_source(state),

@@ -12,7 +12,6 @@ import { IncidentPanel } from "../features/incident/IncidentPanel";
 import { Timeline } from "../features/timeline/Timeline";
 import { useLive } from "../store/live";
 import { useUi, type CenterView } from "../store/ui";
-import { CopilotDrawer } from "../features/copilot/CopilotDrawer";
 import { TopBar } from "./TopBar";
 import { useLiveSourcePoll } from "./useLiveSourcePoll";
 
@@ -90,7 +89,6 @@ export function App() {
       {stale && !replaying && <div role="status" className="flex flex-wrap items-center gap-2 rounded-md border border-suspect/40 bg-suspect/10 px-3 py-2 text-sm text-suspect"><WifiOff size={16} aria-hidden /><span>Connection interrupted. Showing last received readings ({ageSeconds}s ago).</span></div>}
       {replaying && <div role="status" className="rounded-md border border-accent/30 bg-accent/10 px-3 py-2 text-sm text-accent">Historical replay · readings are from the selected point in time.</div>}
       <IncidentToast />
-      <CopilotDrawer />
       <div role="group" aria-label="Monitoring panels" className="monitoring-panel-switch">{([["process", "Process"], ["scenario", "Test scenario"], ["incident", "Incident"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={mobilePanel === value} onClick={() => setMobilePanel(value)}>{label}</button>)}</div>
       <main id="main-workspace" tabIndex={-1} data-mobile-panel={mobilePanel} className={`dashboard-main ${stale && !replaying ? "stale-telemetry" : ""}`}>
         <AttackConsole />

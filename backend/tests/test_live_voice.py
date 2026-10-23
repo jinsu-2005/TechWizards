@@ -39,3 +39,14 @@ def test_voice_rejects_wrong_demo_key_before_gemini(engine: Engine, tmp_path: Pa
     ) as ws:
         ws.send_json({"type": "start", "voice": "Kore", "api_key": "incorrect"})
         assert ws.receive_json() == {"type": "error", "message": "API key required"}
+
+
+def test_voice_session_config_enforces_en_ta_transcription() -> None:
+    from app.api.live_voice import session_config
+
+    config = session_config("Kore")
+    assert config["input_audio_transcription"] == {"language_codes": ["en", "ta"]}
+    assert "STRICT LANGUAGE POLICY:" in config["system_instruction"]
+    assert "Please speak in English or Tamil." in config["system_instruction"]
+    assert "Tanglish" in config["system_instruction"]
+

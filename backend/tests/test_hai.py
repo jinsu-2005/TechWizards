@@ -1,12 +1,13 @@
 from collections.abc import Iterator
 from pathlib import Path
+from shutil import copyfile
 
 import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
 from app.config import Settings
-from app.data.hai import HaiData, hai_paths, load_hai, node_kind, process_of
+from app.data.hai import HaiData, hai_paths, load_hai, load_hai_replay, node_kind, process_of
 from app.detect.hai_pipeline import (
     hai_models_ready,
     load_hai_baseline,
@@ -60,6 +61,18 @@ def test_labels_mark_recovery_as_ignored(data: HaiData) -> None:
 def test_train_files_are_required(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         load_hai(tmp_path)
+
+
+def test_hosted_replay_loads_only_test_recording(
+    tmp_path: Path, hai_dir: Path, data: HaiData
+) -> None:
+    copyfile(hai_dir / "test1.csv.gz", tmp_path / "test1.csv.gz")
+    replay = load_hai_replay(tmp_path, "test1", tuple(FEATURES))
+    assert replay.name == "test1"
+    np.testing.assert_array_equal(replay.x, data.tests[0].x)
+    assert replay.windows() == [TEST1_ATTACK]
+    with pytest.raises(FileNotFoundError):
+        load_hai_replay(tmp_path, "test2", tuple(FEATURES))
 
 
 def test_tag_naming_heuristics() -> None:

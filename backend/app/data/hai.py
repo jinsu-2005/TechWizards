@@ -64,12 +64,15 @@ class HaiData:
 READ_ATTEMPTS = 4
 
 
-def _read_csv(path: Path) -> pd.DataFrame:
+def _read_csv(path: Path, features: list[str] | None = None) -> pd.DataFrame:
     """read_csv with retries: a 35 MB gzip read through a Docker Desktop bind mount once failed
     with OSError 14 (Bad address) and succeeded on the next attempt."""
+    selected = set(features) | set(LABELS) if features is not None else None
     for attempt in range(1, READ_ATTEMPTS + 1):
         try:
-            return pd.read_csv(path, sep=";")
+            return pd.read_csv(
+                path, sep=";", usecols=selected.__contains__ if selected else None
+            )
         except OSError:
             if attempt == READ_ATTEMPTS:
                 raise
@@ -78,12 +81,27 @@ def _read_csv(path: Path) -> pd.DataFrame:
 
 
 def _read(path: Path, features: list[str] | None) -> tuple[list[str], HaiFile]:
-    df = _read_csv(path)
+    df = _read_csv(path, features)
     cols = features or [c for c in df.columns if c != "time" and c not in LABELS]
     attack = df["attack"].to_numpy(np.int8) if "attack" in df else np.zeros(len(df), np.int8)
     flags = [df[c].to_numpy(np.int8) if c in df else np.zeros(len(df), np.int8) for c in LABELS[1:]]
     name = path.name.removesuffix(".gz").removesuffix(".csv")
     return cols, HaiFile(name, df[cols].to_numpy(np.float64), attack, np.stack(flags, axis=1))
+
+
+def load_hai_replay(hai_dir: Path, file_name: str, features: tuple[str, ...]) -> HaiFile:
+    """Load only the requested recording when a compatible trained model already exists.
+
+    Hosted replay needs no training recordings in memory. Model feature order is preserved.
+    """
+    recording = next(
+        (p for p in hai_paths(hai_dir) if p.name in {f"{file_name}.csv", f"{file_name}.csv.gz"}),
+        None,
+    )
+    if recording is None:
+        raise FileNotFoundError(f"HAI recording {file_name} is missing from {hai_dir}")
+    _, replay = _read(recording, list(features))
+    return replay
 
 
 def load_hai(hai_dir: Path) -> HaiData:

@@ -15,6 +15,11 @@ export function browserRecognitionAvailable(): boolean {
   return Boolean(target.SpeechRecognition || target.webkitSpeechRecognition);
 }
 
+export function isUnsupportedScript(text: string): boolean {
+  // Non-Tamil Indic and foreign scripts (Devanagari, Telugu, Kannada, Malayalam, Arabic, Cyrillic, CJK)
+  return /[\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0600-\u06FF\u0400-\u04FF\u4E00-\u9FFF]/.test(text);
+}
+
 export function startBrowserRecognition(onText: (text: string) => void, onError: (message: string) => void, onEnd: () => void): () => void {
   const target = window as Window & { SpeechRecognition?: RecognitionConstructor; webkitSpeechRecognition?: RecognitionConstructor };
   const Constructor = target.SpeechRecognition || target.webkitSpeechRecognition;
@@ -23,7 +28,14 @@ export function startBrowserRecognition(onText: (text: string) => void, onError:
   recognition.lang = navigator.language || "en-US";
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
-  recognition.onresult = (event) => onText(event.results[0]?.[0]?.transcript?.trim() ?? "");
+  recognition.onresult = (event) => {
+    const raw = event.results[0]?.[0]?.transcript?.trim() ?? "";
+    if (isUnsupportedScript(raw)) {
+      onError("Please speak in English or Tamil.");
+      return;
+    }
+    onText(raw);
+  };
   recognition.onerror = (event) => onError(`Microphone recognition failed: ${event.error}`);
   recognition.onend = onEnd;
   recognition.start();

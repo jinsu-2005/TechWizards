@@ -3,15 +3,23 @@ import { useEffect, useRef, useState } from "react";
 import { setLiveConversationActive, stopSpeech, useVoice } from "../../lib/voice";
 import pilotIcon from "../../assets/ai-pilot-emblem.png";
 
-type Line = { id: number; speaker: "user" | "assistant"; text: string };
+type Line = { id: number; speaker: "user" | "assistant"; text: string; language?: string };
 type VoiceEvent =
   | { type: "ready"; model: string; max_seconds: number }
-  | { type: "transcript"; speaker: "user" | "assistant"; text: string }
+  | { type: "transcript"; speaker: "user" | "assistant"; text: string; language?: string }
   | { type: "interrupted" | "turn_complete" }
   | { type: "session_end"; reason: "time_limit" }
   | { type: "error"; message: string };
 
 export type VoiceState = "listening" | "thinking" | "speaking" | "muted" | "disconnected" | "connecting" | "reconnecting";
+
+function isMobileDevice(): boolean {
+  if (typeof window === "undefined" || typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i;
+  const isTouchMac = navigator.maxTouchPoints > 1 && /Macintosh/i.test(ua);
+  return mobileRegex.test(ua) || isTouchMac;
+}
 
 function groupTranscript(lines: Line[]): Line[] {
   return lines.reduce<Line[]>((turns, line) => {
@@ -99,6 +107,10 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
   const stopped = useRef(false);
   const animFrame = useRef<number | null>(null);
   const isSpeakingRef = useRef(false);
+  const isMobileRef = useRef(false);
+  const isPlaybackActiveRef = useRef(false);
+  const playbackCooldownUntilRef = useRef(0);
+  const playbackWatchdogDeadlineRef = useRef(0);
   const outputSelectionSupported = typeof AudioContext !== "undefined" && "setSinkId" in AudioContext.prototype;
 
   // Notify parent of session state changes
@@ -188,6 +200,9 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
     void context.current?.close(); context.current = null;
     setIsSpeaking(false);
     isSpeakingRef.current = false;
+    isPlaybackActiveRef.current = false;
+    playbackCooldownUntilRef.current = 0;
+    playbackWatchdogDeadlineRef.current = 0;
     setIsThinking(false);
     if (message !== null) { setPhase("ended"); setStatus(message); setCanRetry(retry); }
     setSessionStartedAt(null);
@@ -206,6 +221,11 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
     stopped.current = false;
     mutedRef.current = false; setMuted(false);
     setIsSpeaking(false); isSpeakingRef.current = false; setIsThinking(false);
+    const isMobile = isMobileDevice();
+    isMobileRef.current = isMobile;
+    isPlaybackActiveRef.current = false;
+    playbackCooldownUntilRef.current = 0;
+    playbackWatchdogDeadlineRef.current = 0;
     try {
       if (!navigator.mediaDevices?.getUserMedia || !window.AudioContext || typeof AudioWorkletNode === "undefined") {
         throw new Error("Live microphone audio needs a modern browser and a secure connection.");
@@ -224,12 +244,33 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
       if (voice.outputDeviceId && outputSelectionSupported) {
         await (audioContext as AudioContext & { setSinkId: (id: string) => Promise<void> }).setSinkId(voice.outputDeviceId);
       }
-      const media = await navigator.mediaDevices.getUserMedia({ audio: {
-        deviceId: voice.inputDeviceId ? { exact: voice.inputDeviceId } : undefined,
-        echoCancellation: true, noiseSuppression: true, autoGainControl: true,
-      } });
+      // Desktop audio constraints are strictly preserved.
+      // Mobile audio constraints enable echo cancellation, noise suppression, AGC, and single-channel capture.
+      const audioConstraints: MediaTrackConstraints = isMobile
+        ? {
+            deviceId: voice.inputDeviceId ? { exact: voice.inputDeviceId } : undefined,
+            echoCancellation: { ideal: true },
+            noiseSuppression: { ideal: true },
+            autoGainControl: { ideal: true },
+            channelCount: { ideal: 1 },
+            sampleRate: { ideal: 16000 },
+          }
+        : {
+            deviceId: voice.inputDeviceId ? { exact: voice.inputDeviceId } : undefined,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          };
+      const media = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
       if (stopped.current) { media.getTracks().forEach((track) => track.stop()); return; }
       stream.current = media;
+      const audioTrack = media.getAudioTracks()[0];
+      if (audioTrack && isMobile) {
+        try {
+          const trackSettings = audioTrack.getSettings ? audioTrack.getSettings() : {};
+          console.info("[LiveVoice Mobile] Audio track settings:", trackSettings);
+        } catch { /* ignore */ }
+      }
       media.getAudioTracks().forEach((track) => { track.onended = () => {
         if (!stopped.current) stop("Microphone disconnected. Choose a device and reconnect.", true);
       }; });
@@ -247,7 +288,13 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
       ws.binaryType = "arraybuffer";
       ws.onopen = () => {
         if (stopped.current) { ws.close(); return; }
-        ws.send(JSON.stringify({ type: "start", voice: selectedVoice ?? voice.geminiVoice, history: previous, ...(DEMO_KEY ? { api_key: DEMO_KEY } : {}) }));
+        ws.send(JSON.stringify({
+          type: "start",
+          voice: selectedVoice ?? voice.geminiVoice,
+          history: previous,
+          platform: isMobile ? "mobile" : "desktop",
+          ...(DEMO_KEY ? { api_key: DEMO_KEY } : {}),
+        }));
         setStatus("Connecting to Gemini Live…");
       };
       ws.onmessage = (event: MessageEvent) => {
@@ -256,10 +303,24 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
           setIsThinking(false);
           setIsSpeaking(true);
           isSpeakingRef.current = true;
+          if (isMobileRef.current) {
+            isPlaybackActiveRef.current = true;
+            playbackCooldownUntilRef.current = 0;
+            const durationMs = (event.data.byteLength / 2 / 24000) * 1000;
+            playbackWatchdogDeadlineRef.current = Math.max(
+              playbackWatchdogDeadlineRef.current,
+              Date.now() + durationMs + 800
+            );
+          }
           if (context.current && outputAnalyser.current) {
             playPcm(event.data, context.current, timeline.current, outputAnalyser.current, () => {
               setIsSpeaking(false);
               isSpeakingRef.current = false;
+              if (isMobileRef.current) {
+                isPlaybackActiveRef.current = false;
+                // 250ms echo tail grace period to absorb phone casing and room acoustics
+                playbackCooldownUntilRef.current = Date.now() + 250;
+              }
             });
           }
           return;
@@ -275,6 +336,20 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
             const resample = { value: 0 };
             node.port.onmessage = (audioEvent: MessageEvent<ArrayBuffer>) => {
               if (mutedRef.current || ws.readyState !== WebSocket.OPEN || ws.bufferedAmount > 256000) return;
+              // Mobile-specific gating fallback to eliminate speaker-to-mic feedback loop
+              if (isMobileRef.current) {
+                const now = Date.now();
+                // Safety watchdog: ensure playback state cannot get permanently stuck
+                if (isPlaybackActiveRef.current && now > playbackWatchdogDeadlineRef.current && timeline.current.sources.length === 0) {
+                  isPlaybackActiveRef.current = false;
+                  playbackCooldownUntilRef.current = 0;
+                  setIsSpeaking(false);
+                  isSpeakingRef.current = false;
+                }
+                if (isPlaybackActiveRef.current || now < playbackCooldownUntilRef.current) {
+                  return;
+                }
+              }
               ws.send(pcm16(new Float32Array(audioEvent.data), audioContext.sampleRate, resample));
             };
             source.connect(node);
@@ -287,7 +362,10 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
             setStatus(`Live with ${message.model}. Speak naturally; session ends after ${Math.round(message.max_seconds / 60)} minutes.`);
           })().catch(() => stop("Microphone processing could not start. Try another browser.", true));
         } else if (message.type === "transcript") {
-          setLines((previous) => [...previous.slice(-47), { id: Date.now() + Math.random(), speaker: message.speaker, text: message.text }]);
+          setLines((previous) => [
+            ...previous.slice(-47),
+            { id: Date.now() + Math.random(), speaker: message.speaker, text: message.text, language: message.language },
+          ]);
           if (message.speaker === "user") {
             onUserTranscript?.(message.text);
             setIsThinking(true);
@@ -300,9 +378,16 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
           stopSpeech();
           setIsSpeaking(false);
           isSpeakingRef.current = false;
+          if (isMobileRef.current) {
+            isPlaybackActiveRef.current = false;
+            playbackCooldownUntilRef.current = 0;
+          }
           setIsThinking(false);
         } else if (message.type === "turn_complete") {
           setIsThinking(false);
+          if (isMobileRef.current && timeline.current.sources.length === 0) {
+            isPlaybackActiveRef.current = false;
+          }
         } else if (message.type === "session_end") {
           stop("Five-minute session limit reached. Reconnect to continue.", true);
         } else if (message.type === "error") {
@@ -339,6 +424,10 @@ export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = fal
   const toggleMute = () => {
     const next = !mutedRef.current;
     mutedRef.current = next; setMuted(next);
+    if (isMobileRef.current) {
+      isPlaybackActiveRef.current = false;
+      playbackCooldownUntilRef.current = 0;
+    }
     if (next && socket.current?.readyState === WebSocket.OPEN) socket.current.send(JSON.stringify({ type: "audio_end" }));
     setStatus(next ? "Microphone muted. Gemini can finish its current answer." : "Microphone live. Speak naturally.");
   };

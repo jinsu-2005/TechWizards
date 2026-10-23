@@ -50,16 +50,17 @@ function makeWelcome(scope: string): Message {
   };
 }
 
-export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Incident } = {}) {
+export function CopilotDrawer({ selectedIncident: propIncident }: { selectedIncident?: Incident } = {}) {
   const voice = useVoice();
   const { canAdmin } = useAccess();
   const open = useUi((s) => s.copilotOpen);
   const setOpen = useUi((s) => s.setCopilotOpen);
   const latest = useLive(selectView);
   const selectedAsset = useUi((s) => s.selectedAsset);
+  const storeIncident = useUi((s) => s.selectedIncident);
   const scenarioContext = useUi((s) => s.scenarioContext);
   const conn = useLive((s) => s.conn);
-  const incident = selectedIncident ?? latest?.incident ?? null;
+  const incident = propIncident ?? storeIncident ?? latest?.incident ?? null;
 
   const { stale, replaying } = useFreshness();
   const scope = `${latest?.mode ?? "unknown"}:${incident?.id ?? "none"}:${incident?.detected_at ?? ""}:${selectedAsset ?? "all"}:${replaying ? "replay" : "current"}`;
@@ -70,7 +71,14 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
 
   useEffect(() => {
     scopeRef.current = scope;
-    setMessages([makeWelcome(scope)]);
+    // Preserve conversation history across page navigation and asset changes;
+    // only update the initial welcome card if the user hasn't chatted yet.
+    setMessages((prev) => {
+      if (prev.length <= 1 && prev[0]?.id === "initial") {
+        return [makeWelcome(scope)];
+      }
+      return prev;
+    });
     setPendingIsolation(null);
   }, [scope]);
 
@@ -111,13 +119,17 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
 
   useEffect(() => {
     setLoading(false);
+  }, [scope]);
+
+  // Only abort active sessions when CopilotDrawer unmounts from the app, NOT on internal route navigation
+  useEffect(() => {
     return () => {
       requestRef.current?.abort();
       stopListening.current?.();
       stopListening.current = null;
       stopSpeech();
     };
-  }, [scope, open]);
+  }, []);
 
   useEffect(() => {
     const el = composerRef.current;
@@ -746,7 +758,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
                   </div>
 
                   <div className="flex items-center gap-2.5 shrink-0">
-                    <div className="h-4.5 w-[1px] bg-slate-700/60" aria-hidden="true" />
+                    <div className="h-4.5 w-[1px] bg-border" aria-hidden="true" />
                     <button
                       type="button"
                       aria-label={listening ? "Stop recording" : "Start voice input"}
@@ -756,7 +768,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
                       className={`flex h-8 w-8 items-center justify-center rounded-full transition-all active:scale-95 ${
                         listening
                           ? "bg-suspect text-on-accent shadow-[0_0_12px_rgba(var(--suspect-rgb),0.55)] ring-2 ring-suspect/30 hover:scale-105"
-                          : "text-slate-300 hover:text-white hover:bg-white/5"
+                          : "text-muted hover:text-text hover:bg-border/30"
                       }`}
                     >
                       {listening ? <MicOff size={16} className="animate-pulse" /> : <Mic size={17} />}
@@ -765,10 +777,10 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
                       type="submit"
                       disabled={!input.trim() || loading || !!pilotAction || parsedCommand?.kind !== "ask"}
                       aria-label="Send message"
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_12px_rgba(37,99,235,0.45)] hover:shadow-[0_0_16px_rgba(37,99,235,0.7)] transition-all active:scale-95 disabled:opacity-40 disabled:hover:shadow-none disabled:cursor-not-allowed"
+                      className="copilot-send-btn flex h-8 w-8 items-center justify-center rounded-full transition-all active:scale-95 disabled:opacity-40 disabled:hover:shadow-none disabled:cursor-not-allowed"
                     >
                       {loading ? (
-                        <span className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                        <span className="h-3.5 w-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
                       ) : (
                         <Send size={14} className="translate-x-[0.5px] -translate-y-[0.5px]" />
                       )}
@@ -778,11 +790,11 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
 
                 {/* Bottom row: Keyboard shortcut badges */}
                 <div className="flex items-center gap-2 mt-2 pt-0.5">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-[#131b28] border border-[#223046] px-2.5 py-0.5 text-[11px] font-mono text-slate-300 select-none">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-surface border border-border/70 px-2.5 py-0.5 text-[11px] font-mono text-muted select-none">
                     <span className="font-sans font-bold text-[12px] leading-none">↵</span>
                     <span className="leading-none">send</span>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-[#131b28] border border-[#223046] px-2.5 py-0.5 text-[11px] font-mono text-slate-300 select-none">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-surface border border-border/70 px-2.5 py-0.5 text-[11px] font-mono text-muted select-none">
                     <span className="leading-none">Shift+↵</span>
                     <span className="leading-none">line</span>
                   </div>

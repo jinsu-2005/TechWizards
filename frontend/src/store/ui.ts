@@ -1,14 +1,16 @@
 import { create } from "zustand";
-import type { Scenario } from "../lib/types";
+import type { Incident, Scenario } from "../lib/types";
 
 export type CenterView = "twin" | "graph";
 
 interface UiState {
   view: CenterView;
   selectedAsset: string | null;
+  selectedIncident: Incident | null;
   scenarioContext: { scenario: Scenario; target: string } | null;
   setScenarioContext: (scenario: Scenario, target: string) => void;
   selectAsset: (id: string | null) => void;
+  setSelectedIncident: (incident: Incident | null) => void;
   /** One-line notice (e.g. "Demo locked"); cleared by the toast after a few seconds. */
   notice: { text: string; id: number; tone: "warning" | "success" } | null;
   /** Audio alarm toggle. */
@@ -28,9 +30,11 @@ let noticeId = 0;
 export const useUi = create<UiState>((set) => ({
   view: "twin",
   selectedAsset: null,
+  selectedIncident: null,
   scenarioContext: null,
   setScenarioContext: (scenario, target) => set({ scenarioContext: { scenario, target } }),
   selectAsset: (selectedAsset) => set({ selectedAsset }),
+  setSelectedIncident: (selectedIncident) => set({ selectedIncident }),
   notice: null,
   soundEnabled: true,
   copilotOpen: false,

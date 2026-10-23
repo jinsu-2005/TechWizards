@@ -7,6 +7,7 @@ import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
+from app.ai.language import classify_language
 from app.ai.models import Capability, classify_failure
 from app.ai.models import router as model_router
 from app.ai.secrets import gemini_key
@@ -152,7 +153,10 @@ async def transcribe(request: Request) -> dict[str, str]:
     text = _output_text(result).strip()[:4000]
     if not text:
         raise HTTPException(422, "No speech recognized; try again")
-    return {"text": text}
+    classification = classify_language(text)
+    if not classification.is_supported:
+        raise HTTPException(422, "Unsupported language detected. Please speak in English or Tamil.")
+    return {"text": text, "language": classification.language}
 
 
 class SpeechRequest(BaseModel):
@@ -166,6 +170,9 @@ async def synthesize(body: SpeechRequest, request: Request) -> Response:
     _limit(request)
     if body.voice not in VOICES or body.model not in model_router.pool("tts"):
         raise HTTPException(422, "Unsupported Gemini speech model or voice")
+    classification = classify_language(body.text)
+    if not classification.is_supported:
+        raise HTTPException(422, "Unsupported language. Speech synthesis only supports English, Tamil, and Tanglish.")
     result, model = await _interaction(
         {
             "input": [{"type": "user_input", "content": [{"type": "text", "text": body.text}]}],

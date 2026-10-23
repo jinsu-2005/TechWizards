@@ -5,8 +5,10 @@ import contextlib
 import json
 import logging
 import os
+import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI
@@ -17,7 +19,7 @@ from app.api.gateway import GatewayBoundary
 from app.api.live_attack import LiveAttackLauncher
 from app.api.security import RateLimiter
 from app.config import Settings, get_settings
-from app.data.hai import hai_paths, load_hai
+from app.data.hai import hai_paths, load_hai_replay
 from app.detect.hai_pipeline import (
     hai_models_ready,
     load_hai_baseline,
@@ -72,9 +74,9 @@ def build_hai_engine(settings: Settings) -> HaiEngine | None:
         if not hai_models_ready(d):
             log.warning("no HAI models in %s/hai - training (about two minutes)", d)
             train_hai(d, settings.hai_dir, log=False)
-        data = load_hai(settings.hai_dir)
-        replay = next((f for f in data.tests if f.name == settings.hai_file), data.tests[0])
-        return HaiEngine(load_hai_detector(d), load_hai_baseline(d), replay, settings)
+        loaded = load_hai_detector(d)
+        replay = load_hai_replay(settings.hai_dir, settings.hai_file, loaded.features)
+        return HaiEngine(loaded, load_hai_baseline(d), replay, settings)
     except Exception:
         log.exception("HAI mode unavailable")
         return None
@@ -104,6 +106,12 @@ def create_app(
     live_runtime: LiveRuntime | None = None,
 ) -> FastAPI:
     settings = get_settings()
+    seed_path = os.environ.get("AT_HAI_SEED_DIR")
+    if seed_path and not hai_paths(settings.hai_dir) and hai_paths(Path(seed_path)):
+        settings = settings.model_copy(update={"hai_dir": Path(seed_path)})
+    embed_emulator = os.environ.get("AT_EMBED_EMULATOR", "").lower() in {"1", "true", "yes"}
+    if embed_emulator:
+        settings = settings.model_copy(update={"live_host": "127.0.0.1"})
     if settings.auth_enabled and os.environ.get("FIREBASE_AUTH_EMULATOR_HOST"):
         raise ValueError("Private authentication cannot use unsigned emulator tokens")
     if (
@@ -115,6 +123,7 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        emulator: asyncio.subprocess.Process | None = None
         settings.soc_db.parent.mkdir(parents=True, exist_ok=True)
         app.state.soc = SocStore(":memory:" if engine is not None else str(settings.soc_db))
         app.state.session_id = uuid4().hex
@@ -122,6 +131,32 @@ def create_app(
         app.state.hai = hai_engine
         if hai_engine is None and engine is None:  # production start: look for HAI data too
             app.state.hai = await asyncio.to_thread(build_hai_engine, settings)
+        if embed_emulator and engine is None:
+            settings.live_db.parent.mkdir(parents=True, exist_ok=True)
+            emulator_env = os.environ.copy()
+            emulator_env.update(
+                EMU_HOST="127.0.0.1",
+                EMU_PORT=str(settings.live_port),
+                EMU_TAGMAP=str(settings.live_tagmap.resolve()),
+                EMU_MANIFEST=str(settings.live_db.parent / "emulator_manifest.json"),
+            )
+            emulator = await asyncio.create_subprocess_exec(
+                sys.executable, "-m", "plant_emulator", env=emulator_env
+            )
+            for _ in range(50):
+                if emulator.returncode is not None:
+                    break
+                try:
+                    _reader, writer = await asyncio.open_connection("127.0.0.1", settings.live_port)
+                    writer.close()
+                    await writer.wait_closed()
+                    break
+                except OSError:
+                    await asyncio.sleep(0.1)
+            else:
+                log.warning(
+                    "embedded Modbus emulator did not become ready on port %s", settings.live_port
+                )
         if live_runtime is not None:
             app.state.live = live_runtime
         elif engine is None:  # production start: LIVE is optional and never blocks SIM or HAI
@@ -152,6 +187,13 @@ def create_app(
             await app.state.live_attacker.close()
         if getattr(app.state, "lab_proxy", None) is not None:
             await app.state.lab_proxy.stop()
+        if emulator is not None and emulator.returncode is None:
+            emulator.terminate()
+            try:
+                await asyncio.wait_for(emulator.wait(), timeout=5)
+            except TimeoutError:
+                emulator.kill()
+                await emulator.wait()
         app.state.soc.close()
 
     application = FastAPI(title="AttackTrace", version="0.1.0", lifespan=lifespan)

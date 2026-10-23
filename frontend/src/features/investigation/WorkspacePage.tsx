@@ -7,7 +7,6 @@ import {
 import { useLiveStream } from "../../app/useLiveStream";
 import { useLiveSourcePoll } from "../../app/useLiveSourcePoll";
 import { WorkspaceHeader } from "../../components/ui/WorkspaceHeader";
-import { CopilotDrawer } from "../copilot/CopilotDrawer";
 import { useLive } from "../../store/live";
 import { useUi } from "../../store/ui";
 import { getStatus, reportUrl } from "../../lib/api";
@@ -68,6 +67,11 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
 
   const incident = listed.find((i) => i.id === selected) ?? (selected === null ? listed[0] : undefined);
   const heading = page === "sources" ? "Data sources & coverage" : "Incident investigations";
+
+  useEffect(() => {
+    useUi.getState().setSelectedIncident(page === "investigations" ? (incident ?? null) : null);
+    return () => useUi.getState().setSelectedIncident(null);
+  }, [incident, page]);
 
   const handleCopyId = (id: string) => {
     void navigator.clipboard.writeText(id);
@@ -660,8 +664,6 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
           </div>
         )}
       </div>
-
-      <CopilotDrawer selectedIncident={page === "investigations" ? incident : undefined} />
     </main>
   );
 }

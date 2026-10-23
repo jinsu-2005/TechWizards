@@ -13,6 +13,12 @@ from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from google import genai
 from google.genai import types
 
+from app.ai.language import (
+    UNSUPPORTED_LANGUAGE_MESSAGE,
+    classify_language,
+    is_self_echo,
+    sanitize_response_text,
+)
 from app.ai.models import classify_failure
 from app.ai.models import router as model_router
 from app.ai.secrets import gemini_key
@@ -31,7 +37,19 @@ LIVE_SYSTEM_PROMPT = (
     "call read_attacktrace_status. A candidate is a hypothesis and a process path is inferred; "
     "mention uncertainty. SIM is simulation, HAI is replay, and LIVE is Modbus monitoring. "
     "You have read-only tools. Never claim to execute an attack, isolation, source change, "
-    "or other operational action; direct the operator to the authorized on-screen workflow."
+    "or other operational action; direct the operator to the authorized on-screen workflow.\n\n"
+    "STRICT LANGUAGE POLICY:\n"
+    "1. Supported Languages: You ONLY accept English, Tamil, and Tanglish (Tamil code-switched with English). "
+    "Never accept or answer any other language.\n"
+    "2. Unsupported Languages (Hindi, Malayalam, Telugu, Kannada, etc.): If the user speaks ANY unsupported language, "
+    "do NOT answer their question or translate their speech. Respond ONLY with: "
+    "\"Please speak in English or Tamil.\"\n"
+    "3. When the user speaks English: Respond exclusively in clear English. Do not switch to Tamil.\n"
+    "4. When the user speaks Tamil: Respond in natural Tanglish (Tamil mixed with English technical terms like "
+    "sensor, valve, incident, anomaly, status) or English. Preserve technical accuracy.\n"
+    "5. When the user speaks Tanglish: Respond naturally in Tanglish or English, matching their context.\n"
+    "6. Strict Restriction: NEVER generate AI responses in Hindi, Malayalam, Telugu, Kannada, or any other unsupported language.\n"
+    "7. Consistency: Maintain consistent language across turns. If language is ambiguous, default to English."
 )
 
 
@@ -76,7 +94,7 @@ def process_snapshot(state: Any) -> dict[str, Any]:
 def session_config(voice: str, model: str = "gemini-3.8-live") -> dict[str, Any]:
     config: dict[str, Any] = {
         "response_modalities": ["AUDIO"],
-        "input_audio_transcription": {},
+        "input_audio_transcription": {"language_codes": ["en", "ta"]},
         "output_audio_transcription": {},
         "speech_config": {
             "voice_config": {"prebuilt_voice_config": {"voice_name": voice}},
@@ -263,6 +281,9 @@ async def live_voice(ws: WebSocket) -> None:
                         return "time_limit"
 
                     async def gemini_to_browser() -> None:
+                        recent_assistant_texts: list[str] = []
+                        suppress_active_turn = False
+                        turn_language = "en"
                         while time.monotonic() < deadline:
                             async for response in session.receive():
                                 if response.tool_call:
@@ -283,31 +304,76 @@ async def live_voice(ws: WebSocket) -> None:
                                 if not content:
                                     continue
                                 if content.interrupted:
+                                    suppress_active_turn = False
                                     await ws.send_json({"type": "interrupted"})
                                 if content.input_transcription and content.input_transcription.text:
-                                    await ws.send_json(
-                                        {
-                                            "type": "transcript",
-                                            "speaker": "user",
-                                            "text": content.input_transcription.text[:2000],
-                                        }
-                                    )
+                                    user_text = content.input_transcription.text[:2000].strip()
+                                    if user_text:
+                                        if is_self_echo(user_text, recent_assistant_texts):
+                                            log.info("Detected self-echo in live voice, suppressing turn: %s", user_text)
+                                            suppress_active_turn = True
+                                            continue
+
+                                        classification = classify_language(user_text)
+                                        turn_language = classification.language
+                                        if not classification.is_supported:
+                                            log.info("Unsupported language (%s) in live voice: %s", classification.reason, user_text)
+                                            suppress_active_turn = True
+                                            await ws.send_json(
+                                                {
+                                                    "type": "transcript",
+                                                    "speaker": "user",
+                                                    "text": user_text,
+                                                    "language": "unsupported",
+                                                }
+                                            )
+                                            reminder = UNSUPPORTED_LANGUAGE_MESSAGE
+                                            recent_assistant_texts.append(reminder)
+                                            await ws.send_json(
+                                                {
+                                                    "type": "transcript",
+                                                    "speaker": "assistant",
+                                                    "text": reminder,
+                                                    "language": "en",
+                                                }
+                                            )
+                                            continue
+                                        else:
+                                            suppress_active_turn = False
+                                            await ws.send_json(
+                                                {
+                                                    "type": "transcript",
+                                                    "speaker": "user",
+                                                    "text": user_text,
+                                                    "language": classification.language,
+                                                }
+                                            )
                                 if (
                                     content.output_transcription
                                     and content.output_transcription.text
                                 ):
+                                    if suppress_active_turn:
+                                        continue
+                                    assistant_text = sanitize_response_text(content.output_transcription.text[:2000])
+                                    recent_assistant_texts.append(assistant_text)
+                                    if len(recent_assistant_texts) > 8:
+                                        recent_assistant_texts.pop(0)
                                     await ws.send_json(
                                         {
                                             "type": "transcript",
                                             "speaker": "assistant",
-                                            "text": content.output_transcription.text[:2000],
+                                            "text": assistant_text,
+                                            "language": "tanglish" if turn_language in ("ta", "tanglish") else "en",
                                         }
                                     )
                                 if content.model_turn:
+                                    if suppress_active_turn:
+                                        continue
                                     for part in content.model_turn.parts:
                                         if part.inline_data and part.inline_data.data:
                                             await ws.send_bytes(part.inline_data.data)
                                 if content.turn_complete:
+                                    suppress_active_turn = False
                                     await ws.send_json({"type": "turn_complete"})
 
                     sender = asyncio.create_task(browser_to_gemini())

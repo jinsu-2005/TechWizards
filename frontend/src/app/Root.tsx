@@ -66,6 +66,13 @@ export function Root() {
     observer.observe(container.current, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, [href]);
-  const path = href.split("?")[0] ?? "/";
-  return <div ref={container} onClick={handleWorkspaceLink}><div key={href} id="workspace-content" tabIndex={-1}><Route /></div><NoticeToast />{["/alerts", "/assets", "/lab", "/metrics", "/settings"].includes(path) && <CopilotDrawer />}</div>;
+  return (
+    <div ref={container} onClick={handleWorkspaceLink}>
+      <div key={href} id="workspace-content" tabIndex={-1}>
+        <Route />
+      </div>
+      <NoticeToast />
+      <CopilotDrawer />
+    </div>
+  );
 }
