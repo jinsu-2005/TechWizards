@@ -5,7 +5,7 @@ export default {
   fetch(request, env) {
     return handle(request, env, async (upstream) => {
       const url = new URL(upstream.url);
-      if (url.pathname === "/ws/live") {
+      if (url.pathname === "/ws/live" || url.pathname === "/ws/voice") {
         if (url.hostname !== "attacktrace-api.onrender.com"
           || upstream.headers.get("cookie") !== "__Host-at_session=test-session"
           || upstream.headers.get("origin") !== env.PUBLIC_ORIGIN

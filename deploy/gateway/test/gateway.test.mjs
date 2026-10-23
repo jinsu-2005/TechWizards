@@ -50,26 +50,29 @@ test("preserves POST body, Origin and two host-only cookies through the API gate
   assert.match(response.headers.getSetCookie()[0], /HttpOnly/);
 });
 
-test("returns the native WebSocket upgrade and forwards the session, secret and browser Origin", async () => {
-  const upgraded = { status: 101, webSocket: {} };
-  const response = await handle(req("/ws/live", { headers: {
-    upgrade: "websocket", origin: env.PUBLIC_ORIGIN, cookie: "__Host-at_session=session",
-  } }), env, async (upstream) => {
-    assert.equal(upstream.url, env.BACKEND_ORIGIN + "/ws/live");
-    assert.equal(upstream.headers.get("upgrade"), "websocket");
-    assert.equal(upstream.headers.get("cookie"), "__Host-at_session=session");
-    assert.equal(upstream.headers.get("origin"), env.PUBLIC_ORIGIN);
-    assert.equal(upstream.headers.get("x-attacktrace-gateway"), env.GATEWAY_SECRET);
-    return upgraded;
+for (const path of ["/ws/live", "/ws/voice"]) {
+  test(`returns the native ${path} upgrade with the session, secret and browser Origin`, async () => {
+    const upgraded = { status: 101, webSocket: {} };
+    const response = await handle(req(path, { headers: {
+      upgrade: "websocket", origin: env.PUBLIC_ORIGIN, cookie: "__Host-at_session=session",
+    } }), env, async (upstream) => {
+      assert.equal(upstream.url, env.BACKEND_ORIGIN + path);
+      assert.equal(upstream.headers.get("upgrade"), "websocket");
+      assert.equal(upstream.headers.get("cookie"), "__Host-at_session=session");
+      assert.equal(upstream.headers.get("origin"), env.PUBLIC_ORIGIN);
+      assert.equal(upstream.headers.get("x-attacktrace-gateway"), env.GATEWAY_SECRET);
+      return upgraded;
+    });
+    assert.equal(response, upgraded);
   });
-  assert.equal(response, upgraded);
-});
+}
 
 test("fails closed for unset configuration, wrong host and non-upgrade stream requests", async () => {
   const never = () => { throw new Error("Must not reach upstream"); };
   assert.equal((await handle(req("/"), { ...env, GATEWAY_SECRET: "" }, never)).status, 503);
   assert.equal((await handle(new Request("https://other.workers.dev/"), env, never)).status, 404);
   assert.equal((await handle(req("/ws/live"), env, never)).status, 426);
+  assert.equal((await handle(req("/ws/voice"), env, never)).status, 426);
   assert.equal((await handle(req("/ws/unknown"), env, never)).status, 404);
   assert.equal((await handle(req("/" , { method: "POST" }), env, never)).status, 405);
 });

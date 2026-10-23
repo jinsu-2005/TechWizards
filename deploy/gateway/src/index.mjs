@@ -31,7 +31,7 @@ export async function handle(request, env, fetchUpstream = fetch) {
   const incoming = new URL(request.url);
   if (incoming.origin !== publicUrl.origin) return error(404, "Unknown application hostname");
   const api = incoming.pathname === "/api" || incoming.pathname.startsWith("/api/");
-  const ws = incoming.pathname === "/ws/live";
+  const ws = incoming.pathname === "/ws/live" || incoming.pathname === "/ws/voice";
   if (incoming.pathname.startsWith("/ws") && !ws) return error(404, "Unknown stream");
   if (ws && (request.method !== "GET" || request.headers.get("upgrade")?.toLowerCase() !== "websocket")) {
     return error(426, "WebSocket upgrade required");

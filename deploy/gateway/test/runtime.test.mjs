@@ -32,8 +32,9 @@ test("Cloudflare runtime preserves separate HttpOnly session and readable CSRF S
   assert.equal(response.headers.get("cache-control"), "no-store");
 });
 
-test("Cloudflare runtime forwards a real WebSocket upgrade and bidirectional frames", { timeout: 15000 }, async () => {
-  const response = await runtime.dispatchFetch(PUBLIC + "/ws/live", {
+for (const path of ["/ws/live", "/ws/voice"]) {
+test(`Cloudflare runtime forwards ${path} upgrade and bidirectional frames`, { timeout: 15000 }, async () => {
+  const response = await runtime.dispatchFetch(PUBLIC + path, {
     headers: { upgrade: "websocket", origin: PUBLIC, cookie: "__Host-at_session=test-session" },
   });
   assert.equal(response.status, 101);
@@ -45,7 +46,8 @@ test("Cloudflare runtime forwards a real WebSocket upgrade and bidirectional fra
       socket.addEventListener("message", (event) => resolve(event.data), { once: true });
       socket.addEventListener("error", reject, { once: true });
     });
-    socket.send("telemetry-check");
-    assert.equal(await received, "echo:telemetry-check");
+    socket.send("stream-check");
+    assert.equal(await received, "echo:stream-check");
   } finally { socket.close(1000, "verified"); }
 });
+}
