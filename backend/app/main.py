@@ -5,6 +5,7 @@ import contextlib
 import json
 import logging
 import os
+import shutil
 import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -31,6 +32,7 @@ from app.engine import Engine
 from app.engine_hai import HaiEngine
 from app.graph import load_graph
 from app.live.runtime import LiveRuntime, build_live_runtime
+from app.live.train import live_models_ready
 from app.soc import SocStore
 
 log = logging.getLogger("attacktrace")
@@ -68,12 +70,28 @@ def build_hai_engine(settings: Settings) -> HaiEngine | None:
     """HAI replay engine when HAI files are present. Never raises: a failure just leaves HAI
     mode unavailable (the API answers 503) and SIM running."""
     if not hai_paths(settings.hai_dir):
-        return None
+        seed_raw = os.environ.get("AT_HAI_SEED_DIR")
+        if seed_raw and hai_paths(Path(seed_raw)):
+            settings = settings.model_copy(update={"hai_dir": Path(seed_raw)})
+        else:
+            return None
     try:
         d = settings.models_dir
         if not hai_models_ready(d):
-            log.warning("no HAI models in %s/hai - training (about two minutes)", d)
-            train_hai(d, settings.hai_dir, log=False)
+            for candidate in (
+                Path("/app/models/hai"),
+                Path(__file__).resolve().parents[2] / "backend" / "models" / "hai",
+                Path(__file__).resolve().parents[1] / "models" / "hai",
+                Path("models/hai"),
+            ):
+                if (candidate / "detector.json").exists():
+                    log.info("seeding HAI models from %s into %s/hai", candidate, d)
+                    (d / "hai").mkdir(parents=True, exist_ok=True)
+                    shutil.copytree(candidate, d / "hai", dirs_exist_ok=True)
+                    break
+            else:
+                log.warning("no HAI models in %s/hai - training (about two minutes)", d)
+                train_hai(d, settings.hai_dir, log=False)
         loaded = load_hai_detector(d)
         replay = load_hai_replay(settings.hai_dir, settings.hai_file, loaded.features)
         return HaiEngine(loaded, load_hai_baseline(d), replay, settings)
@@ -107,8 +125,19 @@ def create_app(
 ) -> FastAPI:
     settings = get_settings()
     seed_path = os.environ.get("AT_HAI_SEED_DIR")
-    if seed_path and not hai_paths(settings.hai_dir) and hai_paths(Path(seed_path)):
-        settings = settings.model_copy(update={"hai_dir": Path(seed_path)})
+    if seed_path and Path(seed_path).is_dir():
+        seed_dir = Path(seed_path)
+        if not hai_paths(settings.hai_dir):
+            if hai_paths(seed_dir):
+                settings = settings.model_copy(update={"hai_dir": seed_dir})
+            try:
+                settings.hai_dir.mkdir(parents=True, exist_ok=True)
+                for item in seed_dir.iterdir():
+                    dest = settings.hai_dir / item.name
+                    if not dest.exists():
+                        shutil.copy2(item, dest)
+            except Exception:
+                pass
     embed_emulator = os.environ.get("AT_EMBED_EMULATOR", "").lower() in {"1", "true", "yes"}
     if embed_emulator:
         settings = settings.model_copy(update={"live_host": "127.0.0.1"})
@@ -123,7 +152,7 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        emulator: asyncio.subprocess.Process | None = None
+        embedded_emu: Any = None
         settings.soc_db.parent.mkdir(parents=True, exist_ok=True)
         app.state.soc = SocStore(":memory:" if engine is not None else str(settings.soc_db))
         app.state.session_id = uuid4().hex
@@ -133,33 +162,49 @@ def create_app(
             app.state.hai = await asyncio.to_thread(build_hai_engine, settings)
         if embed_emulator and engine is None:
             settings.live_db.parent.mkdir(parents=True, exist_ok=True)
-            emulator_env = os.environ.copy()
-            emulator_env.update(
-                EMU_HOST="127.0.0.1",
-                EMU_PORT=str(settings.live_port),
-                EMU_TAGMAP=str(settings.live_tagmap.resolve()),
-                EMU_MANIFEST=str(settings.live_db.parent / "emulator_manifest.json"),
-            )
-            emulator = await asyncio.create_subprocess_exec(
-                sys.executable, "-m", "plant_emulator", env=emulator_env
-            )
-            for _ in range(50):
-                if emulator.returncode is not None:
-                    break
+            already_up = False
+            try:
+                _reader, writer = await asyncio.open_connection("127.0.0.1", settings.live_port)
+                writer.close()
+                await writer.wait_closed()
+                already_up = True
+            except OSError:
+                already_up = False
+
+            if not already_up:
+                from app.live.tagmap import load_tagmap
+                from plant_emulator.server import PlantEmulator
+
+                manifest = settings.live_db.parent / "emulator_manifest.json"
                 try:
-                    _reader, writer = await asyncio.open_connection("127.0.0.1", settings.live_port)
-                    writer.close()
-                    await writer.wait_closed()
-                    break
-                except OSError:
-                    await asyncio.sleep(0.1)
-            else:
-                log.warning(
-                    "embedded Modbus emulator did not become ready on port %s", settings.live_port
-                )
+                    tagmap = load_tagmap(settings.live_tagmap)
+                    embedded_emu = PlantEmulator(
+                        tagmap,
+                        host="127.0.0.1",
+                        port=settings.live_port,
+                        health_port=None,
+                        realtime=True,
+                        manifest_path=manifest,
+                    )
+                    await embedded_emu.start()
+                    log.info("embedded Modbus plant emulator started on 127.0.0.1:%s", settings.live_port)
+                except Exception:
+                    log.exception("could not start embedded PlantEmulator in-process")
         if live_runtime is not None:
             app.state.live = live_runtime
         elif engine is None:  # production start: LIVE is optional and never blocks SIM or HAI
+            if not live_models_ready(settings.models_dir):
+                for candidate in (
+                    Path("/app/models/live"),
+                    Path(__file__).resolve().parents[2] / "backend" / "models" / "live",
+                    Path(__file__).resolve().parents[1] / "models" / "live",
+                    Path("models/live"),
+                ):
+                    if (candidate / "detector.json").exists():
+                        log.info("seeding LIVE models from %s into %s/live", candidate, settings.models_dir)
+                        (settings.models_dir / "live").mkdir(parents=True, exist_ok=True)
+                        shutil.copytree(candidate, settings.models_dir / "live", dirs_exist_ok=True)
+                        break
             app.state.live, app.state.live_reason = build_live_runtime(settings)
         if app.state.live is not None:
             app.state.live_attacker = LiveAttackLauncher(settings.attacker_allowlist)
@@ -187,13 +232,8 @@ def create_app(
             await app.state.live_attacker.close()
         if getattr(app.state, "lab_proxy", None) is not None:
             await app.state.lab_proxy.stop()
-        if emulator is not None and emulator.returncode is None:
-            emulator.terminate()
-            try:
-                await asyncio.wait_for(emulator.wait(), timeout=5)
-            except TimeoutError:
-                emulator.kill()
-                await emulator.wait()
+        if embedded_emu is not None:
+            await embedded_emu.stop()
         app.state.soc.close()
 
     application = FastAPI(title="AttackTrace", version="0.1.0", lifespan=lifespan)

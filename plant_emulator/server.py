@@ -11,8 +11,11 @@ import asyncio
 import contextlib
 import hashlib
 import json
+import logging
 import math
 import time
+
+log = logging.getLogger("plant_emulator.server")
 from collections import deque
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
@@ -108,9 +111,13 @@ class PlantEmulator:
             await self._set(HOLDING_FC, tag, -1.0)
         await self._publish()
         if self.health_port is not None:
-            self._health = await asyncio.start_server(
-                self._handle_http, self.host, self.health_port
-            )
+            try:
+                self._health = await asyncio.start_server(
+                    self._handle_http, self.host, self.health_port
+                )
+            except OSError as exc:
+                log.warning("emulator health HTTP server on port %s could not start: %s", self.health_port, exc)
+                self._health = None
         if self.realtime:
             self._tasks.append(asyncio.create_task(self._run()))
 

@@ -26,7 +26,11 @@ async def main() -> int:
         seed=int(os.environ.get("EMU_SEED", "42")),
         host=os.environ.get("EMU_HOST", "127.0.0.1"),
         port=int(os.environ.get("EMU_PORT", "5020")),
-        health_port=int(os.environ.get("EMU_HEALTH_PORT", "8081")),
+        health_port=(
+            None
+            if os.environ.get("EMU_HEALTH_PORT", "8081").strip().lower() in {"0", "none", "off", "disabled"}
+            else int(os.environ.get("EMU_HEALTH_PORT", "8081"))
+        ),
         hz=float(os.environ.get("EMU_HZ", "10")),
         manifest_path=Path(
             os.environ.get(

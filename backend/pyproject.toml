@@ -36,7 +36,7 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["app*", "eval*"]
+include = ["app*", "eval*", "plant_emulator*", "attacker*"]
 
 [tool.ruff]
 line-length = 100

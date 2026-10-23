@@ -258,9 +258,9 @@
     "semantic_hash": "1fae0b664cdf20a958d5c814a8da93e3"
   },
   "backend/app/main.py": {
-    "mtime": 1792763714.9974208,
-    "seen": 1792764074.4399457,
-    "ast_hash": "c5ccee7276ca9a310cb3027253616b1b",
+    "mtime": 1792767036.5247416,
+    "seen": 1792767116.9366925,
+    "ast_hash": "7186a5e14db0e1c284701c141a8f63a4",
     "semantic_hash": ""
   },
   "backend/app/propagate/__init__.py": {
@@ -486,9 +486,9 @@
     "semantic_hash": "d2197add8f17de4b8da7d825b24cc344"
   },
   "backend/pyproject.toml": {
-    "mtime": 1792591069.2717383,
-    "seen": 1792603274.688855,
-    "ast_hash": "d61042e2c86cd3821a822765eb288ffa",
+    "mtime": 1792767049.6769307,
+    "seen": 1792767116.9366925,
+    "ast_hash": "05572545653d8ace3e3477eb7cab7718",
     "semantic_hash": ""
   },
   "backend/tests/__init__.py": {
@@ -1128,10 +1128,10 @@
     "semantic_hash": "2fa66dade565ed18a60943c9809e9015"
   },
   "plant_emulator/__main__.py": {
-    "mtime": 1792058350.5315423,
-    "seen": 1792578452.955185,
-    "ast_hash": "00667e34672e718e686ffbb5a87a6d2d",
-    "semantic_hash": "00667e34672e718e686ffbb5a87a6d2d"
+    "mtime": 1792766933.5299017,
+    "seen": 1792767116.9366925,
+    "ast_hash": "cc551f57dbf71aeb38b8f77b80256828",
+    "semantic_hash": ""
   },
   "plant_emulator/overlay.py": {
     "mtime": 1791966065.220974,
@@ -1140,10 +1140,10 @@
     "semantic_hash": "c9af860ece36c3423a21004ad2fce947"
   },
   "plant_emulator/server.py": {
-    "mtime": 1792058755.8099074,
-    "seen": 1792578452.955185,
-    "ast_hash": "6b977a1a09b89a03dba5bbd70eb33618",
-    "semantic_hash": "6b977a1a09b89a03dba5bbd70eb33618"
+    "mtime": 1792766897.8951888,
+    "seen": 1792767116.9366925,
+    "ast_hash": "129fc0a69667e8471598a50536136218",
+    "semantic_hash": ""
   },
   "scripts/_common.ps1": {
     "mtime": 1791966065.220974,
@@ -1404,9 +1404,9 @@
     "semantic_hash": "d897ec5579106088f6671e071faf087e"
   },
   "backend/app/deploy.py": {
-    "mtime": 1792603207.335055,
-    "seen": 1792603274.688855,
-    "ast_hash": "1330d3e904c8207f36e36324749028cb",
+    "mtime": 1792766795.6939151,
+    "seen": 1792767116.9366925,
+    "ast_hash": "8aa2827b27d57a7d13964c33a25eae6c",
     "semantic_hash": ""
   },
   "backend/app/explain/copilot_engine.py": {

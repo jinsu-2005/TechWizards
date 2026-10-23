@@ -75,8 +75,23 @@ def prepare_storage(settings: Settings, root: Path, seed_models: Path) -> None:
         root / "backups",
     ):
         path.mkdir(parents=True, exist_ok=True)
-    if not any(settings.models_dir.iterdir()) and seed_models.is_dir():
-        shutil.copytree(seed_models, settings.models_dir, dirs_exist_ok=True)
+    if seed_models.is_dir():
+        for item in seed_models.iterdir():
+            target = settings.models_dir / item.name
+            if not target.exists():
+                if item.is_dir():
+                    shutil.copytree(item, target)
+                else:
+                    shutil.copy2(item, target)
+    seed_hai = Path(os.environ.get("AT_HAI_SEED_DIR", "/app/hai-seed"))
+    if seed_hai.is_dir() and not any(settings.hai_dir.glob("*.csv*")):
+        for item in seed_hai.iterdir():
+            target = settings.hai_dir / item.name
+            if not target.exists():
+                if item.is_dir():
+                    shutil.copytree(item, target)
+                else:
+                    shutil.copy2(item, target)
 
 
 def check_identity(project: str) -> None:
