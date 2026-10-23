@@ -1,14 +1,11 @@
 import { Crosshair, History, ShieldAlert } from "lucide-react";
 import { useEffect, useMemo } from "react";
+import { useFreshness } from "../../app/useFreshness";
 import { Panel } from "../../components/ui/Panel";
 import { indexToX, markers, nodeSeries, timelineAxis, timelineRows, xToIndex } from "../../lib/replay";
 import { useLive } from "../../store/live";
 import { ReplayControls } from "./ReplayControls";
 import { Sparkline } from "./Sparkline";
-
-const LABEL_W = 148;
-const ROW_H = 26;
-const TRACK_H = 14;
 
 /** Drives playback while `playing`: one sample per emit period. */
 function usePlayback(): void {
@@ -25,11 +22,14 @@ const pctX = (i: number, len: number): number => indexToX(i, len, Math.max(2, le
 
 export function Timeline() {
   usePlayback();
+  const { stale } = useFreshness();
   const physical = useLive((s) => s.latest?.nodes.some((n) => n.truth !== null) ?? false);
   const buffer = useLive((s) => s.buffer);
   const cursor = useLive((s) => s.cursor);
   const len = buffer.length;
   const at = cursor ?? len - 1;
+  const live = cursor === null;
+  const view = buffer[at];
   const ids = useLive((s) => s.latest?.nodes.map((n) => n.id).join(",") ?? "");
   const rows = useMemo(() => timelineRows(ids ? ids.split(",") : []), [ids]);
   const series = useMemo(() => rows.map((id) => ({ id, ...nodeSeries(buffer, id) })), [rows, buffer]);
@@ -43,29 +43,30 @@ export function Timeline() {
   };
 
   return (
-    <Panel title="Timeline" icon={History} className="h-full" actions={<div className="flex items-center gap-3 text-xs text-muted"><span className="flex items-center gap-1.5"><span className="w-4 border-t-2 border-accent" />Reported</span>{physical && <span className="flex items-center gap-1.5"><span className="w-4 border-t border-dashed border-muted" />Physical</span>}</div>}>
-      <div className="flex h-full">
+    <Panel title="Timeline" icon={History} className="h-full" actions={<div className="timeline-legend"><span><i className="timeline-key-reported" />Reported</span>{physical && <span><i className="timeline-key-physical" />Physical</span>}</div>}>
+      <div className="timeline-body">
         <ReplayControls />
-        <div className="flex min-w-0 flex-1 flex-col justify-center pr-2">
-          <div className="relative text-[11px] font-mono text-muted select-none" style={{ height: TRACK_H, marginLeft: LABEL_W }} aria-hidden>
-            {axis.map((tick) => <span key={tick.position} className={tick.label === "Latest" ? "font-semibold text-text" : "hidden sm:inline first:inline"} style={{ position: "absolute", left: `${tick.position}%`, transform: tick.position === 0 ? undefined : tick.position === 100 ? "translateX(-100%)" : "translateX(-50%)" }}>{tick.label}</span>)}
+        <div className="timeline-chart">
+          <div className="timeline-axis" aria-hidden>
+            {axis.filter((tick, index) => tick.label === "Latest" || axis.findIndex((item) => item.label === tick.label) === index).map((tick) => <span key={tick.position} className={tick.label === "Latest" ? "timeline-axis-latest" : "timeline-axis-offset"} style={{ left: `${tick.position}%`, transform: tick.position === 0 ? undefined : tick.position === 100 ? "translateX(-100%)" : "translateX(-50%)" }}>{tick.label}</span>)}
             {marks.map((m) => {
               const Icon = m.kind === "detected" ? ShieldAlert : Crosshair;
               return (
                 <span
                   key={`${m.kind}-${m.index}`}
                   title={m.label}
-                  className={`absolute top-0 -translate-x-1/2 z-10 ${
-                    m.kind === "detected" ? "text-origin" : "text-accent"
-                  }`}
+                  className={`timeline-event ${m.kind === "detected" ? "timeline-event-detected" : ""}`}
                   style={{ left: `${pctX(m.index, len)}%` }}
                 >
-                  <Icon size={12} />
+                  <Icon size={14} />
                 </span>
               );
             })}
           </div>
-          <div className="relative">
+          {marks.length > 0 && <ul className="sr-only" aria-label="Timeline events">
+            {marks.map((mark) => <li key={`${mark.kind}-${mark.index}`}>{mark.label}</li>)}
+          </ul>}
+          <div className="timeline-rows">
             {series.map((s) => (
               <Sparkline
                 key={s.id}
@@ -73,7 +74,9 @@ export function Timeline() {
                 reported={s.reported}
                 truth={s.truth}
                 at={at}
-                height={ROW_H}
+                live={live && !stale}
+                physical={physical}
+                status={view?.nodes.find((node) => node.id === s.id)?.status}
               />
             ))}
             {len > 0 && (
@@ -90,8 +93,7 @@ export function Timeline() {
                   if (e.key === "Home") { e.preventDefault(); useLive.getState().scrubTo(0); }
                   if (e.key === "End") { e.preventDefault(); useLive.getState().goLive(); }
                 }}
-                className="absolute top-0 h-full cursor-ew-resize touch-none"
-                style={{ left: LABEL_W, right: 0 }}
+                className="timeline-scrubber"
                 onPointerDown={(e) => {
                   e.currentTarget.setPointerCapture(e.pointerId);
                   scrub(e);
@@ -99,9 +101,9 @@ export function Timeline() {
                 onPointerMove={scrub}
               >
                 <div
-                  className={`absolute top-0 h-full w-px ${cursor === null ? "bg-normal" : "bg-accent"}`}
+                  className={`timeline-playhead ${live ? "timeline-playhead-live" : ""}`}
                   style={{ left: `${pctX(at, len)}%` }}
-                />
+                ><span className="timeline-playhead-handle" /></div>
               </div>
             )}
           </div>

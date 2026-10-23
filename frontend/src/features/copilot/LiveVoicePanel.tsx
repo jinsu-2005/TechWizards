@@ -1,6 +1,7 @@
-import { Mic, MicOff, Radio, Square, Volume2, Loader2, Sparkles } from "lucide-react";
+import { Mic, MicOff, Radio, Square, Volume2, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { setLiveConversationActive, stopSpeech, useVoice } from "../../lib/voice";
+import pilotIcon from "../../assets/ai-pilot-emblem.png";
 
 type Line = { id: number; speaker: "user" | "assistant"; text: string };
 type VoiceEvent =
@@ -70,7 +71,7 @@ function playPcm(
   timeline.sources.push(source);
 }
 
-export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionChange?: (active: boolean) => void; active?: boolean } = {}) {
+export function LiveVoicePanel({ onSessionChange, onUserTranscript, active = false }: { onSessionChange?: (active: boolean) => void; onUserTranscript?: (text: string) => void; active?: boolean } = {}) {
   const voice = useVoice();
   const [phase, setPhase] = useState<"idle" | "connecting" | "live" | "ended">("idle");
   const [muted, setMuted] = useState(false);
@@ -81,6 +82,10 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [waveLevels, setWaveLevels] = useState<number[]>([4, 4, 4, 4, 4, 4, 4]);
+  const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const transcriptRef = useRef<HTMLDivElement>(null);
+  const followTranscript = useRef(true);
 
   const socket = useRef<WebSocket | null>(null);
   const context = useRef<AudioContext | null>(null);
@@ -101,6 +106,18 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
     onSessionChange?.(phase === "live" || phase === "connecting");
     setLiveConversationActive(phase === "live" || phase === "connecting");
   }, [phase, onSessionChange]);
+  useEffect(() => {
+    if (phase !== "live" || sessionStartedAt === null) return;
+    const update = () => setElapsed(Math.floor((Date.now() - sessionStartedAt) / 1000));
+    update();
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [phase, sessionStartedAt]);
+  useEffect(() => {
+    if (followTranscript.current) {
+      transcriptRef.current?.scrollTo({ top: transcriptRef.current.scrollHeight });
+    }
+  }, [lines]);
 
   useEffect(() => {
     const refresh = () => { void navigator.mediaDevices?.enumerateDevices().then(setDevices).catch(() => setDevices([])); };
@@ -173,6 +190,7 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
     isSpeakingRef.current = false;
     setIsThinking(false);
     if (message !== null) { setPhase("ended"); setStatus(message); setCanRetry(retry); }
+    setSessionStartedAt(null);
   };
   const stopRef = useRef(stop);
   stopRef.current = stop;
@@ -183,7 +201,7 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
     const previous = preserve ? groupTranscript(lines).slice(-6).map(({ speaker, text }) => ({ speaker, text })) : [];
     if (preserve) stop(null);
     setStatus("Requesting microphone access…"); setPhase("connecting");
-    if (!preserve) setLines([]);
+    if (!preserve) { setLines([]); followTranscript.current = true; }
     setCanRetry(false);
     stopped.current = false;
     mutedRef.current = false; setMuted(false);
@@ -264,11 +282,14 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
             node.connect(audioContext.destination);
             sourceNode.current = source; processor.current = node;
             setPhase("live");
+            setSessionStartedAt(Date.now());
+            setElapsed(0);
             setStatus(`Live with ${message.model}. Speak naturally; session ends after ${Math.round(message.max_seconds / 60)} minutes.`);
           })().catch(() => stop("Microphone processing could not start. Try another browser.", true));
         } else if (message.type === "transcript") {
           setLines((previous) => [...previous.slice(-47), { id: Date.now() + Math.random(), speaker: message.speaker, text: message.text }]);
           if (message.speaker === "user") {
+            onUserTranscript?.(message.text);
             setIsThinking(true);
           } else {
             setIsThinking(false);
@@ -326,13 +347,14 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
     <section className="live-voice-panel flex flex-col flex-1 min-h-0" aria-label="Live voice chat" data-state={voiceState}>
       {/* ── Status header & State indicator ── */}
       <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <Radio size={16} className="text-accent shrink-0" aria-hidden />
           <span className="font-semibold text-sm text-text">Live Voice</span>
         </div>
 
         {/* State Badge */}
         <div className="flex items-center gap-2">
+          {phase === "live" && <span className="aip-session-time" aria-label={`Session duration ${Math.floor(elapsed / 60)} minutes ${elapsed % 60} seconds`}>{String(Math.floor(elapsed / 60)).padStart(2, "0")}:{String(elapsed % 60).padStart(2, "0")}</span>}
           {voiceState === "listening" && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-normal/15 border border-normal/30 px-2.5 py-0.5 text-xs font-semibold text-normal">
               <span className="h-2 w-2 rounded-full bg-normal animate-pulse" aria-hidden />
@@ -384,7 +406,7 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
           <span className="aip-voice-ring aip-voice-ring-two" />
           <span className="aip-voice-ring aip-voice-ring-three" />
           <span className="aip-voice-core">
-            {voiceState === "muted" ? <MicOff size={25} /> : voiceState === "disconnected" ? <Sparkles size={28} /> : (
+            {voiceState === "muted" ? <MicOff size={25} /> : voiceState === "disconnected" ? <img src={pilotIcon} alt="" className="aip-emblem" /> : (
               <span className="aip-voice-bars">
                 {waveLevels.map((level, index) => (
                   <span key={index} style={{ height: `${voiceState === "speaking" || voiceState === "listening" ? Math.max(7, level * 1.35) : 8}px` }} />
@@ -395,7 +417,7 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
         </div>
         <div className="aip-voice-stage-copy">
           <span className="aip-voice-eyebrow">LIVE AUDIO SESSION</span>
-          <strong>{voiceState === "speaking" ? "AI Pilot is speaking" : voiceState === "listening" ? "Listening to you" : voiceState === "thinking" ? "Connecting the evidence" : voiceState === "muted" ? "Microphone muted" : voiceState === "disconnected" ? "Ready when you are" : "Establishing your session"}</strong>
+          <strong>{voiceState === "speaking" ? "AI Pilot is speaking" : voiceState === "listening" ? "Listening to you" : voiceState === "thinking" ? "Connecting the evidence" : voiceState === "muted" ? "Microphone muted" : voiceState === "disconnected" ? canRetry ? "Connection unavailable" : "Ready when you are" : "Establishing your session"}</strong>
           <p role="status" aria-atomic="true">{status}</p>
         </div>
       </div>
@@ -432,6 +454,13 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
             </button>
           </>
         )}
+      </div>
+
+      <div className="aip-voice-suggestions" aria-label="Suggested voice questions">
+        <span>Try asking</span>
+        <p>“Summarize anomalies”</p>
+        <p>“Explain the selected asset”</p>
+        <p>“What evidence is missing?”</p>
       </div>
       <p className="aip-voice-disclosure">While connected, microphone audio and the conversation transcript are sent to Google through this server.</p>
 
@@ -500,6 +529,11 @@ export function LiveVoicePanel({ onSessionChange, active = false }: { onSessionC
       <div className="mt-3 flex flex-1 flex-col min-h-0 border-t border-border/60 pt-2">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">Live transcript</span>
         <div
+          ref={transcriptRef}
+          onScroll={(event) => {
+            const element = event.currentTarget;
+            followTranscript.current = element.scrollHeight - element.scrollTop - element.clientHeight < 48;
+          }}
           role="log"
           aria-label="Live voice transcript"
           className="live-voice-transcript mt-1.5 flex-1 min-h-[6rem] max-h-48 overflow-y-auto space-y-2 rounded-lg border border-border/50 bg-bg/50 p-2 text-xs"

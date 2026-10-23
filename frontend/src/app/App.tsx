@@ -3,8 +3,8 @@ import { useState } from "react";
 import { Radar, Waypoints, WifiOff } from "lucide-react";
 import { CalibratingState } from "../components/ui/CalibratingState";
 import { EmptyState } from "../components/ui/EmptyState";
+import { BackendConnectionBanner } from "../components/ui/BackendConnectionBanner";
 import { IncidentToast } from "../components/ui/IncidentToast";
-import { NoticeToast } from "../components/ui/NoticeToast";
 import { Panel } from "../components/ui/Panel";
 import { AttackConsole } from "../features/console/AttackConsole";
 import { ProcessWorkspace } from "../features/investigation/ProcessWorkspace";
@@ -15,7 +15,6 @@ import { useUi, type CenterView } from "../store/ui";
 import { CopilotDrawer } from "../features/copilot/CopilotDrawer";
 import { TopBar } from "./TopBar";
 import { useLiveSourcePoll } from "./useLiveSourcePoll";
-import { useLiveStream } from "./useLiveStream";
 
 function ViewToggle() {
   const view = useUi((s) => s.view);
@@ -78,7 +77,6 @@ function Center({ live }: { live: boolean }) {
 
 export function App() {
   const [mobilePanel, setMobilePanel] = useState("process");
-  useLiveStream();
   useLiveSourcePoll();
   const hasLatest = useLive((s) => s.latest !== null);
   const conn = useLive((s) => s.conn);
@@ -88,10 +86,10 @@ export function App() {
   return (
     <div className="dashboard-shell">
       <TopBar />
+      {(!hasLatest || conn !== "live") && <BackendConnectionBanner />}
       {stale && !replaying && <div role="status" className="flex flex-wrap items-center gap-2 rounded-md border border-suspect/40 bg-suspect/10 px-3 py-2 text-sm text-suspect"><WifiOff size={16} aria-hidden /><span>Connection interrupted. Showing last received readings ({ageSeconds}s ago).</span></div>}
       {replaying && <div role="status" className="rounded-md border border-accent/30 bg-accent/10 px-3 py-2 text-sm text-accent">Historical replay · readings are from the selected point in time.</div>}
       <IncidentToast />
-      <NoticeToast />
       <CopilotDrawer />
       <div role="group" aria-label="Monitoring panels" className="monitoring-panel-switch">{([["process", "Process"], ["scenario", "Test scenario"], ["incident", "Incident"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={mobilePanel === value} onClick={() => setMobilePanel(value)}>{label}</button>)}</div>
       <main id="main-workspace" tabIndex={-1} data-mobile-panel={mobilePanel} className={`dashboard-main ${stale && !replaying ? "stale-telemetry" : ""}`}>

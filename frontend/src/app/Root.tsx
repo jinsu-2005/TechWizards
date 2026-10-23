@@ -3,6 +3,8 @@ import { App } from "./App";
 import { handleWorkspaceLink, subscribeNavigation } from "../lib/navigation";
 import { CopilotDrawer } from "../features/copilot/CopilotDrawer";
 import { WorkspaceHeader } from "../components/ui/WorkspaceHeader";
+import { NoticeToast } from "../components/ui/NoticeToast";
+import { useLiveStream } from "./useLiveStream";
 
 // Tiny pathname switch instead of a router dependency. The metrics page (and ECharts) load lazily.
 const MetricsPage = lazy(() =>
@@ -14,7 +16,16 @@ const SocPage = lazy(() => import("../features/investigation/SocPage").then((m) 
 const VoiceSettingsPage = lazy(() => import("../features/voice/VoiceSettingsPage").then((m) => ({ default: m.VoiceSettingsPage })));
 
 function WorkspaceLoading({ current }: { current: string }) {
-  return <div className="p-3 sm:p-5"><WorkspaceHeader current={current} /><div role="status" aria-busy="true" className="mt-4 rounded-xl border border-border bg-surface p-6 text-sm text-muted">Loading workspace…</div></div>;
+  return (
+    <div className="content-page bg-bg">
+      <div className="page-container flex flex-col gap-3 sm:gap-3.5">
+        <WorkspaceHeader current={current} />
+        <div role="status" aria-busy="true" className="mt-4 rounded-xl border border-border bg-surface p-6 text-sm text-muted">
+          Loading workspace…
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function Route() {
@@ -37,6 +48,7 @@ function Route() {
 }
 
 export function Root() {
+  useLiveStream();
   const href = useSyncExternalStore(subscribeNavigation, () => window.location.pathname + window.location.search);
   const previous = useRef(href);
   const container = useRef<HTMLDivElement>(null);
@@ -55,5 +67,5 @@ export function Root() {
     return () => observer.disconnect();
   }, [href]);
   const path = href.split("?")[0] ?? "/";
-  return <div ref={container} onClick={handleWorkspaceLink}><div key={href} id="workspace-content" tabIndex={-1}><Route /></div>{["/alerts", "/assets", "/lab", "/metrics", "/settings"].includes(path) && <CopilotDrawer />}</div>;
+  return <div ref={container} onClick={handleWorkspaceLink}><div key={href} id="workspace-content" tabIndex={-1}><Route /></div><NoticeToast />{["/alerts", "/assets", "/lab", "/metrics", "/settings"].includes(path) && <CopilotDrawer />}</div>;
 }

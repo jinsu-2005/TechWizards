@@ -57,13 +57,50 @@ export function PulseEdgeView(props: EdgeProps<PulseEdgeT>) {
   const [curve] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition });
   const d = data?.feedback ? `M ${sourceX},${sourceY} C ${sourceX + 60},${sourceY - 110} ${targetX - 60},${targetY - 110} ${targetX},${targetY}` : curve;
   const onPath = data?.delay !== null && data?.delay !== undefined;
-  return <g>
-    <title>{`${props.source} → ${props.target} · ${data?.uncertain ? "Direction uncertain" : onPath ? `Inferred effect, source onset +${data?.onset ?? 0}s (illustrative animation)` : data?.learned ? "Learned statistical association" : "Configured topology"}`}</title>
-    <BaseEdge path={d} markerEnd={markerEnd} style={{
-      stroke: data?.uncertain ? "var(--suspect)" : onPath ? "var(--origin)" : "var(--muted)",
-      strokeOpacity: data?.dimmed ? .06 : onPath ? .85 : data?.learned ? .17 : .5,
-      strokeWidth: onPath ? 2 : 1, strokeDasharray: data?.uncertain ? "8 5" : data?.learned ? "4 4" : undefined }} />
-    {onPath && !data?.uncertain && <path d={d} pathLength={1} className="graph-trace" stroke="var(--origin)" strokeWidth={3} strokeLinecap="round" fill="none"
-      style={{ animationDuration: `${data.cycle ?? 7}s`, animationDelay: `${(data.phase ?? 0) * (data.cycle ?? 7)}s` }} />}
-  </g>;
+  const isHealthyActive = !onPath && !data?.dimmed && !data?.uncertain && !data?.learned;
+
+  return (
+    <g>
+      <title>{`${props.source} → ${props.target} · ${data?.uncertain ? "Direction uncertain" : onPath ? `Inferred effect, source onset +${data?.onset ?? 0}s (illustrative animation)` : data?.learned ? "Learned statistical association" : "Configured topology"}`}</title>
+      <BaseEdge
+        path={d}
+        markerEnd={markerEnd}
+        style={{
+          stroke: data?.uncertain ? "var(--suspect)" : onPath ? "var(--origin)" : "var(--muted)",
+          strokeOpacity: data?.dimmed ? 0.08 : onPath ? 0.9 : data?.learned ? 0.2 : 0.55,
+          strokeWidth: onPath ? 2.5 : 1.25,
+          strokeDasharray: data?.uncertain ? "8 5" : data?.learned ? "4 4" : undefined,
+        }}
+      />
+      {/* Ambient process telemetry data flow */}
+      {isHealthyActive && (
+        <path
+          d={d}
+          pathLength={1}
+          className="graph-ambient-particle"
+          stroke="var(--accent)"
+          strokeWidth={2}
+          strokeLinecap="round"
+          fill="none"
+          style={{ animationDelay: `${((sourceX + sourceY) % 300) / 100}s` }}
+        />
+      )}
+      {/* Dynamic threat propagation wave */}
+      {onPath && !data?.uncertain && (
+        <path
+          d={d}
+          pathLength={1}
+          className="graph-trace"
+          stroke="var(--origin)"
+          strokeWidth={3.5}
+          strokeLinecap="round"
+          fill="none"
+          style={{
+            animationDuration: `${Math.min(data.cycle ?? 7, 3.2)}s`,
+            animationDelay: `${(data.phase ?? 0) * (data.cycle ?? 7)}s`,
+          }}
+        />
+      )}
+    </g>
+  );
 }

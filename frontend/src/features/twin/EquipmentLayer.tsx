@@ -6,13 +6,14 @@ import { NodeBadge } from "./NodeBadge";
 interface Props {
   nodes: ReadonlyMap<string, NodeState>;
   topo: ReadonlyMap<string, TopologyNode>;
+  onFocusFilter?: () => void;
   /** LIVE only: node_id -> age of its last reading, for the quality tooltip. */
   ageByNode?: ReadonlyMap<string, number | null>;
 }
 
 const truth = (n: NodeState | undefined): number => n?.truth ?? n?.value ?? 0;
 
-export function Equipment({ nodes, topo, ageByNode }: Props) {
+export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
   const get = (id: string) => nodes.get(id);
   const lit101 = get("LIT101");
   const lit301 = get("LIT301");
@@ -166,6 +167,24 @@ export function Equipment({ nodes, topo, ageByNode }: Props) {
       >
         FIL-01 · FILTER
       </text>
+      {onFocusFilter && <g
+        role="button"
+        tabIndex={0}
+        aria-label="Zoom to FIL-01 filter"
+        className="twin-filter-target"
+        onClick={onFocusFilter}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onFocusFilter();
+          }
+        }}
+      >
+        <title>Zoom to FIL-01 filter</title>
+        <rect className="twin-filter-outline" x={FILTER.x - 2} y={FILTER.y - 6}
+          width={FILTER.w + 4} height={FILTER.h + 12} rx={10} fill="transparent"
+          stroke="var(--accent)" strokeWidth={2} />
+      </g>}
       {mv && <Valve at={ANCHOR.MV101} open={truth(mv)} status={mv.status} />}
       {p101 && <Pump at={ANCHOR.P101} speed={truth(p101)} status={p101.status} />}
       {p301 && <Pump at={ANCHOR.P301} speed={truth(p301)} status={p301.status} />}

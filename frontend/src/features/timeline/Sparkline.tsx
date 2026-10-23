@@ -1,79 +1,73 @@
 import { formatValue } from "../../lib/format";
-import { seriesPath } from "../../lib/replay";
+import { indexToX, seriesPath } from "../../lib/replay";
 import { useUi } from "../../store/ui";
 
-/** Virtual drawing width; the SVG stretches to its container, so no measuring is needed. */
 const VW = 1000;
+const VH = 30;
 
 interface Props {
   id: string;
   reported: readonly number[];
   truth: readonly number[];
-  /** Sample index of the value shown in the label (cursor or newest). */
   at: number;
-  height: number;
+  live: boolean;
+  physical: boolean;
+  status?: string;
 }
 
-/** Reported value (solid) over physical truth (dashed); a gap between them is spoofing. */
-export function Sparkline({ id, reported, truth, at, height }: Props) {
+/** Each path is drawn from received samples. Motion is limited to the live sample marker. */
+export function Sparkline({ id, reported, truth, at, live, physical, status }: Props) {
   const selected = useUi((s) => s.selectedAsset === id);
   const select = useUi((s) => s.selectAsset);
-  const all = [...reported, ...truth];
+  const all = physical ? [...reported, ...truth] : [...reported];
   const min = all.length ? Math.min(...all) : 0;
   const max = all.length ? Math.max(...all) : 1;
-  const pad = (max - min) * 0.1 || 0.5;
+  const pad = (max - min) * 0.13 || 0.5;
   const lo = min - pad;
   const hi = max + pad;
-  const shown = reported[at];
-  const gradId = `spark-grad-${id}`;
+  const sample = Math.min(at, reported.length - 1);
+  const shown = reported[sample];
+  const x = sample < 0 ? 0 : indexToX(sample, reported.length, Math.max(2, reported.length), VW);
+  const y = shown === undefined ? VH / 2 : VH - ((shown - lo) / (hi - lo)) * VH;
+  const path = seriesPath(reported, Math.max(2, reported.length), VW, VH, lo, hi);
+  const gradId = `timeline-fill-${id}`;
+  const statusName = status && status !== "normal" ? status : null;
 
   return (
-    <div className={`grid grid-cols-[148px_1fr] items-center border-b border-border/30 last:border-b-0 hover:bg-surface/40 transition-colors ${selected ? "bg-accent/10" : ""}`} style={{ height }}>
-      <div className="flex items-baseline gap-2 pl-2 font-mono leading-none">
-        <button aria-label={`Inspect ${id} from timeline`} aria-pressed={selected} className="w-14 text-left text-xs font-semibold text-text/80 hover:text-accent" onClick={() => select(id)}>{id}</button>
-        <span className="whitespace-nowrap text-xs font-mono font-medium text-accent">
+    <div className={`timeline-row ${selected ? "timeline-row-selected" : ""}`}>
+      <div className="timeline-row-label">
+        <button type="button" aria-label={`Inspect ${id} from timeline`} aria-pressed={selected}
+          onClick={() => select(id)} title={`Inspect ${id}`} className="timeline-tag">{id}</button>
+        <span className={`timeline-value ${statusName ? "timeline-value-alert" : ""}`}>
           {shown === undefined ? "–" : formatValue(id, shown)}
         </span>
+        <span className={`timeline-status-dot ${statusName ? "timeline-status-alert" : ""}`}
+          role="img" aria-label={statusName ? `${statusName} status` : "normal status"} title={statusName ?? "normal"} />
       </div>
-      <div className="relative h-full w-full">
-        <svg
-          viewBox={`0 0 ${VW} ${height}`}
-          preserveAspectRatio="none"
-          className="h-full w-full min-w-0"
-          aria-hidden
-        >
+      <div className="timeline-plot">
+        <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none" className="timeline-svg" aria-hidden>
           <defs>
-            <linearGradient id={gradId} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity={0.0} />
+            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--accent)" stopOpacity=".20" />
+              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
             </linearGradient>
           </defs>
-
-          {/* Oscilloscope Grid Guides */}
-          <line x1={250} y1={0} x2={250} y2={height} stroke="var(--border)" strokeWidth={0.8} strokeDasharray="2 4" strokeOpacity={0.5} />
-          <line x1={500} y1={0} x2={500} y2={height} stroke="var(--border)" strokeWidth={0.8} strokeDasharray="2 4" strokeOpacity={0.5} />
-          <line x1={750} y1={0} x2={750} y2={height} stroke="var(--border)" strokeWidth={0.8} strokeDasharray="2 4" strokeOpacity={0.5} />
-          <line x1={0} y1={height / 2} x2={VW} y2={height / 2} stroke="var(--border)" strokeWidth={0.6} strokeDasharray="4 6" strokeOpacity={0.4} />
-
-          {/* Physical Truth Waveform (Dashed Reference) */}
-          <path
-            d={seriesPath(truth, Math.max(2, reported.length), VW, height, lo, hi)}
-            fill="none"
-            stroke="var(--muted)"
-            strokeWidth={1}
-            strokeDasharray="3 3"
-            vectorEffect="non-scaling-stroke"
-          />
-
-          {/* Reported Live Waveform */}
-          <path
-            d={seriesPath(reported, Math.max(2, reported.length), VW, height, lo, hi)}
-            fill="none"
-            stroke="var(--accent)"
-            strokeWidth={1.5}
-            vectorEffect="non-scaling-stroke"
-          />
+          {[250, 500, 750].map((guide) => <line key={guide} x1={guide} x2={guide} y1="0" y2={VH}
+            stroke="var(--border)" strokeOpacity=".55" strokeDasharray="2 5" vectorEffect="non-scaling-stroke" />)}
+          <line x1="0" x2={VW} y1={VH / 2} y2={VH / 2} stroke="var(--border)" strokeOpacity=".55"
+            strokeDasharray="3 6" vectorEffect="non-scaling-stroke" />
+          {path && <path d={`${path} L${indexToX(reported.length - 1, reported.length, Math.max(2, reported.length), VW).toFixed(1)} ${VH} L0 ${VH} Z`} fill={`url(#${gradId})`} />}
+          {physical && <path d={seriesPath(truth, Math.max(2, reported.length), VW, VH, lo, hi)}
+            fill="none" stroke="var(--muted)" strokeOpacity=".82" strokeWidth="1.25"
+            strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />}
+          <path d={path} fill="none" stroke="var(--accent)" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+          {shown !== undefined && <>
+            <circle cx={x} cy={y} r="5" fill="var(--surface)" stroke="var(--accent)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+            <circle cx={x} cy={y} r="2" fill="var(--accent)" />
+          </>}
         </svg>
+        {live && shown !== undefined && <span className="timeline-live-glow" style={{ left: `${(x / VW) * 100}%`, top: `${(y / VH) * 100}%` }} aria-hidden />}
       </div>
     </div>
   );

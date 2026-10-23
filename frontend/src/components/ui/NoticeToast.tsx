@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Lock } from "lucide-react";
+import { CheckCircle2, Lock } from "lucide-react";
 import { useEffect } from "react";
 import { useUi } from "../../store/ui";
 
@@ -24,10 +24,10 @@ export function NoticeToast() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex items-center gap-2 rounded border border-suspect bg-surface px-3 py-2 font-mono text-xs"
+            className={`flex max-w-[min(34rem,calc(100vw-2rem))] items-start gap-2 rounded border bg-surface px-3 py-2 text-xs shadow-lg ${notice.tone === "success" ? "border-normal/50 text-text" : "border-suspect text-text"}`}
           >
-            <Lock size={14} className="text-suspect" aria-hidden />
-            {notice.text}
+            {notice.tone === "success" ? <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-normal" aria-hidden /> : <Lock size={14} className="mt-0.5 shrink-0 text-suspect" aria-hidden />}
+            <span>{notice.text}</span>
           </motion.div>
         )}
       </AnimatePresence>

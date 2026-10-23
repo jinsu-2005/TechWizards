@@ -1,5 +1,8 @@
 .env
 /data/investigations.sqlite*
+/data/live_incidents.sqlite*
+*.sqlite-wal
+*.sqlite-shm
 /data/emulator_manifest.json
 /data/emulator_manifest.tmp
 __pycache__/

@@ -128,15 +128,16 @@ export function MetricsPage() {
   const rows = useMemo(() => (load.state === "ready" ? f1Rows(load.metrics) : []), [load]);
 
   return (
-    <div className="metrics-page content-page page-container flex flex-col gap-3 sm:gap-3.5">
-      <WorkspaceHeader current="/metrics" />
+    <div className="metrics-page content-page bg-bg">
+      <div className="page-container flex flex-col gap-3 sm:gap-3.5">
+        <WorkspaceHeader current="/metrics" />
       <div className="page-heading">
         <div className="page-heading-main">
-          <h1>Benchmark evaluation &amp; telemetry metrics</h1>
+          <h1>Benchmark Evaluations &amp; Threat Metrics</h1>
           <span className="hidden sm:inline text-border">·</span>
           <p className="page-heading-context">
             <span className="font-mono text-xs uppercase px-1.5 py-0.5 rounded border border-border bg-surface text-text font-semibold">GDN</span>
-            <span>Recorded evaluations across tested datasets and scenarios</span>
+            <span>Detection F1, localization accuracy &amp; stress benchmarks</span>
           </p>
         </div>
         <div className="page-heading-actions">
@@ -146,8 +147,7 @@ export function MetricsPage() {
           </a>
         </div>
       </div>
-      <main id="main-workspace" tabIndex={-1} className="flex min-h-0 flex-1 flex-col gap-2.5">
-        <RobustnessPanel />
+      <main id="main-workspace" tabIndex={-1} className="flex min-h-0 flex-1 flex-col gap-3.5">
         {load.state === "loading" && <EmptyState icon={LoaderCircle} text="Loading Benchmark Metrics..." />}
         {load.state === "missing" && <EmptyState icon={FileX} text="No benchmark results yet. Run an evaluation to populate this page." />}
         {load.state === "ready" && (
@@ -155,27 +155,34 @@ export function MetricsPage() {
             <Cards m={load.metrics} />
             {load.metrics.hai && <HaiCards h={load.metrics.hai} />}
             {load.metrics.live && <LiveCards l={load.metrics.live} />}
-            <BaselineComparison />
-            <section
-              aria-label="F1 by scenario"
-              className="flex min-h-[360px] flex-1 flex-col rounded-lg border border-border/70 bg-surface p-4  shadow-sm"
-            >
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
-                <div className="flex items-center gap-2">
-                  <BarChart3 size={15} className="text-accent" />
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted">
-                    Detection F1 Performance vs Baseline by Threat Scenario
-                  </span>
+
+            <div className="grid gap-3.5 lg:grid-cols-2">
+              <section
+                aria-label="F1 by scenario"
+                className="flex min-h-[360px] flex-col rounded-xl border border-border bg-surface p-4 shadow-sm"
+              >
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 size={15} className="text-accent" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+                      Detection F1 vs Baseline by Scenario
+                    </span>
+                  </div>
+                  <span className="font-mono text-xs text-muted">Max 1.00</span>
                 </div>
-                <span className="font-mono text-xs text-muted">Higher is better (Max 1.00)</span>
-              </div>
-              <div className="min-h-[300px] flex-1">
-                <MetricsChart rows={rows} />
-              </div>
-            </section>
+                <div className="min-h-[300px] flex-1">
+                  <MetricsChart rows={rows} />
+                </div>
+              </section>
+
+              <BaselineComparison />
+            </div>
+
+            <RobustnessPanel />
           </>
         )}
       </main>
+      </div>
     </div>
   );
 }

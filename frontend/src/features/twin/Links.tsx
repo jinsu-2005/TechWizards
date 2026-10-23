@@ -25,11 +25,19 @@ export function Links({ nodes, incident }: Props) {
                   d={l.d}
                   className={dur === null ? "" : "flow"}
                   stroke="var(--accent)"
-                  strokeOpacity={dur === null ? 0.2 : 0.9}
-                  strokeWidth={2.5}
-                  strokeDasharray="4 8"
+                  strokeOpacity={dur === null ? 0.2 : 0.95}
+                  strokeWidth={2.75}
+                  strokeDasharray="6 10"
+                  strokeLinecap="round"
                   fill="none"
-                  style={dur === null ? undefined : { animationDuration: `${dur}s` }}
+                  style={
+                    dur === null
+                      ? undefined
+                      : {
+                          animationDuration: `${dur}s`,
+                          filter: "drop-shadow(0 0 4px rgb(var(--accent-rgb) / 0.8))",
+                        }
+                  }
                 />
               </>
             ) : (

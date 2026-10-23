@@ -130,21 +130,40 @@ body {
   }
 }
 
-/* Process graph: a staggered cycle illustrates inferred order, followed by a quiet interval. */
-.graph-trace { stroke-dasharray: .09 1; opacity: 0; pointer-events: none; animation: graph-travel 7s linear infinite backwards; }
+/* Process graph: enhanced dynamic particle flow and threat propagation waves */
+.graph-trace {
+  stroke-dasharray: .18 1;
+  opacity: 0;
+  pointer-events: none;
+  animation: graph-travel 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  filter: drop-shadow(0 0 5px var(--origin));
+}
+.graph-ambient-particle {
+  stroke-dasharray: .08 .92;
+  opacity: 0;
+  pointer-events: none;
+  animation: graph-ambient-travel 3.8s linear infinite;
+  filter: drop-shadow(0 0 3px rgb(var(--accent-rgb) / .6));
+}
 @keyframes graph-travel {
   0% { stroke-dashoffset: .1; opacity: 0; }
-  3% { opacity: .9; }
-  28% { stroke-dashoffset: -1; opacity: .9; }
-  32%, 100% { stroke-dashoffset: -1; opacity: 0; }
+  8% { opacity: .95; }
+  60% { stroke-dashoffset: -.9; opacity: .95; }
+  75%, 100% { stroke-dashoffset: -1; opacity: 0; }
+}
+@keyframes graph-ambient-travel {
+  0% { stroke-dashoffset: 0; opacity: 0; }
+  12% { opacity: .75; }
+  80% { opacity: .75; }
+  100% { stroke-dashoffset: -1; opacity: 0; }
 }
 .graph-origin { animation: graph-halo var(--graph-cycle, 7s) ease-out infinite; }
-@keyframes graph-halo { 0%, 38%, 100% { box-shadow: 0 0 0 3px rgb(var(--origin-rgb) / .12); } 15% { box-shadow: 0 0 0 7px rgb(var(--origin-rgb) / .2); } }
-.graph-paused .graph-trace, .graph-paused .graph-origin,
-.stale-telemetry .graph-trace, .stale-telemetry .graph-origin, .stale-telemetry .origin-halo { animation-play-state: paused; }
+@keyframes graph-halo { 0%, 38%, 100% { box-shadow: 0 0 0 3px rgb(var(--origin-rgb) / .12); } 15% { box-shadow: 0 0 0 8px rgb(var(--origin-rgb) / .28); } }
+.graph-paused .graph-trace, .graph-paused .graph-ambient-particle, .graph-paused .graph-origin,
+.stale-telemetry .graph-trace, .stale-telemetry .graph-ambient-particle, .stale-telemetry .graph-origin, .stale-telemetry .origin-halo { animation-play-state: paused; }
 .process-graph .react-flow__node-stage { pointer-events: none !important; }
 .process-graph .react-flow__minimap { max-width: 140px; max-height: 90px; border: 1px solid var(--border); border-radius: 8px; }
-@media (prefers-reduced-motion: reduce) { .graph-trace, .graph-origin { animation: none !important; } .graph-trace { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .graph-trace, .graph-ambient-particle, .graph-origin { animation: none !important; } .graph-trace, .graph-ambient-particle { opacity: 0; } }
 
 .hai-progress { appearance: none; border: 0; border-radius: 999px; overflow: hidden; background: var(--border); color: var(--accent); }
 .hai-progress::-webkit-progress-bar { background: var(--border); }
@@ -154,6 +173,18 @@ body {
 /* Screenshot review: retain a useful canvas on short windows and at browser zoom. */
 .process-canvas { overflow: hidden; }
 .process-primary { height: 100%; overflow: hidden; }
+.twin-tool-button { display: inline-flex; min-width: 2.5rem; min-height: 2.5rem; align-items: center; justify-content: center; gap: .35rem; padding: .35rem .55rem; border: 1px solid var(--border); border-radius: .5rem; color: var(--text); background: var(--surface); font-size: .75rem; transition: border-color .15s, background .15s, color .15s; }
+.twin-tool-button:hover:not(:disabled), .twin-tool-button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: rgb(var(--accent-rgb) / .09); }
+.twin-tool-button:disabled { cursor: not-allowed; opacity: .4; }
+.twin-filter-control { font-family: ui-monospace, monospace; font-weight: 600; }
+.twin-viewport { overscroll-behavior: contain; }
+.twin-pan-enabled { cursor: grab; touch-action: none; user-select: none; }
+.twin-pan-enabled.twin-dragging { cursor: grabbing; }
+.twin-filter-target { cursor: zoom-in; outline: none; }
+.twin-filter-outline { opacity: 0; transition: opacity .15s ease; }
+.twin-filter-target:hover .twin-filter-outline, .twin-filter-target:focus-visible .twin-filter-outline { opacity: .9; }
+@media (max-width: 40rem) { .twin-toolbar { gap: .25rem; } .twin-toolbar > span:first-child { flex-basis: 100%; } .twin-filter-control { min-width: 3.5rem; padding-inline: .35rem; font-size: .68rem; } .twin-filter-control svg { display: none; } }
+@media (max-width: 21rem) { .twin-toolbar { padding-inline: .375rem; } .twin-filter-control { min-width: 2.5rem; } .twin-filter-control svg { display: block; } .twin-filter-control span { display: none; } }
 .graph-toolbar { max-height: 42%; overflow-y: auto; }
 .graph-options summary::marker { color: var(--accent); }
 .process-graph input::placeholder { color: var(--muted); opacity: 1; }
@@ -163,6 +194,17 @@ body {
 .copilot-icon-button:hover { background: var(--bg); color: var(--text); }
 .copilot-drawer :is(button,a,summary,textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .workspace-nav > summary::-webkit-details-marker { display: none; }
+.backend-connection-banner { display: flex; align-items: center; gap: .85rem; min-height: 4rem; padding: .75rem 1rem; border: 1px solid rgb(var(--accent-rgb) / .32); border-radius: .75rem; color: var(--text); background: linear-gradient(100deg, rgb(var(--accent-rgb) / .12), var(--surface)); }
+.backend-connection-banner strong { display: block; font-size: .82rem; font-weight: 650; }
+.backend-connection-banner p { margin-top: .15rem; color: var(--muted); font-size: .72rem; line-height: 1.4; }
+.backend-connection-symbol { position: relative; display: grid; flex: none; place-items: center; width: 2.25rem; height: 2.25rem; border: 1px solid rgb(var(--accent-rgb) / .35); border-radius: .7rem; color: var(--accent); background: rgb(var(--accent-rgb) / .1); }
+.backend-connection-spinner { position: absolute; right: -.35rem; bottom: -.3rem; padding: .08rem; border-radius: 50%; color: var(--accent); background: var(--surface); animation: spin 1.5s linear infinite; }
+.backend-connection-dots { display: flex; gap: .25rem; margin-left: auto; }
+.backend-connection-dots i { width: .3rem; height: .3rem; border-radius: 50%; background: var(--accent); animation: backend-pulse 1.2s ease-in-out infinite; }
+.backend-connection-dots i:nth-child(2) { animation-delay: .2s; }
+.backend-connection-dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes backend-pulse { 0%, 80%, 100% { opacity: .3; transform: scale(.75); } 40% { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .backend-connection-spinner, .backend-connection-dots i { animation: none; } }
 @media (max-width: 639px) {
   .workspace-nav nav a, .workspace-nav nav button { justify-content: flex-start; }
 }

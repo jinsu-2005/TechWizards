@@ -1,5 +1,5 @@
 import { useAccess } from "../auth/access";
-import { Crosshair, Rocket, RotateCcw, WifiOff } from "lucide-react";
+import { CheckCircle2, Crosshair, LoaderCircle, Rocket, RotateCcw, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Panel } from "../../components/ui/Panel";
@@ -7,7 +7,7 @@ import { postAttack, postReset } from "../../lib/api";
 import { SCENARIOS, SCENARIO_LABEL, magnitudeFor, validTargets } from "../../lib/scenarios";
 import type { Scenario } from "../../lib/types";
 import { useLive } from "../../store/live";
-import { noticeIfLocked } from "../../store/ui";
+import { noticeIfLocked, useUi } from "../../store/ui";
 import { HaiReplayPanel } from "./HaiReplayPanel";
 import { MagnitudeField } from "./MagnitudeField";
 import { NodeScores } from "./NodeScores";
@@ -25,6 +25,8 @@ export function AttackConsole() {
   const [target, setTarget] = useState("LIT101");
   const [magnitude, setMagnitude] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [launchState, setLaunchState] = useState<"idle" | "launched" | "failed">("idle");
+  const [attackId, setAttackId] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
   const [note, setNote] = useState<{ text: string; error: boolean } | null>(null);
 
@@ -36,16 +38,29 @@ export function AttackConsole() {
     if (node && node.id !== target) setTarget(node.id);
   }, [node, target]);
   useEffect(() => {
+    if (node) useUi.getState().setScenarioContext(scenario, node.id);
+  }, [scenario, node]);
+  useEffect(() => {
     setMagnitude(input.kind === "none" ? 0 : input.value);
   }, [input]);
+  useEffect(() => {
+    setLaunchState("idle");
+    setAttackId(null);
+    setNote(null);
+  }, [scenario, node?.id, magnitude]);
 
   const launch = async () => {
     if (!node || calibrating || busy || resetting) return;
     setBusy(true);
+    setLaunchState("idle");
+    setNote(null);
     try {
-      await postAttack({ scenario, target: node.id, magnitude });
-      setNote({ text: "Scenario launched. Watch the process and incident panel for the response.", error: false });
+      const result = await postAttack({ scenario, target: node.id, magnitude });
+      setAttackId(result.attack_id);
+      setLaunchState("launched");
+      setNote({ text: `Test accepted for ${node.id}. Watch the process and incident panel for its effect.`, error: false });
     } catch (e) {
+      setLaunchState("failed");
       if (!noticeIfLocked(e)) setNote({ text: e instanceof Error ? e.message : "Failed", error: true });
     } finally {
       setBusy(false);
@@ -56,6 +71,7 @@ export function AttackConsole() {
     setResetting(true);
     try {
       await postReset(); clear();
+      setLaunchState("idle"); setAttackId(null);
       setNote({ text: "Scenario reset. Saved investigation records are retained.", error: false });
     } catch (cause) {
       if (!noticeIfLocked(cause)) setNote({ text: cause instanceof Error ? cause.message : "Reset failed. Your readings have been retained.", error: true });
@@ -102,8 +118,8 @@ export function AttackConsole() {
             disabled={!canAdmin || busy || resetting || !node || calibrating}
             className="flex h-10 min-h-10 w-full shrink-0 items-center justify-center gap-2 rounded-md bg-accent px-3 text-sm font-semibold leading-none text-on-accent shadow-sm hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50"
           >
-            <Rocket size={16} className="shrink-0" aria-hidden />
-            {calibrating ? "Calibration in progress" : busy ? "Launching…" : "Launch"}
+            {busy ? <LoaderCircle size={16} className="shrink-0 animate-spin motion-reduce:animate-none" aria-hidden /> : launchState === "launched" ? <CheckCircle2 size={16} className="shrink-0" aria-hidden /> : <Rocket size={16} className="shrink-0" aria-hidden />}
+            {calibrating ? "Calibration in progress" : busy ? "Launching test…" : launchState === "launched" ? "Launch again" : "Launch attack"}
           </button>
           <button
             type="button"
@@ -114,14 +130,10 @@ export function AttackConsole() {
             <RotateCcw size={14} aria-hidden />
             {resetting ? "Resetting…" : "Reset"}
           </button>
-          {note && (
-            <span
-              role="status"
-              className={`text-xs leading-relaxed ${note.error ? "text-origin" : "text-normal"}`}
-            >
-              {note.text}
-            </span>
-          )}
+          {(busy || note) && <div role={note?.error ? "alert" : "status"} aria-live="polite" className={`attack-launch-status rounded-md border px-2.5 py-2 text-xs leading-relaxed ${note?.error ? "border-origin/40 bg-origin/10 text-origin" : "border-accent/30 bg-accent/10 text-text"}`}>
+            <span className="flex items-start gap-2">{busy ? <LoaderCircle size={14} className="mt-0.5 shrink-0 animate-spin motion-reduce:animate-none" aria-hidden /> : launchState === "launched" ? <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-normal" aria-hidden /> : null}<span>{busy ? `Sending ${SCENARIO_LABEL[scenario]} to ${node?.id}…` : note?.text}</span></span>
+            {attackId && launchState === "launched" && <span className="mt-1 block break-all font-mono text-[10px] text-muted">Test ID: {attackId}</span>}
+          </div>}
           {calibrating ? <p className="text-xs leading-relaxed text-muted">Test attacks and scores are unavailable until a LIVE detector is ready. Keep the emulator in normal operation while collecting the baseline.</p> : <NodeScores />}
         </form>
       )}

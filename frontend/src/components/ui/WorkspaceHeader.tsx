@@ -1,8 +1,11 @@
-import { Activity, Bell, Boxes, ChartColumn, Database, FlaskConical, Menu, Search, Settings, ShieldCheck, Sparkles, Volume2, VolumeX, X } from "lucide-react";
+import { Activity, Bell, Boxes, ChartColumn, Database, FlaskConical, Menu, Search, Settings, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { navigate } from "../../lib/navigation";
 import { useUi } from "../../store/ui";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import pilotIcon from "../../assets/ai-pilot-emblem.png";
+
+import { useLive } from "../../store/live";
 
 const NAV_PAGES = [
   { href: "/", label: "Monitoring", icon: Activity },
@@ -19,6 +22,8 @@ export function WorkspaceHeader({ current }: { current: string }) {
   const toggleSound = useUi((s) => s.toggleSound);
   const copilot = useUi((s) => s.copilotOpen);
   const toggleCopilot = useUi((s) => s.toggleCopilot);
+  const incident = useLive((s) => s.latest?.incident);
+  const isIncidentActive = incident && ["open", "localizing"].includes(incident.status);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -51,15 +56,24 @@ export function WorkspaceHeader({ current }: { current: string }) {
         {/* Brand */}
         <a href="/" className="workspace-brand" aria-label="AttackTrace monitoring home">
           <span className="brand-glyph"><ShieldCheck size={20} aria-hidden /></span>
-          <span><strong>AttackTrace</strong><span className="brand-caption">Process security workspace</span></span>
+          <span>
+            <strong>AttackTrace</strong>
+            <span className="brand-caption flex items-center gap-1.5">
+              Process security
+              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-normal animate-pulse" title="Telemetry live 2 Hz" />
+            </span>
+          </span>
         </a>
 
         {/* Primary nav – wide screens */}
         <nav aria-label="Workspace navigation" className="workspace-links">
           {NAV_PAGES.map(({ href, label, icon: Icon }) => (
-            <a key={href} href={href} aria-current={href === current ? "page" : undefined}>
+            <a key={href} href={href} aria-current={href === current ? "page" : undefined} className="relative">
               <Icon size={15} aria-hidden />
               <span>{label}</span>
+              {href === "/alerts" && isIncidentActive && (
+                <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-origin animate-ping shadow-[0_0_6px_var(--origin)]" />
+              )}
             </a>
           ))}
         </nav>
@@ -85,7 +99,7 @@ export function WorkspaceHeader({ current }: { current: string }) {
             aria-pressed={copilot}
             onClick={toggleCopilot}
           >
-            <Sparkles size={16} aria-hidden />
+            <img src={pilotIcon} alt="" className="aip-trigger-emblem" />
             <span className="copilot-label">AI Pilot</span>
           </button>
 

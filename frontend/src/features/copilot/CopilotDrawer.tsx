@@ -1,10 +1,10 @@
 import {
   Send, X, Wrench, RefreshCw, Plus, ArrowDown, FileSearch,
   GitBranch, BookOpen, ArrowUpRight, Mic, MicOff, Volume2,
-  VolumeX, Settings, Sparkles, Radio, AlertCircle,
+  Settings, Radio, AlertCircle, Activity, ListChecks,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { postCopilotChat, postIsolate } from "../../lib/api";
+import { controlHaiReplay, getTopology, postAttack, postCopilotChat, postIsolate, postReset, setMode } from "../../lib/api";
 import type { CopilotChatResponse, Incident, EvidenceEvent } from "../../lib/types";
 import { useFreshness } from "../../app/useFreshness";
 import { selectView, useLive } from "../../store/live";
@@ -16,6 +16,9 @@ import { useVoice, parseVoiceCommand, speak, stopSpeech } from "../../lib/voice"
 import { startBrowserRecognition, startServerRecording } from "../../lib/voiceInput";
 import { navigate } from "../../lib/navigation";
 import { LiveVoicePanel } from "./LiveVoicePanel";
+import { SCENARIO_LABEL } from "../../lib/scenarios";
+import { parsePilotAction } from "../../lib/pilotActions";
+import pilotIcon from "../../assets/ai-pilot-emblem.png";
 
 interface Message {
   id: string;
@@ -54,6 +57,8 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
   const setOpen = useUi((s) => s.setCopilotOpen);
   const latest = useLive(selectView);
   const selectedAsset = useUi((s) => s.selectedAsset);
+  const scenarioContext = useUi((s) => s.scenarioContext);
+  const conn = useLive((s) => s.conn);
   const incident = selectedIncident ?? latest?.incident ?? null;
 
   const { stale, replaying } = useFreshness();
@@ -88,10 +93,13 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isolating, setIsolating] = useState(false);
+  const [acting, setActing] = useState(false);
+  const [voiceCommand, setVoiceCommand] = useState("");
   const [listening, setListening] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState("");
   const [activeTab, setActiveTab] = useState<"conversation" | "voice">("conversation");
   const [liveVoiceActive, setLiveVoiceActive] = useState(false);
+  const [docked, setDocked] = useState(() => window.matchMedia("(min-width: 87.5rem)").matches);
 
   const stopListening = useRef<(() => void) | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -113,7 +121,10 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
 
   useEffect(() => {
     const el = composerRef.current;
-    if (el) { el.style.height = "auto"; el.style.height = `${Math.min(el.scrollHeight, 160)}px`; }
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = `${Math.min(Math.max(el.scrollHeight, 22), 140)}px`;
+    }
   }, [input, open]);
 
   useEffect(() => {
@@ -124,7 +135,19 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
     }
   }, [messages, loading, open]);
 
-  useModalFocus(open, dialogRef, () => setOpen(false), "#aip-tab-conversation");
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 87.5rem)");
+    const update = () => setDocked(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("aip-docked", open && docked);
+    return () => document.body.classList.remove("aip-docked");
+  }, [open, docked]);
+
+  useModalFocus(open && !docked, dialogRef, () => setOpen(false), "#aip-tab-conversation");
 
   if (!open) return null;
 
@@ -134,10 +157,12 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
     { icon: FileSearch, title: "Explain the suspected origin", detail: "See what supports the leading candidate", question: "Explain the suspected origin and its supporting evidence" },
     { icon: GitBranch, title: "Compare alternative explanations", detail: "Separate competing origins and benign faults", question: "Compare the origin candidates and alternative explanations" },
     { icon: BookOpen, title: "Find the evidence gaps", detail: "Understand what this case cannot establish", question: "What evidence is missing and what should I check next?" },
+    { icon: ListChecks, title: "Recommend next checks", detail: "Prioritize safe investigative steps", question: "What should I check next to distinguish the leading origins?" },
   ] : [
-    { icon: BookOpen, title: "Understand the data sources", detail: "Simulation, HAI replay and Modbus monitoring", question: "Explain SIM, HAI and LIVE" },
-    { icon: FileSearch, title: "Know what evidence is missing", detail: "Learn the limits of process telemetry", question: "What evidence is missing?" },
-    { icon: GitBranch, title: "Start an investigation", detail: "A practical path from anomaly to evidence", question: "How do I investigate an anomaly and compare possible origins?" },
+    { icon: Activity, title: "Summarize anomalies", detail: "What looks unusual right now?", question: "Summarize the current anomalies and cite the available evidence" },
+    { icon: FileSearch, title: "Explain signal deviation", detail: "Compare readings with the baseline", question: "Which current signals deviate from their baseline, and what supports that?" },
+    { icon: GitBranch, title: "Trace likely cause", detail: "Compare candidate origins", question: "Trace the likely cause and compare alternative explanations" },
+    { icon: ListChecks, title: "Recommend next checks", detail: "What should I investigate?", question: "What should I check next, and what evidence is still missing?" },
   ];
 
   const handleSend = async (textToSend?: string, retry = false) => {
@@ -187,7 +212,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
       };
       setMessages((prev) => [...prev, aiMsg]);
       if (useVoice.getState().replySpeech) void speak(res.reply).catch((error: unknown) => setVoiceStatus(`Speech unavailable: ${String(error)}`));
-    } catch {
+    } catch (error) {
       if (scopeRef.current !== requestScope || requestRef.current !== controller) return;
       const isAbort = controller.signal.aborted;
       const errorMsg: Message = {
@@ -196,7 +221,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
         isError: true,
         text: isAbort
           ? "Request cancelled or timed out. No action was executed."
-          : "Unable to reach AI Pilot. Check the local backend connection and retry.",
+          : error instanceof Error ? `AI Pilot request failed: ${error.message}. Retry when the backend is ready.` : "Unable to reach AI Pilot. Check the backend connection and retry.",
         timestamp: isAbort ? "Cancelled" : "Unavailable",
         retryText: text,
       };
@@ -268,7 +293,57 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
   const parsedCommand = input.trim()
     ? parseVoiceCommand(input, useLive.getState().topology?.nodes.map((n) => n.id) ?? [])
     : null;
-  const executeCommand = () => {
+  const pilotAction = input.trim() ? parsePilotAction(input, useLive.getState().topology?.nodes ?? []) : null;
+  const executeCommand = async () => {
+    if (pilotAction) {
+      if (acting || conn !== "live" || (pilotAction.kind !== "timeline" && (!canAdmin || stale || replaying))) return;
+      const currentMode = latest?.mode ?? useLive.getState().status?.mode;
+      if (pilotAction.kind === "attack" || pilotAction.kind === "reset") { if (currentMode !== "sim") return; }
+      if (pilotAction.kind === "haiReplay" && currentMode !== "hai") return;
+      const status = useLive.getState().status;
+      if (pilotAction.kind === "source" && ((pilotAction.mode === "hai" && !status?.hai_available) || (pilotAction.mode === "live" && !status?.live_available))) return;
+      setActing(true);
+      try {
+        let confirmation: string;
+        if (pilotAction.kind === "source") {
+          const result = await setMode(pilotAction.mode);
+          useLive.getState().setStatus(result);
+          useLive.getState().clear();
+          useLive.getState().setTopology(await getTopology());
+          useUi.getState().selectAsset(null);
+          confirmation = `${pilotAction.label} accepted. Waiting for source readings.`;
+        } else if (pilotAction.kind === "attack") {
+          const result = await postAttack(pilotAction.request);
+          confirmation = `${pilotAction.label} accepted. Test ID: ${result.attack_id}. Watch the process and incident panels for the effect.`;
+        } else if (pilotAction.kind === "haiReplay") {
+          await controlHaiReplay({ paused: pilotAction.paused });
+          confirmation = `${pilotAction.label} accepted.`;
+        } else if (pilotAction.kind === "timeline") {
+          const live = useLive.getState();
+          if (pilotAction.action === "pause") {
+            if (!live.buffer.length) throw new Error("No timeline readings are available yet.");
+            live.pause();
+          } else if (pilotAction.action === "play") {
+            if (live.cursor === null) throw new Error("The timeline is already showing current readings.");
+            live.play();
+          }
+          else if (pilotAction.action === "live") live.goLive();
+          else if (live.latest?.incident && live.buffer.some((item) => item.incident?.id === live.latest?.incident?.id)) live.replayIncident();
+          else throw new Error("There is no current incident to replay.");
+          confirmation = `${pilotAction.label} applied.`;
+        } else {
+          await postReset();
+          useLive.getState().clear();
+          confirmation = "Simulation reset accepted. Saved investigation records remain available.";
+        }
+        setMessages((previous) => [...previous, { id: crypto.randomUUID(), sender: "copilot", model: "system", text: confirmation, timestamp: new Date().toLocaleTimeString(), scope }]);
+        useUi.getState().notify(confirmation, "success");
+        setInput(""); setVoiceCommand("");
+      } catch (error) {
+        setMessages((previous) => [...previous, { id: crypto.randomUUID(), sender: "copilot", model: "system", isError: true, text: `Action failed: ${error instanceof Error ? error.message : String(error)}`, timestamp: "Failed", scope }]);
+      } finally { setActing(false); }
+      return;
+    }
     if (!parsedCommand || parsedCommand.kind === "ask") return;
     if (parsedCommand.kind === "selectAsset") {
       useUi.getState().selectAsset(parsedCommand.asset);
@@ -281,31 +356,32 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
   };
 
   const modeLabel = latest?.mode ? SOURCE_LABELS[latest.mode] ?? latest.mode.toUpperCase() : "No source";
-  const incidentLabel = incident
-    ? `${incident.id.slice(0, 12)}… · ${incident.status}`
-    : selectedAsset ? `Asset: ${selectedAsset}` : "General guidance";
+  const incidentLabel = incident ? `${incident.id.slice(0, 12)}… · ${incident.status}` : null;
 
   return (
     <>
-      <div
+      {!docked && <div
         data-dialog-backdrop
         className="fixed inset-0 z-40 bg-black/40"
         aria-hidden="true"
         onClick={() => setOpen(false)}
-      />
+      />}
       <div
         ref={dialogRef}
-        role="dialog"
+        onKeyDown={(event) => {
+          if (docked && event.key === "Escape") setOpen(false);
+        }}
+        role={docked ? "complementary" : "dialog"}
         tabIndex={-1}
-        aria-modal="true"
+        aria-modal={docked ? undefined : true}
         aria-label="AI Pilot"
-        className="aip-drawer copilot-drawer fixed inset-y-0 right-0 z-50 flex h-dvh w-full max-w-[640px] flex-col border-l border-border bg-surface shadow-2xl"
+        className={`aip-drawer copilot-drawer fixed inset-y-0 right-0 z-50 flex h-dvh w-full flex-col border-l border-border bg-surface ${docked ? "aip-drawer-docked" : "aip-drawer-modal"}`}
       >
         {/* ── Header ── */}
         <div className="aip-header flex shrink-0 items-start justify-between gap-2 border-b border-border/80 px-4 py-3">
           <div className="flex min-w-0 items-center gap-2.5">
             <div className="aip-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent border border-accent/25">
-              <Sparkles size={18} aria-hidden />
+              <img src={pilotIcon} alt="" className="aip-emblem" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -322,8 +398,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
               {/* Compact context strip */}
               <div className="aip-header-context mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted leading-tight">
                 <span className="aip-source-label font-mono text-accent/80">{modeLabel}</span>
-                <span aria-hidden className="text-border">/</span>
-                <span className="truncate max-w-[26ch]">{incidentLabel}</span>
+                <span className="truncate max-w-[16ch]">{stale ? "· Signal stale" : conn === "live" ? "· Receiving" : "· Connecting"}</span>
               </div>
             </div>
           </div>
@@ -337,7 +412,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
             >
               <Settings size={16} />
             </a>
-            <button
+            {!starting && <button
               type="button"
               className="copilot-icon-button"
               aria-label="New conversation"
@@ -345,7 +420,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
               onClick={resetChat}
             >
               <Plus size={16} />
-            </button>
+            </button>}
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -357,8 +432,27 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
           </div>
         </div>
 
+        {activeTab === "voice" && voiceCommand && <div role="status" className="mx-3 mt-2 flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-text">
+          <span className="min-w-0 flex-1">Voice command heard: <strong>{voiceCommand}</strong>. Review before it runs.</span>
+          <button type="button" className="shrink-0 rounded bg-accent px-2 py-1 font-semibold text-on-accent" onClick={() => { setInput(voiceCommand); setVoiceCommand(""); setActiveTab("conversation"); }}>Review</button>
+          <button type="button" aria-label="Dismiss voice command" onClick={() => setVoiceCommand("")}><X size={15} /></button>
+        </div>}
+
         {/* ── Tab bar ── */}
-        <div className="aip-tabs flex shrink-0 border-b border-border/60" role="tablist" aria-label="AI Pilot panels">
+        <div
+          className="aip-tabs flex shrink-0 border-b border-border/60"
+          role="tablist"
+          aria-label="AI Pilot panels"
+          onKeyDown={(event) => {
+            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+            event.preventDefault();
+            const next = event.key === "Home" ? "conversation"
+              : event.key === "End" ? "voice"
+                : activeTab === "voice" ? "conversation" : "voice";
+            setActiveTab(next);
+            dialogRef.current?.querySelector<HTMLElement>(`#aip-tab-${next}`)?.focus();
+          }}
+        >
           <button
             type="button"
             role="tab"
@@ -368,7 +462,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
             className={`aip-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors ${activeTab === "conversation" ? "aip-tab-active text-accent border-b-2 border-accent" : "text-muted hover:text-text border-b-2 border-transparent"}`}
             onClick={() => handleVoiceTabSwitch("conversation")}
           >
-            <Sparkles size={13} aria-hidden /> Conversation
+            <img src={pilotIcon} alt="" className="aip-tab-emblem" /> Conversation
           </button>
           <button
             type="button"
@@ -385,6 +479,13 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
             )}
           </button>
         </div>
+
+        {activeTab === "conversation" && (
+          <div className="aip-context-card" role="group" aria-label="Current investigation context">
+            <div><span>{latest?.mode === "sim" ? "Scenario" : "Context"}</span><strong>{latest?.mode === "sim" && scenarioContext ? SCENARIO_LABEL[scenarioContext.scenario] : incident ? "Incident investigation" : modeLabel}</strong></div>
+            <div><span>{incident ? "Incident" : "Focus"}</span><strong>{incidentLabel ?? selectedAsset ?? (latest?.mode === "sim" ? scenarioContext?.target : null) ?? "All assets"}</strong></div>
+          </div>
+        )}
 
         {/* ── Ambiguity notice ── */}
         {incident?.ambiguous && activeTab === "conversation" && (
@@ -416,31 +517,24 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
               {/* Starting state */}
               {starting && (
                 <div className="aip-start copilot-start">
-                  <div className="aip-start-visual" aria-hidden="true">
-                    <span className="aip-start-orbit aip-start-orbit-outer" />
-                    <span className="aip-start-orbit aip-start-orbit-inner" />
-                    <span className="copilot-start-icon"><Sparkles size={25} /></span>
-                    <span className="aip-orbit-point aip-orbit-point-one" />
-                    <span className="aip-orbit-point aip-orbit-point-two" />
-                  </div>
-                  <p className="aip-kicker">SIGNAL / CONTEXT / EVIDENCE</p>
-                  <h2>{incident ? "Trace the signal." : "From signal to evidence."}</h2>
+                  <p className="aip-kicker">AI PILOT · INVESTIGATION</p>
+                  <h2>{incident ? "Trace the signal" : "Investigate with evidence"}</h2>
                   <p className="copilot-start-description">
                     {incident
-                      ? "Compare origin hypotheses, inspect saved evidence, and choose the next check."
-                      : "Ask a question about your process. AI Pilot keeps claims grounded in what AttackTrace can actually observe."}
+                      ? "Inspect evidence, test hypotheses, and verify next steps."
+                      : "Ask anything about process telemetry, anomalies, or checks."}
                   </p>
-                  <div className="aip-start-divider"><span>EXPLORE A PATH</span><span>01 / 03</span></div>
+                  <div className="aip-start-divider"><span>SUGGESTED QUESTIONS</span></div>
                   <div className="copilot-start-tasks">
-                    {prompts.map(({ icon: Icon, title, detail, question }, index) => (
+                    {prompts.map(({ icon: Icon, title, detail, question }) => (
                       <button key={title} onClick={() => { void handleSend(question); }}>
-                        <span className="aip-task-index">0{index + 1}</span>
                         <span className="aip-task-icon"><Icon size={17} aria-hidden /></span>
                         <span><strong>{title}</strong><small>{detail}</small></span>
                         <ArrowUpRight size={15} aria-hidden />
                       </button>
                     ))}
                   </div>
+                  <p className="mt-3 text-xs leading-relaxed text-muted">App commands: “switch data source to HAI”, “launch sensor offset on LIT101 at -25”, “pause timeline”, “go live”, or “reset simulation”. AI Pilot previews each change before it runs.</p>
                   <a className="copilot-checklist" href="/api/runbooks/local" target="_blank" rel="noreferrer">
                     <BookOpen size={14} aria-hidden />
                     Open the local investigation checklist
@@ -461,7 +555,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
                       <span>You</span>
                     ) : (
                       <>
-                        <Sparkles size={11} aria-hidden className="text-accent/70" />
+                        <img src={pilotIcon} alt="" className="aip-message-emblem" />
                         <span className="text-accent/80">AI Pilot</span>
                         {m.model && m.model !== "evidence-summary" && m.model !== "system" && (
                           <span className="aip-model-tag" title={m.model}>GEMINI · {m.model.replace("gemini-", "")}</span>
@@ -585,73 +679,124 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
             )}
 
             {/* ── Composer ── */}
-            <div className="copilot-composer border-t border-border/70 p-3 bg-surface">
+            <div className="copilot-composer">
               {voiceStatus && (
-                <p role="status" className="mb-2 rounded-md bg-bg px-3 py-2 text-xs text-muted">
-                  {voiceStatus}
-                </p>
+                <div role="status" className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-border/80 bg-surface/90 px-3 py-1.5 text-xs text-muted backdrop-blur-sm">
+                  <span className="truncate">{voiceStatus}</span>
+                  <button
+                    type="button"
+                    onClick={() => setVoiceStatus("")}
+                    aria-label="Dismiss voice status"
+                    className="shrink-0 p-0.5 text-muted hover:text-text rounded transition-colors"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
               )}
-              {parsedCommand && parsedCommand.kind !== "ask" && (
-                <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent/50 bg-accent/5 px-3 py-2 text-xs">
-                  <span>{parsedCommand.kind === "selectAsset" ? `Focus asset ${parsedCommand.asset}` : `Open ${parsedCommand.label}`}</span>
-                  <button type="button" className="min-h-10 rounded-md bg-accent px-3 font-semibold text-on-accent" onClick={executeCommand}>Open view</button>
+              {pilotAction && (
+                <div role="group" aria-label="Review AI Pilot action" className="mb-2 rounded-xl border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-text">
+                  <strong className="block">Review action</strong>
+                  <span className="mt-1 block">{pilotAction.label}</span>
+                  <span className="mt-1 block text-muted">{pilotAction.kind === "attack" ? "Local SIM test only. The backend will return a test ID; effects are verified from telemetry." : pilotAction.kind === "reset" ? "Clears the current simulation state; saved incidents remain." : pilotAction.kind === "haiReplay" ? "Controls the recorded dataset replay; no physical equipment is affected." : pilotAction.kind === "timeline" ? "Changes only your local view of the telemetry timeline." : "Changes the data source for this workspace."}</span>
+                  <div className="mt-2 flex gap-2">
+                    <button type="button" disabled={acting || conn !== "live" || (pilotAction.kind !== "timeline" && (!canAdmin || stale || replaying)) || ((pilotAction.kind === "attack" || pilotAction.kind === "reset") && latest?.mode !== "sim") || (pilotAction.kind === "haiReplay" && latest?.mode !== "hai") || (pilotAction.kind === "source" && pilotAction.mode === "hai" && !useLive.getState().status?.hai_available) || (pilotAction.kind === "source" && pilotAction.mode === "live" && !useLive.getState().status?.live_available)} onClick={() => void executeCommand()} className="rounded-md bg-accent px-3 py-1.5 font-semibold text-on-accent disabled:opacity-50">{acting ? "Working…" : "Confirm action"}</button>
+                    <button type="button" onClick={() => setInput("")} className="rounded-md border border-border px-3 py-1.5">Cancel</button>
+                  </div>
+                  {!canAdmin && pilotAction.kind !== "timeline" && <p className="mt-1 text-muted">An administrator session is required for this action.</p>}
+                  {(stale || replaying || conn !== "live") && pilotAction.kind !== "timeline" && <p className="mt-1 text-muted">Return to current live readings before running actions.</p>}
+                </div>
+              )}
+              {!pilotAction && parsedCommand && parsedCommand.kind !== "ask" && (
+                <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs text-accent">
+                  <span className="truncate font-medium">{parsedCommand.kind === "selectAsset" ? `Focus asset ${parsedCommand.asset}` : `Open ${parsedCommand.label}`}</span>
+                  <button type="button" className="shrink-0 rounded-lg bg-accent px-2.5 py-1 text-[11px] font-semibold text-on-accent hover:brightness-110 active:scale-95 transition-all" onClick={executeCommand}>
+                    Open view
+                  </button>
                 </div>
               )}
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (parsedCommand?.kind === "ask") void handleSend(); else executeCommand();
+                  if (pilotAction) return;
+                  if (parsedCommand?.kind === "ask") void handleSend(); else void executeCommand();
                 }}
-                className="flex items-end gap-2"
+                className="copilot-composer-box flex flex-col justify-between"
               >
-                <textarea
-                  ref={composerRef}
-                  rows={2}
-                  aria-describedby="aip-composer-help"
-                  aria-label="Message to AI Pilot"
-                  maxLength={4000}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) {
-                      e.preventDefault();
-                      if (parsedCommand?.kind === "ask") void handleSend(); else executeCommand();
-                    }
-                  }}
-                  placeholder="Ask about evidence, candidates, or next checks…"
-                  className="max-h-40 min-h-12 resize-none min-w-0 flex-1 rounded-lg border border-border bg-bg/90 px-3 py-2 text-sm leading-6 text-text placeholder-muted focus:border-accent focus:ring-1 focus:ring-accent/30 focus:outline-none transition-all"
-                />
-                <button
-                  type="button"
-                  aria-label={listening ? "Stop recording" : "Start voice input"}
-                  aria-pressed={listening}
-                  title={listening ? "Stop recording" : "Start voice input"}
-                  onClick={() => void startListening()}
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${listening ? "border-suspect text-suspect" : "border-border text-muted hover:text-accent hover:border-accent"} transition-colors`}
-                >
-                  {listening ? <MicOff size={16} /> : <Mic size={16} />}
-                </button>
-                <button
-                  type="button"
-                  aria-label="Stop speaking"
-                  title="Stop speaking"
-                  onClick={stopSpeech}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:text-accent transition-colors"
-                >
-                  <VolumeX size={16} />
-                </button>
-                <button
-                  type="submit"
-                  disabled={!input.trim() || loading || parsedCommand?.kind !== "ask"}
-                  aria-label="Send message"
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-on-accent transition-all hover:bg-accent/90 disabled:opacity-40 shadow-sm"
-                >
-                  <Send size={14} />
-                </button>
+                {/* Top row: Input on left, vertical divider + mic + circular send on right */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <textarea
+                      ref={composerRef}
+                      rows={1}
+                      aria-label="Message to AI Pilot"
+                      maxLength={4000}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) {
+                          e.preventDefault();
+                          if (pilotAction) return;
+                          if (parsedCommand?.kind === "ask") void handleSend(); else void executeCommand();
+                        }
+                      }}
+                      placeholder="Ask about evidence, candidates, or next checks..."
+                      className="w-full resize-none border-0 bg-transparent p-0 text-[13.5px] leading-relaxed text-text placeholder:text-muted/60 focus:outline-none focus:ring-0"
+                      style={{ minHeight: "22px", maxHeight: "140px" }}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <div className="h-4.5 w-[1px] bg-slate-700/60" aria-hidden="true" />
+                    <button
+                      type="button"
+                      aria-label={listening ? "Stop recording" : "Start voice input"}
+                      aria-pressed={listening}
+                      title={listening ? "Stop recording" : "Start voice input"}
+                      onClick={() => void startListening()}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full transition-all active:scale-95 ${
+                        listening
+                          ? "bg-suspect text-on-accent shadow-[0_0_12px_rgba(var(--suspect-rgb),0.55)] ring-2 ring-suspect/30 hover:scale-105"
+                          : "text-slate-300 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      {listening ? <MicOff size={16} className="animate-pulse" /> : <Mic size={17} />}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!input.trim() || loading || !!pilotAction || parsedCommand?.kind !== "ask"}
+                      aria-label="Send message"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_12px_rgba(37,99,235,0.45)] hover:shadow-[0_0_16px_rgba(37,99,235,0.7)] transition-all active:scale-95 disabled:opacity-40 disabled:hover:shadow-none disabled:cursor-not-allowed"
+                    >
+                      {loading ? (
+                        <span className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      ) : (
+                        <Send size={14} className="translate-x-[0.5px] -translate-y-[0.5px]" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Bottom row: Keyboard shortcut badges */}
+                <div className="flex items-center gap-2 mt-2 pt-0.5">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-[#131b28] border border-[#223046] px-2.5 py-0.5 text-[11px] font-mono text-slate-300 select-none">
+                    <span className="font-sans font-bold text-[12px] leading-none">↵</span>
+                    <span className="leading-none">send</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-[#131b28] border border-[#223046] px-2.5 py-0.5 text-[11px] font-mono text-slate-300 select-none">
+                    <span className="leading-none">Shift+↵</span>
+                    <span className="leading-none">line</span>
+                  </div>
+                  {listening && (
+                    <div className="ml-auto flex items-center gap-1.5 rounded-full bg-suspect/10 border border-suspect/25 px-2 py-0.5 text-[11px] font-medium text-suspect">
+                      <span className="relative flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-suspect opacity-75" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-suspect" />
+                      </span>
+                      <span>Listening…</span>
+                    </div>
+                  )}
+                </div>
               </form>
-              <p id="aip-composer-help" className="mt-1.5 text-[11px] text-muted">
-                Review voice transcripts before sending. Enter to send · Shift+Enter for a new line.
-              </p>
             </div>
         </div>
 
@@ -662,7 +807,7 @@ export function CopilotDrawer({ selectedIncident }: { selectedIncident?: Inciden
           aria-labelledby="aip-tab-voice"
           className={`flex-1 flex-col min-h-0 ${activeTab === "voice" ? "flex" : "hidden"}`}
         >
-          <LiveVoicePanel active={activeTab === "voice"} onSessionChange={setLiveVoiceActive} />
+          <LiveVoicePanel active={activeTab === "voice"} onSessionChange={setLiveVoiceActive} onUserTranscript={(text) => { if (parsePilotAction(text, useLive.getState().topology?.nodes ?? [])) setVoiceCommand(text); }} />
         </div>
       </div>
     </>

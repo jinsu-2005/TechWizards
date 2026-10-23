@@ -4,13 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { incidentStartIndex } from "../../lib/replay";
 import { useLive } from "../../store/live";
 
-function Btn({
-  icon: Icon,
-  label,
-  onClick,
-  pressed,
-  disabled,
-}: {
+function Btn({ icon: Icon, label, onClick, pressed, disabled }: {
   icon: LucideIcon;
   label: string;
   onClick: () => void;
@@ -18,53 +12,36 @@ function Btn({
   disabled?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      aria-pressed={pressed}
-      disabled={disabled}
-      onClick={onClick}
-      className={`flex h-7 w-7 items-center justify-center rounded border transition-colors duration-150 disabled:opacity-40 ${
-        pressed ? "border-accent text-accent" : "border-border text-muted hover:text-text"
-      }`}
-    >
-      <Icon size={14} aria-hidden />
+    <button type="button" aria-label={label} title={label} aria-pressed={pressed}
+      disabled={disabled} onClick={onClick}
+      className={`timeline-control ${pressed ? "timeline-control-active" : ""}`}>
+      <Icon size={15} aria-hidden />
     </button>
   );
 }
 
-/** Replay incident, play, pause, back to live. */
+/** Controls for recorded samples; the live badge always describes the actual cursor. */
 export function ReplayControls() {
   const { stale } = useFreshness();
   const playing = useLive((s) => s.playing);
   const hai = useLive((s) => s.latest?.mode === "hai");
   const cursor = useLive((s) => s.cursor);
+  const hasSamples = useLive((s) => s.buffer.length > 0);
   const hasIncident = useLive((s) => incidentStartIndex(s.buffer) !== null);
   const { play, pause, goLive, replayIncident } = useLive.getState();
   const live = cursor === null;
-  const running = live || playing; // the stream itself counts as playing
+  const running = live || playing;
+
   return (
-    <div className="flex flex-col items-start gap-1 p-2">
-      <div className="flex gap-1">
+    <div className="timeline-controls">
+      <div className="timeline-control-group">
         <Btn icon={RotateCcw} label="Replay incident" onClick={replayIncident} disabled={!hasIncident} />
-        <Btn
-          icon={running ? Pause : Play}
-          label={running ? "Pause" : "Play"}
-          onClick={running ? pause : play}
-          pressed={playing}
-        />
+        <Btn icon={running ? Pause : Play} label={running ? "Pause timeline" : "Play timeline"}
+          onClick={running ? pause : play} pressed={playing} disabled={!hasSamples} />
       </div>
-      <button
-        type="button"
-        onClick={goLive}
-        disabled={live}
-        className={`flex h-6 whitespace-nowrap items-center gap-1 rounded-full border px-2 font-mono text-xs transition-colors duration-150 ${
-          live && !stale ? "border-normal text-normal" : "border-border text-muted hover:text-text"
-        }`}
-      >
-        {live ? <Radio size={12} aria-hidden /> : <History size={12} aria-hidden />}
-        {live ? (stale ? "Last received" : hai ? "Latest" : "Live") : "Replay"}
+      <button type="button" onClick={goLive} disabled={live} className={`timeline-live ${live && !stale ? "timeline-live-current" : ""}`}>
+        {live ? <Radio size={14} aria-hidden /> : <History size={14} aria-hidden />}
+        <span>{live ? (stale ? "Last received" : hai ? "Latest" : "Live") : playing ? "Playing replay" : "Paused replay"}</span>
       </button>
     </div>
   );
