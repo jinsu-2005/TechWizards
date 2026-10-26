@@ -7,6 +7,7 @@ check passes; prints one PASS/FAIL/SKIP line per check either way.
 """
 
 import asyncio
+import contextlib
 import json
 import shutil
 import subprocess
@@ -19,6 +20,10 @@ ROOT = Path(__file__).resolve().parent.parent
 BACKEND = "http://localhost:8000"
 FRONTEND = "http://localhost:5173"
 NPX = shutil.which("npx") or "npx"  # Windows: CreateProcess needs the resolved npx.cmd, not "npx"
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    with contextlib.suppress(Exception):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
 def check(name: str, ok: bool, detail: str = "") -> bool:
@@ -83,10 +88,16 @@ def check_console_errors() -> bool:
         cwd=ROOT / "frontend",
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=30,
     )
+    combined = (result.stdout or "") + (result.stderr or "")
+    if "npx playwright install" in combined:
+        print("SKIP  no browser console errors -- Playwright browser not downloaded yet")
+        return True
     ok = result.returncode == 0
-    return check("no browser console errors", ok, "" if ok else result.stdout[-300:])
+    return check("no browser console errors", ok, "" if ok else (result.stdout[-300:] if result.stdout else (result.stderr[-300:] if result.stderr else "exit code non-zero")))
 
 
 def check_emulator(status: dict[str, object] | None) -> bool:

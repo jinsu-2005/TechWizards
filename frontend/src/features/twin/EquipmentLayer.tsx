@@ -20,6 +20,10 @@ export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
   const mv = get("MV101");
   const p101 = get("P101");
   const p301 = get("P301");
+  const fit201 = get("FIT201");
+  const flowVal = truth(fit201);
+  const isFiltering = flowVal > 0.1;
+  const turbineDur = isFiltering ? `${Math.max(0.6, 3.5 - (flowVal / 12) * 2.8).toFixed(2)}s` : undefined;
   return (
     <g>
       {lit101 && (
@@ -51,7 +55,7 @@ export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
         <linearGradient id="media-bed-grad" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#0284c7" stopOpacity={0.25} />
           <stop offset="40%" stopColor="#0d9488" stopOpacity={0.35} />
-          <stop offset="100%" stopColor="#d97706" stopOpacity={0.3} />
+          <stop offset="100%" stopColor="#0369a1" stopOpacity={0.3} />
         </linearGradient>
       </defs>
 
@@ -125,10 +129,10 @@ export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
         strokeWidth={1.2}
       />
       <g
-        className="spin"
+        className={isFiltering ? "spin" : ""}
         style={{
           transformOrigin: `${FILTER.x + FILTER.w / 2}px ${FILTER.y + 44}px`,
-          animationDuration: "5s",
+          animationDuration: turbineDur,
         }}
       >
         {[0, 60, 120, 180, 240, 300].map((deg) => (
@@ -136,7 +140,7 @@ export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
             key={deg}
             d={`M${FILTER.x + FILTER.w / 2} ${FILTER.y + 44} Q${FILTER.x + FILTER.w / 2 + 5} ${FILTER.y + 37} ${FILTER.x + FILTER.w / 2} ${FILTER.y + 30}`}
             stroke="var(--accent)"
-            strokeOpacity={0.8}
+            strokeOpacity={isFiltering ? 0.9 : 0.4}
             strokeWidth={1.8}
             strokeLinecap="round"
             fill="none"
@@ -144,7 +148,7 @@ export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
           />
         ))}
       </g>
-      <circle cx={FILTER.x + FILTER.w / 2} cy={FILTER.y + 44} r={3.5} fill="var(--accent)" />
+      <circle cx={FILTER.x + FILTER.w / 2} cy={FILTER.y + 44} r={3.5} fill={isFiltering ? "var(--accent)" : "var(--muted)"} />
 
       {/* Differential Pressure Tag Pill */}
       <rect
@@ -165,7 +169,7 @@ export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
         className="fill-text font-mono font-semibold"
         fontSize={9}
       >
-        FIL-01 · FILTER
+        {isFiltering ? `FIL-01 · ${flowVal.toFixed(1)} L/s` : "FIL-01 · STANDBY"}
       </text>
       {onFocusFilter && <g
         role="button"

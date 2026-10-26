@@ -65,6 +65,32 @@ body {
     stroke-dashoffset: -1;
   }
 }
+@keyframes wave-crest {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(-2.5px);
+    opacity: 0.9;
+  }
+}
+@keyframes bubble-rise {
+  0% {
+    transform: translateY(0) scale(0.8);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.65;
+  }
+  85% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateY(-44px) scale(1.1);
+    opacity: 0;
+  }
+}
 
 .flow {
   animation: flow 1s linear infinite;
@@ -80,6 +106,21 @@ body {
 .attack-pulse {
   stroke-dasharray: 0.1 1;
   animation: travel 1.4s linear infinite backwards;
+}
+.tank-wave-crest {
+  animation: wave-crest 2.8s ease-in-out infinite;
+}
+.bubble-1 {
+  animation: bubble-rise 2.6s ease-in infinite;
+}
+.bubble-2 {
+  animation: bubble-rise 3.2s ease-in infinite 0.8s;
+}
+.bubble-3 {
+  animation: bubble-rise 2.9s ease-in infinite 1.5s;
+}
+.bubble-4 {
+  animation: bubble-rise 3.6s ease-in infinite 0.4s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -173,7 +214,7 @@ body {
 /* Screenshot review: retain a useful canvas on short windows and at browser zoom. */
 .process-canvas { overflow: hidden; }
 .process-primary { height: 100%; overflow: hidden; }
-.twin-tool-button { display: inline-flex; min-width: 2.5rem; min-height: 2.5rem; align-items: center; justify-content: center; gap: .35rem; padding: .35rem .55rem; border: 1px solid var(--border); border-radius: .5rem; color: var(--text); background: var(--surface); font-size: .75rem; transition: border-color .15s, background .15s, color .15s; }
+.twin-tool-button { display: inline-flex; min-width: 1.875rem; min-height: 1.875rem; align-items: center; justify-content: center; gap: .3rem; padding: .2rem .45rem; border: 1px solid var(--border); border-radius: .375rem; color: var(--text); background: var(--surface); font-size: .75rem; transition: border-color .15s, background .15s, color .15s; }
 .twin-tool-button:hover:not(:disabled), .twin-tool-button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: rgb(var(--accent-rgb) / .09); }
 .twin-tool-button:disabled { cursor: not-allowed; opacity: .4; }
 .twin-filter-control { font-family: ui-monospace, monospace; font-weight: 600; }

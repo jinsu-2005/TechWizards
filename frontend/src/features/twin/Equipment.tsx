@@ -45,9 +45,9 @@ export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) 
           <stop offset="100%" stopColor="#083344" stopOpacity={0.9} />
         </linearGradient>
         <linearGradient id="tank-fluid-t2" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.85} />
-          <stop offset="35%" stopColor="#f59e0b" stopOpacity={0.65} />
-          <stop offset="100%" stopColor="#451a03" stopOpacity={0.9} />
+          <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.9} />
+          <stop offset="35%" stopColor="#3b82f6" stopOpacity={0.75} />
+          <stop offset="100%" stopColor="#172554" stopOpacity={0.95} />
         </linearGradient>
         <linearGradient id="tank-fluid-hazard" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#f87171" stopOpacity={0.9} />
@@ -118,11 +118,32 @@ export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) 
           y={fluidTopY}
           width={w - 4}
           height={fillH}
-          rx={6}
+          rx={4}
           clipPath={`url(#clip-${label})`}
           fill={extreme ? "url(#tank-fluid-hazard)" : `url(#${gradId})`}
           style={{ transition: "y 400ms cubic-bezier(0.4, 0, 0.2, 1), height 400ms cubic-bezier(0.4, 0, 0.2, 1)" }}
         />
+
+        {/* Dynamic Wave Crest Surface */}
+        <g clipPath={`url(#clip-${label})`}>
+          <path
+            d={`M ${x + 2} ${fluidTopY} Q ${x + w * 0.25} ${fluidTopY - 2.5} ${x + w * 0.5} ${fluidTopY} T ${x + w - 2} ${fluidTopY} L ${x + w - 2} ${fluidTopY + 8} L ${x + 2} ${fluidTopY + 8} Z`}
+            fill={extreme ? "#ef4444" : isT1 ? "#22d3ee" : "#60a5fa"}
+            fillOpacity={0.4}
+            className="tank-wave-crest"
+            style={{ transition: "all 400ms ease" }}
+          />
+        </g>
+
+        {/* Rising Aeration Micro-bubbles */}
+        {fillH > 20 && (
+          <g clipPath={`url(#clip-${label})`} pointerEvents="none" opacity={0.65}>
+            <circle cx={x + w * 0.28} cy={y + h - 14} r={1.5} className="bubble-1" fill="#ffffff" />
+            <circle cx={x + w * 0.52} cy={y + h - 22} r={2} className="bubble-2" fill="#ffffff" />
+            <circle cx={x + w * 0.72} cy={y + h - 16} r={1.2} className="bubble-3" fill="#ffffff" />
+            <circle cx={x + w * 0.4} cy={y + h - 28} r={1.8} className="bubble-4" fill="#ffffff" />
+          </g>
+        )}
 
         {/* Glowing fluid meniscus highlight */}
         <line
@@ -130,7 +151,7 @@ export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) 
           x2={x + w - 4}
           y1={fluidTopY}
           y2={fluidTopY}
-          stroke={extreme ? "#f87171" : isT1 ? "#67e8f9" : "#fde047"}
+          stroke={extreme ? "#f87171" : isT1 ? "#67e8f9" : "#93c5fd"}
           strokeWidth={2}
           strokeOpacity={0.9}
           filter={`url(#${glowId})`}

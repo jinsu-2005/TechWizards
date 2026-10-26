@@ -14,6 +14,8 @@ import { useLive } from "../store/live";
 import { useUi, type CenterView } from "../store/ui";
 import { TopBar } from "./TopBar";
 import { useLiveSourcePoll } from "./useLiveSourcePoll";
+import { useDashboardLayout } from "../components/layout/useDashboardLayout";
+import { ResizeHandle } from "../components/layout/ResizeHandle";
 
 function ViewToggle() {
   const view = useUi((s) => s.view);
@@ -81,6 +83,7 @@ export function App() {
   const conn = useLive((s) => s.conn);
   const live = (conn === "live" || hasLatest) && hasLatest;
   const { stale, ageSeconds, replaying } = useFreshness();
+  const { layout, isDragging, startDrag, resetLeft, resetRight, resetBottom } = useDashboardLayout();
 
   return (
     <div className="dashboard-shell">
@@ -90,10 +93,47 @@ export function App() {
       {replaying && <div role="status" className="rounded-md border border-accent/30 bg-accent/10 px-3 py-2 text-sm text-accent">Historical replay · readings are from the selected point in time.</div>}
       <IncidentToast />
       <div role="group" aria-label="Monitoring panels" className="monitoring-panel-switch">{([["process", "Process"], ["scenario", "Test scenario"], ["incident", "Incident"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={mobilePanel === value} onClick={() => setMobilePanel(value)}>{label}</button>)}</div>
-      <main id="main-workspace" tabIndex={-1} data-mobile-panel={mobilePanel} className={`dashboard-main ${stale && !replaying ? "stale-telemetry" : ""}`}>
+      <main
+        id="main-workspace"
+        tabIndex={-1}
+        data-mobile-panel={mobilePanel}
+        style={{
+          "--left-width": `${layout.leftWidth}px`,
+          "--right-width": `${layout.rightWidth}px`,
+          "--timeline-height": `${layout.timelineHeight}px`,
+        } as React.CSSProperties}
+        className={`dashboard-main ${stale && !replaying ? "stale-telemetry" : ""} ${isDragging ? "dashboard-is-resizing" : ""}`}
+      >
         <AttackConsole />
+        <ResizeHandle
+          orientation="vertical"
+          label="Attack Console Sidebar"
+          className="splitter-left"
+          isDragging={isDragging === "left"}
+          valueNow={layout.leftWidth}
+          onPointerDown={(e) => startDrag("left", e)}
+          onDoubleClick={resetLeft}
+        />
         <Center live={live} />
+        <ResizeHandle
+          orientation="vertical"
+          label="Incident Panel Sidebar"
+          className="splitter-right"
+          isDragging={isDragging === "right"}
+          valueNow={layout.rightWidth}
+          onPointerDown={(e) => startDrag("right", e)}
+          onDoubleClick={resetRight}
+        />
         <IncidentPanel />
+        <ResizeHandle
+          orientation="horizontal"
+          label="Timeline Panel Height"
+          className="splitter-bottom"
+          isDragging={isDragging === "bottom"}
+          valueNow={layout.timelineHeight}
+          onPointerDown={(e) => startDrag("bottom", e)}
+          onDoubleClick={resetBottom}
+        />
         <div className="timeline-panel min-h-0">
           <Timeline />
         </div>

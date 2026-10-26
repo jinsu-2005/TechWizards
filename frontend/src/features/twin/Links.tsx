@@ -13,21 +13,36 @@ export function Links({ nodes, incident }: Props) {
   return (
     <g>
       {LINKS.map((l) => {
-        const dur = l.kind === "pipe" ? flowDuration(flowRatio(l, nodes)) : null;
+        const ratio = flowRatio(l, nodes);
+        const dur = l.kind === "pipe" ? flowDuration(ratio) : null;
         const delay = active ? pulseDelay(l, incident.path_edges, incident.path) : null;
+        const isTreated = l.id === "o1" || l.id === "o2";
+        const pipeColor = isTreated ? "#60a5fa" : "var(--accent)";
+        const pipeGlow = isTreated ? "rgb(96 165 250 / 0.85)" : "rgb(var(--accent-rgb) / 0.85)";
         return (
           <g key={l.id}>
             {l.kind === "pipe" ? (
               <>
-                <path d={l.d} stroke="var(--accent)" strokeWidth={11} strokeOpacity={0.08} fill="none" strokeLinecap="round" />
-                <path d={l.d} stroke="var(--border)" strokeWidth={7} fill="none" strokeLinecap="round" />
+                {/* Outer pipeline conduit housing */}
+                <path d={l.d} stroke={pipeColor} strokeWidth={13} strokeOpacity={0.06} fill="none" strokeLinecap="round" />
+                <path d={l.d} stroke="var(--border)" strokeWidth={7.5} fill="none" strokeLinecap="round" />
+                {/* Luminous fluid interior stream */}
+                <path
+                  d={l.d}
+                  stroke={pipeColor}
+                  strokeWidth={4.5}
+                  strokeOpacity={dur === null ? 0.2 : 0.4}
+                  fill="none"
+                  strokeLinecap="round"
+                />
+                {/* Dynamic flowing fluid particles */}
                 <path
                   d={l.d}
                   className={dur === null ? "" : "flow"}
-                  stroke="var(--accent)"
-                  strokeOpacity={dur === null ? 0.2 : 0.95}
+                  stroke={pipeColor}
+                  strokeOpacity={dur === null ? 0.25 : 0.95}
                   strokeWidth={2.75}
-                  strokeDasharray="6 10"
+                  strokeDasharray="7 12"
                   strokeLinecap="round"
                   fill="none"
                   style={
@@ -35,7 +50,7 @@ export function Links({ nodes, incident }: Props) {
                       ? undefined
                       : {
                           animationDuration: `${dur}s`,
-                          filter: "drop-shadow(0 0 4px rgb(var(--accent-rgb) / 0.8))",
+                          filter: `drop-shadow(0 0 5px ${pipeGlow})`,
                         }
                   }
                 />

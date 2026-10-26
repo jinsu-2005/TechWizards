@@ -27,9 +27,34 @@ export function PlantIntegrityGuard({ latest, stale, calibrating = false }: { la
     const value = byId.get(id)?.value;
     return value === undefined ? "–" : formatValue(id, value);
   };
-  const readings = latest.mode === "hai"
-    ? ["P1_LIT01", "P1_FT01", "P1_PIT01", "P3_LT01"].filter((id) => byId.has(id)).map((id) => [id, reading(id)])
-    : [["Inflow · FIT201", reading("FIT201")], ["Pump · P101", reading("P101")], ["Tank 1 · LIT101", reading("LIT101")], ["Tank 2 · LIT301", reading("LIT301")]];
+  const stageReadings = latest.mode === "hai"
+    ? [
+        { stage: "Reference Telemetry", tags: ["P1_LIT01", "P1_FT01", "P1_PIT01", "P3_LT01"].filter((id) => byId.has(id)).map((id) => ({ id, name: id, value: reading(id), status: byId.get(id)?.status ?? "normal" })) }
+      ]
+    : [
+        {
+          stage: "Stage 1 · Intake & T1",
+          tags: [
+            { id: "MV101", name: "Inlet Valve", value: reading("MV101"), status: byId.get("MV101")?.status ?? "normal" },
+            { id: "LIT101", name: "Tank 1 Level", value: reading("LIT101"), status: byId.get("LIT101")?.status ?? "normal" },
+          ],
+        },
+        {
+          stage: "Stage 2 · Filtration",
+          tags: [
+            { id: "P101", name: "Transfer Pump", value: reading("P101"), status: byId.get("P101")?.status ?? "normal" },
+            { id: "FIT201", name: "Filter Flow", value: reading("FIT201"), status: byId.get("FIT201")?.status ?? "normal" },
+            { id: "PIT301", name: "Filter Pressure", value: reading("PIT301"), status: byId.get("PIT301")?.status ?? "normal" },
+          ],
+        },
+        {
+          stage: "Stage 3 · Dispatch",
+          tags: [
+            { id: "LIT301", name: "Tank 2 Level", value: reading("LIT301"), status: byId.get("LIT301")?.status ?? "normal" },
+            { id: "P301", name: "Outlet Pump", value: reading("P301"), status: byId.get("P301")?.status ?? "normal" },
+          ],
+        },
+      ];
   return (
     <div className="flex flex-col gap-3 border-b border-border p-3">
       <div className="rounded-lg border border-border bg-bg/50 p-3">
@@ -43,12 +68,31 @@ export function PlantIntegrityGuard({ latest, stale, calibrating = false }: { la
         </div>}
       </div>
       <div>
-        <p className="mb-2 text-xs font-medium text-muted">{latest.mode === "hai" ? "HAI reference readings" : "Reported process readings"}</p>
-        <div className="grid grid-cols-2 gap-2">
-          {readings.map(([name, value]) => (
-            <div key={name} className="rounded-md border border-border bg-bg/50 p-2.5">
-              <span className="block text-xs text-muted">{name}</span>
-              <span className="mt-1 block font-mono text-sm font-semibold">{value}</span>
+        <p className="mb-2 text-xs font-medium text-muted">{latest.mode === "hai" ? "HAI reference readings" : "Reported process telemetry by stage"}</p>
+        <div className="flex flex-col gap-2">
+          {stageReadings.map(({ stage, tags }) => (
+            <div key={stage} className="rounded-md border border-border/80 bg-bg/40 p-2">
+              <span className="block text-[10px] font-mono uppercase tracking-wider text-muted/80 mb-1.5">{stage}</span>
+              <div className="grid grid-cols-2 gap-1.5">
+                {tags.map((tag) => (
+                  <div
+                    key={tag.id}
+                    className={`rounded border px-2 py-1.5 bg-surface/60 transition-colors ${
+                      tag.status === "origin"
+                        ? "border-origin bg-origin/10 text-origin"
+                        : tag.status !== "normal"
+                        ? "border-suspect/60 bg-suspect/5 text-suspect"
+                        : "border-border/60 text-text"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="truncate text-[11px] text-muted">{tag.name}</span>
+                      <span className="font-mono text-[10px] opacity-75">{tag.id}</span>
+                    </div>
+                    <span className="mt-0.5 block font-mono text-xs font-semibold">{tag.value}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>

@@ -17,6 +17,7 @@ export function browserRecognitionAvailable(): boolean {
 
 export function isUnsupportedScript(text: string): boolean {
   // Non-Tamil Indic and foreign scripts (Devanagari, Telugu, Kannada, Malayalam, Arabic, Cyrillic, CJK)
+  // eslint-disable-next-line no-misleading-character-class
   return /[\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0600-\u06FF\u0400-\u04FF\u4E00-\u9FFF]/.test(text);
 }
 

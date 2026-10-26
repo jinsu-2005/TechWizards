@@ -664,15 +664,142 @@
 }
 @media (min-width: 75rem) {
   .dashboard-shell { height: 100dvh; min-height: 0; }
-  .dashboard-main { flex: 1; grid-template-columns: minmax(12rem, 15%) minmax(0, 1fr) minmax(16rem, 20%); grid-template-rows: minmax(18rem, 1fr) clamp(11.5rem, 21dvh, 14.5rem); }
-  .center-panel { grid-column: 2; grid-row: 1; height: auto; min-height: 0; }
+  .dashboard-main {
+    flex: 1;
+    grid-template-columns: var(--left-width, 260px) 8px minmax(0, 1fr) 8px var(--right-width, 320px);
+    grid-template-rows: minmax(18rem, 1fr) 8px var(--timeline-height, 190px);
+    gap: 0;
+  }
+  .center-panel { grid-column: 3; grid-row: 1; height: auto; min-height: 0; }
   .dashboard-main > section[aria-label="Attack console"], .dashboard-main > section[aria-label="Replay"] { grid-column: 1; grid-row: 1; min-height: 0; }
-  .dashboard-main > section[aria-label="Incident"] { grid-column: 3; grid-row: 1; min-height: 0; }
-  .timeline-panel { grid-row: 2; height: auto; min-height: 0; }
+  .dashboard-main > section[aria-label="Incident"] { grid-column: 5; grid-row: 1; min-height: 0; }
+  .dashboard-main > .splitter-left { display: flex; grid-column: 2; grid-row: 1; }
+  .dashboard-main > .splitter-right { display: flex; grid-column: 4; grid-row: 1; }
+  .dashboard-main > .splitter-bottom { display: flex; grid-column: 1 / -1; grid-row: 2; }
+  .timeline-panel { grid-column: 1 / -1; grid-row: 3; height: auto; min-height: 0; }
 }
 @media (min-width: 75rem) and (max-height: 56.25rem) {
   .dashboard-shell { height: auto; min-height: 100dvh; }
-  .dashboard-main { flex: none; grid-template-rows: minmax(20rem, 48dvh) clamp(11.5rem, 22dvh, 14.5rem); }
+  .dashboard-main { flex: none; grid-template-rows: minmax(20rem, 48dvh) 8px var(--timeline-height, 190px); }
+}
+
+/* ── Interactive Dashboard Splitters / Resize Handles ── */
+.dashboard-resize-handle {
+  display: none;
+  position: relative;
+  z-index: 10;
+  touch-action: none;
+  user-select: none;
+  background: transparent;
+  transition: background-color 150ms ease, opacity 150ms ease;
+}
+
+.resize-handle-vertical {
+  width: 8px;
+  cursor: col-resize;
+  align-items: center;
+  justify-content: center;
+}
+
+.resize-handle-horizontal {
+  height: 8px;
+  cursor: row-resize;
+  align-items: center;
+  justify-content: center;
+}
+
+.resize-handle-line {
+  position: absolute;
+  background: var(--border);
+  opacity: 0.6;
+  border-radius: 9999px;
+  transition: background-color 150ms, opacity 150ms;
+}
+
+.resize-handle-vertical .resize-handle-line {
+  top: 4px;
+  bottom: 4px;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+.resize-handle-horizontal .resize-handle-line {
+  left: 4px;
+  right: 4px;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.resize-handle-grip {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  opacity: 0.7;
+  transition: border-color 150ms, background-color 150ms, opacity 150ms, transform 150ms, box-shadow 150ms;
+}
+
+.resize-handle-vertical .resize-handle-grip {
+  width: 12px;
+  height: 26px;
+}
+
+.resize-handle-horizontal .resize-handle-grip {
+  width: 26px;
+  height: 12px;
+}
+
+.grip-dots-vertical, .grip-dots-horizontal {
+  display: flex;
+  gap: 2.5px;
+  align-items: center;
+  justify-content: center;
+}
+
+.grip-dots-vertical {
+  flex-direction: column;
+}
+
+.grip-dots-vertical span, .grip-dots-horizontal span {
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background-color 150ms;
+}
+
+.dashboard-resize-handle:hover .resize-handle-line,
+.dashboard-resize-handle.is-dragging .resize-handle-line {
+  background: var(--accent);
+  opacity: 1;
+}
+
+.dashboard-resize-handle:hover .resize-handle-grip,
+.dashboard-resize-handle.is-dragging .resize-handle-grip {
+  opacity: 1;
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 10px rgb(var(--accent-rgb) / 0.4);
+  transform: scale(1.1);
+}
+
+.dashboard-resize-handle:hover span,
+.dashboard-resize-handle.is-dragging span {
+  background: var(--accent);
+}
+
+.dashboard-is-resizing {
+  user-select: none;
+}
+
+body.aip-docked .dashboard-resize-handle {
+  display: none !important;
 }
 @media (max-width: 68.75rem) {
   .center-panel:has(.asset-inspector) { height: auto; min-height: 38rem; }

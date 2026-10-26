@@ -17,6 +17,10 @@ interface UiState {
   soundEnabled: boolean;
   /** AI Pilot slide-out drawer state. */
   copilotOpen: boolean;
+  /** Whether the digital twin toolbar is condensed/hidden. */
+  twinToolbarCollapsed: boolean;
+  setTwinToolbarCollapsed: (collapsed: boolean) => void;
+  toggleTwinToolbar: () => void;
   setView: (v: CenterView) => void;
   notify: (text: string, tone?: "warning" | "success") => void;
   clearNotice: () => void;
@@ -38,6 +42,9 @@ export const useUi = create<UiState>((set) => ({
   notice: null,
   soundEnabled: true,
   copilotOpen: false,
+  twinToolbarCollapsed: false,
+  setTwinToolbarCollapsed: (twinToolbarCollapsed) => set({ twinToolbarCollapsed }),
+  toggleTwinToolbar: () => set((s) => ({ twinToolbarCollapsed: !s.twinToolbarCollapsed })),
   setView: (view) => set({ view }),
   notify: (text, tone = "warning") => set({ notice: { text, id: ++noticeId, tone } }),
   clearNotice: () => set({ notice: null }),
