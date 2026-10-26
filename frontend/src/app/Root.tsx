@@ -14,6 +14,7 @@ const MetricsPage = lazy(() =>
 const WorkspacePage = lazy(() => import("../features/investigation/WorkspacePage").then((m) => ({ default: m.WorkspacePage })));
 const SocPage = lazy(() => import("../features/investigation/SocPage").then((m) => ({ default: m.SocPage })));
 const VoiceSettingsPage = lazy(() => import("../features/voice/VoiceSettingsPage").then((m) => ({ default: m.VoiceSettingsPage })));
+const AboutPage = lazy(() => import("../features/about/AboutPage").then((m) => ({ default: m.AboutPage })));
 
 function WorkspaceLoading({ current }: { current: string }) {
   return (
@@ -31,6 +32,7 @@ function WorkspaceLoading({ current }: { current: string }) {
 function Route() {
   const path = window.location.pathname.replace(/\/$/, "");
   if (path === "/settings") return <Suspense fallback={<WorkspaceLoading current={path} />}><VoiceSettingsPage /></Suspense>;
+  if (path === "/about") return <Suspense fallback={<WorkspaceLoading current={path} />}><AboutPage /></Suspense>;
   if (path === "/alerts" || path === "/assets" || path === "/lab") {
     return <Suspense fallback={<WorkspaceLoading current={path} />}><SocPage page={path.slice(1) as "alerts" | "assets" | "lab"} /></Suspense>;
   }

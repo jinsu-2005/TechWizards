@@ -1,4 +1,4 @@
-import { Activity, Bell, Boxes, ChartColumn, Database, FlaskConical, Menu, Search, Settings, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
+import { Activity, Bell, Boxes, ChartColumn, Database, FlaskConical, Info, Menu, Search, Settings, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { navigate } from "../../lib/navigation";
 import { useUi } from "../../store/ui";
@@ -15,6 +15,7 @@ const NAV_PAGES = [
   { href: "/sources", label: "Sources", icon: Database },
   { href: "/metrics", label: "Metrics", icon: ChartColumn },
   { href: "/lab", label: "Local lab", icon: FlaskConical },
+  { href: "/about", label: "About", icon: Info },
 ];
 
 export function WorkspaceHeader({ current }: { current: string }) {

@@ -1,6 +1,6 @@
 import type { MouseEvent } from "react";
 
-export const WORKSPACE_PATHS = ["/", "/alerts", "/assets", "/investigations", "/sources", "/metrics", "/lab"];
+export const WORKSPACE_PATHS = ["/", "/alerts", "/assets", "/investigations", "/sources", "/metrics", "/lab", "/about", "/settings"];
 export const NAVIGATION_EVENT = "attacktrace:navigation";
 export function navigate(href: string) {
   if (window.location.pathname + window.location.search + window.location.hash === href) return;
