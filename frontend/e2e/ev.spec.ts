@@ -52,4 +52,48 @@ test("EV replay preserves evidence and pilot conversation across navigation", as
   await page.getByRole("button", { name: "Return to current", exact: true }).click();
   await page.getByRole("button", { name: "Reset EV simulation" }).click();
   await expect(page.getByRole("button", { name: "Launch injection", exact: true })).toBeEnabled();
+ });
+
+test("EV 3D digital twin renders canvas, supports camera presets, view modes, and screenshot capture", async ({ page }) => {
+  test.setTimeout(60000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/ev");
+  const viewport = page.getByRole("region", { name: "Scrollable interactive EV diagram" });
+  await expect(viewport).toBeVisible();
+  await expect(viewport.locator("canvas")).toBeVisible();
+
+  // Test view modes
+  await page.getByRole("button", { name: "Exterior", exact: true }).click();
+  await page.getByRole("button", { name: "Exploded", exact: true }).click();
+  await page.getByRole("button", { name: "Subsystems", exact: true }).click();
+  await page.getByRole("button", { name: "Attack View", exact: true }).click();
+  await page.getByRole("button", { name: "X-Ray", exact: true }).click();
+
+  // Test camera presets
+  await page.getByRole("button", { name: "Front", exact: true }).click();
+  await page.getByRole("button", { name: "Side", exact: true }).click();
+  await page.getByRole("button", { name: "Rear", exact: true }).click();
+  await page.getByRole("button", { name: "Top", exact: true }).click();
+  await page.getByRole("button", { name: "Iso", exact: true }).click();
+
+  // Test subsystem filters
+  await page.getByRole("button", { name: "Energy", exact: true }).click();
+  await page.getByRole("button", { name: "Powertrain", exact: true }).click();
+  await page.getByRole("button", { name: "Thermal", exact: true }).click();
+  await page.getByRole("button", { name: "All", exact: true }).click();
+
+  // Test component inspection from quick buttons
+  await page.getByRole("button", { name: "Inspect Pack temperature" }).click();
+  await expect(page.getByRole("heading", { name: "Pack temperature" })).toBeVisible();
+
+  // Capture screenshot of the 3D twin command deck for design comparison
+  await page.waitForTimeout(1000); // allow canvas animation frame
+  await page.screenshot({ path: "../docs/ui-review/ev-3d-twin-screenshot.png", fullPage: true });
+
+  // Test toggle to 2D Schematic and back to 3D Twin
+  await page.getByRole("button", { name: "2D Schematic" }).click();
+  await expect(page.locator(".ev-diagram-scroll svg")).toBeVisible();
+  await page.getByRole("button", { name: "3D Twin" }).click();
+  await expect(viewport.locator("canvas")).toBeVisible();
 });
+

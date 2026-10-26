@@ -62,7 +62,7 @@ export function EvTwin({ snapshot, frame }: { snapshot: Snapshot; frame: Frame }
           <EvCanvas snapshot={snapshot} frame={frame} />
           {/* Quick Component Accessible Bar */}
           <div className="ev-accessible-quick-select" role="group" aria-label="Selectable vehicle components">
-            {snapshot.components.slice(0, 10).map((c) => (
+            {snapshot.components.map((c) => (
               <button
                 key={c.id}
                 type="button"

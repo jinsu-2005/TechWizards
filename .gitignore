@@ -46,3 +46,5 @@ graphify-out/.graphify_uncached.txt
 graphify-out/cost.json
 graphify-out/2026-*/
 reports/*.log
+output/
+tmp/

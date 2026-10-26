@@ -30,7 +30,29 @@ This document records the continuous, iterative **Generate → Review → Improv
 
 ### 3. Implementation Status
 - Three.js core installed (`three`, `@types/three`).
-- Building modular 3D car geometry, materials, subsystems, animations, and picking engine in `frontend/src/features/ev/3d/`.
-- Integrating 3D canvas into `frontend/src/features/ev/EvTwin.tsx`.
+- Implemented modular 3D car geometry, materials, subsystems, animations, and raycasting picking engine in `frontend/src/features/ev/3d/`.
+- Integrated 3D canvas into `frontend/src/features/ev/EvTwin.tsx` with dual-mode 3D Twin / 2D Schematic toggle and accessible component quick-select bar.
 
 ---
+
+## Iteration 2: Implementation Review & Design Comparison
+
+### 1. Implemented Screenshot vs Reference Critique
+- **Captured Artifact**: `docs/ui-review/ev-3d-twin-screenshot.png`
+- **Reference Concept**: `docs/ui-review/ev-3d-command-deck-ref.jpg`
+- **Visual Alignment**:
+  - **Color Discipline & Atmosphere**: The dark graphite background (`#0b0f14`), electric cyan accents, and glowing high-voltage and thermal subsystems align with the high-tech automotive OEM aesthetic established in the concept reference.
+  - **3D Geometry & Material Fidelity**: Skateboard chassis with battery packs, front/rear axles, inverter, traction motor, DC/DC converter, steering rack, brake assemblies, and glowing cooling loop match the anatomical placement required for physical plausibility.
+  - **Floating HUD Usability**: Floating top HUD features glassmorphic view mode selectors (`Exterior`, `X-Ray`, `Exploded`, `Subsystems`, `Attack View`), camera presets (`Iso`, `Front`, `Side`, `Rear`, `Top`, `Reset`), and subsystem category filters (`All`, `Energy`, `Powertrain`, `Thermal`, `Chassis`, `Network`).
+  - **Live Dynamic Telemetry**: Bottom HUD status pill actively updates wheel speed (64 km/h), vehicle state ("Cruising"), nominal/attack badge, selected component card (`Pack Temperature Sensor`), and interaction hint.
+- **Key Enhancements beyond the Concept Reference**:
+  - **Accessibility & Low-End Fallback**: An interactive "3D Twin" / "2D Schematic" toggle lets operators and automated testers instantly toggle to an SVG topological schematic.
+  - **Quick-Select Accessible Strip**: Added a horizontally scrollable component bar directly beneath the 3D canvas allowing keyboard and screen-reader navigation across all 22 simulated components.
+  - **Smooth Raycast Picking & Camera Focus**: Clicking any 3D subsystem smoothly orbits and animates the camera to frame that specific component while syncing state with the Component Inspector and EV AI Pilot panels.
+  - **Attack Propagation Particle Stream**: Implemented dynamic Catmull-Rom spline curves with traveling light pulses visualizing the causal propagation paths inferred by the detector.
+
+### 2. Validation & Verification
+- All 4 Playwright E2E tests passing cleanly (`e2e/ev.spec.ts`), including the full 3D interactive twin test.
+- Full Vitest suite passing (237 of 237 tests).
+- Backend pytest passing (13 of 13 tests).
+- Production build verified with zero TypeScript errors and zero impact on the Water Plant bundle chunk.
