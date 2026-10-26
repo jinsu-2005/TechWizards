@@ -1,0 +1,74 @@
+import { useEffect, useState } from "react";
+import { ArrowRight, Battery, Bot, CheckCircle2, ChevronRight, Cpu, Gauge, Pause, Play, Radio, RotateCcw, Thermometer, TriangleAlert, WifiOff, Zap } from "lucide-react";
+import { WorkspaceHeader } from "../../components/ui/WorkspaceHeader";
+import { navigate } from "../../lib/navigation";
+import { componentStatus, formatReading, getReading, type ComponentKind, type Frame, type Snapshot } from "./model";
+import { useEv } from "./store";
+import { EvAttackLab, EvCard, EvEvidence, EvInspector, EvLocalization, EvPilotPanel } from "./EvPanels";
+import { EvTwin } from "./EvTwin";
+
+const views = ["twin", "components", "telemetry", "lab", "pilot"] as const;
+type View = typeof views[number];
+const labels: Record<View, string> = { twin: "Vehicle twin", components: "Components", telemetry: "Telemetry", lab: "Attack lab", pilot: "EV AI Pilot" };
+const titles: Record<View, string> = { twin: "Vehicle intelligence", components: "Inside the vehicle", telemetry: "Signals and their references", lab: "Test the attack. Trace the evidence.", pilot: "Your EV investigation partner" };
+
+function Telemetry({ snapshot, frame }: { snapshot: Snapshot; frame: Frame }) {
+  const signals = [{ id: "TEMP", title: "Pack temperature" }, { id: "COOL", title: "Pump request vs feedback" }, { id: "CAN", title: "Gateway latency" }, { id: "VCU", title: "Vehicle torque request" }];
+  const history = snapshot.history.filter((h) => h.time_s <= frame.time_s);
+  return <>{signals.map(({ id, title }) => {
+    const values = history.map((h) => getReading(h, id)).filter((r) => r !== undefined);
+    const current = getReading(frame, id);
+    const min = Math.min(0, ...values.flatMap((v) => [v.value, v.expected]));
+    const max = Math.max(1, ...values.flatMap((v) => [v.value, v.expected]));
+    const point = (value: number, index: number) => `${index / Math.max(1, values.length - 1) * 600},${130 - (value - min) / (max - min || 1) * 115}`;
+    return <EvCard key={id} title={title} detail={`${id} · ${current?.unit ?? ""}`}><div className="ev-chart-value">{current?.value.toFixed(1)} <small>{current?.unit}</small></div><div className="ev-chart-legend"><span>Measured</span><span>Model reference (dashed)</span></div>{values.length < 2 ? <p role="status">Collecting backend samples…</p> : <svg className="ev-chart" viewBox="0 0 600 145" role="img" aria-label={`${title}: measured ${current?.value.toFixed(1)}, reference ${current?.expected.toFixed(1)} ${current?.unit}.`}><path d="M0 35H600M0 70H600M0 105H600" fill="none" stroke="var(--border)" /><polyline points={values.map((v, i) => point(v.expected, i)).join(" ")} fill="none" stroke="var(--muted)" strokeWidth="1.5" strokeDasharray="5 4" /><polyline points={values.map((v, i) => point(v.value, i)).join(" ")} fill="none" stroke="var(--ev-accent)" strokeWidth="2.5" /></svg>}<div className="ev-chart-axis"><span>T+{history[0]?.time_s.toFixed(1) ?? "0"}s</span><span>T+{frame.time_s.toFixed(1)}s · {values.length} samples</span></div></EvCard>;
+  })}<EvCard title="Signal reference" detail="Measured / expected / residual" className="ev-span-full"><div className="ev-table-wrap"><table className="ev-table"><thead><tr><th>Component</th><th>Type</th><th>Measured</th><th>Expected</th><th>Residual</th><th>State</th></tr></thead><tbody>{snapshot.components.map((c) => { const r = getReading(frame, c.id); return <tr key={c.id}><td>{c.name} ({c.id})</td><td>{c.kind}</td><td>{formatReading(r)}</td><td>{r?.expected.toFixed(1)} {c.unit}</td><td>{r?.residual.toFixed(2)}</td><td>{componentStatus(frame, c.id)}</td></tr>; })}</tbody></table></div></EvCard></>;
+}
+
+function DrivingProfile({ snapshot }: { snapshot: Snapshot }) {
+  const control = useEv((s) => s.control); const busy = useEv((s) => s.busy); const replayTime = useEv((s) => s.replayTime);
+  const [speed, setSpeed] = useState(snapshot.speed);
+  return <EvCard title="Driving profile" detail="Sandbox driver demand"><label className="ev-slider-label" htmlFor="ev-speed">Cruise demand <strong>{speed} km/h</strong></label><input id="ev-speed" type="range" min="0" max="120" step="1" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} /><div className="ev-driving-actions"><p>Applied demand: {snapshot.speed.toFixed(0)} km/h · modeled speed: {snapshot.actual_speed.toFixed(1)} km/h</p><button className="ev-button" disabled={busy || replayTime !== null || speed === snapshot.speed} onClick={() => { void control("speed", speed); }}>Apply demand</button></div><p className="ev-small">Change demand during freeze or replay tests to observe signal inconsistency. Abrupt demand steps can also cause transient residuals.</p></EvCard>;
+}
+
+export function EvWorkspace() {
+  const ev = useEv();
+  const raw = new URLSearchParams(window.location.search).get("view");
+  const view: View = views.includes(raw as View) ? raw as View : "twin";
+  const [kind, setKind] = useState<ComponentKind | "All">("All"); const [search, setSearch] = useState("");
+  useEffect(() => {
+    void useEv.getState().poll();
+    const timer = window.setInterval(() => { if (!document.hidden) void useEv.getState().poll(); }, 1000);
+    const refresh = () => { if (!document.hidden) void useEv.getState().poll(); };
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+  }, []);
+  const snapshot = ev.snapshot;
+  const retained = ev.replayTime === null ? null : snapshot?.history.find((h) => h.time_s === ev.replayTime);
+  const frame = ev.replayTime === null ? snapshot : retained;
+  const filtered = snapshot?.components.filter((c) => (kind === "All" || c.kind === kind) && `${c.id} ${c.name} ${c.system}`.toLowerCase().includes(search.toLowerCase())) ?? [];
+  const replayIndex = snapshot?.history.findIndex((h) => h.time_s === ev.replayTime) ?? -1;
+  const alerts = frame?.analysis.affected.length ?? 0;
+  return <div className="ev-workspace"><WorkspaceHeader current={view === "twin" ? "/ev" : `/ev?view=${view}`} /><main id="main-workspace" tabIndex={-1}>
+    <div className="ev-page-heading"><div><span className="ev-eyebrow">ATTACKTRACE / EV SECURITY OPERATIONS</span><h1>{titles[view]}</h1><p>Observe the vehicle. Challenge a signal. Investigate the cause.</p></div><div className="ev-heading-actions"><span className="ev-source"><Radio size={14} aria-hidden />BACKEND SIMULATION</span><button className="ev-button" disabled={!snapshot || ev.busy || !ev.connected} onClick={() => { void ev.control(snapshot?.running ? "pause" : "resume"); }}>{snapshot?.running ? <Pause size={15} aria-hidden /> : <Play size={15} aria-hidden />}{snapshot?.running ? "Pause" : "Resume"}</button><button className="ev-button ev-reset" disabled={!snapshot || ev.busy} aria-label="Reset EV simulation" title="Reset EV simulation" onClick={() => { void ev.control("reset"); }}><RotateCcw size={15} aria-hidden /></button></div></div>
+    {ev.error && <div role="alert" className="ev-error"><WifiOff size={18} aria-hidden /><div><strong>{ev.connected ? "EV command could not complete" : "EV backend connection unavailable"}</strong><p>{ev.error}. {snapshot ? "Showing the last received snapshot." : "Start the updated backend with /api/ev routes enabled."}</p></div><button className="ev-button" disabled={ev.busy} onClick={() => { void ev.poll(); }}>Retry connection</button></div>}
+    <div className="ev-mobile-nav" role="group" aria-label="EV sections">{views.map((v) => <button key={v} aria-pressed={view === v} onClick={() => navigate(v === "twin" ? "/ev" : `/ev?view=${v}`)}>{labels[v]}</button>)}</div>
+    {!snapshot && !ev.error && <div className="ev-loading" role="status" aria-busy="true">Connecting to the EV simulator and loading component definitions…</div>}
+    {snapshot && <>
+      <div className="ev-status-strip"><span><i className={ev.connected && snapshot.running ? "" : "ev-dot-warning"} />{!ev.connected ? "Disconnected · last snapshot" : snapshot.running ? "Simulator running" : "Simulator paused"}</span><span>EV-01 · {snapshot.components.length} components</span><span>{snapshot.attack_active ? `Injection active · ${snapshot.attack_remaining_s.toFixed(1)}s left` : snapshot.incident?.status === "recovered" ? "Recovery verified" : "No active injection"}</span><span>T+{snapshot.time_s.toFixed(1)}s</span></div>
+      <div className="ev-workflow" aria-label="Investigation stages">{["Observe", "Inject", "Detect", "Investigate", "Recover"].map((step, i) => <span key={step} className={(i === 0 && !snapshot.attack_active && !snapshot.incident) || (i === 1 && snapshot.attack_active && !snapshot.incident) || (i === 3 && snapshot.incident?.status === "investigating") || (i === 4 && snapshot.incident?.status === "recovered") ? "is-current" : ""}><small>0{i + 1}</small>{step}{i < 4 && <ChevronRight size={13} aria-hidden />}</span>)}</div>
+      <div className="ev-replay-bar"><label htmlFor="ev-replay">Evidence replay</label><input id="ev-replay" aria-label="Evidence replay sample" type="range" min="0" max={Math.max(0, snapshot.history.length - 1)} value={ev.replayTime === null ? snapshot.history.length - 1 : Math.max(0, replayIndex)} onChange={(e) => { const h = snapshot.history[Number(e.target.value)]; if (h) ev.replay(h.time_s); }} /><span>{ev.replayTime === null ? "Current" : `T+${ev.replayTime.toFixed(1)}s`}</span><button className="ev-button" disabled={ev.replayTime === null} onClick={() => ev.replay(null)}>Return to current</button></div>
+      {ev.replayTime !== null && <div className="ev-replay-notice" role="status">{retained ? "Historical snapshot. The simulator continues; injection and driving controls are disabled during review." : "This snapshot has left the 120-second buffer. Return to current readings to continue."}</div>}
+      {frame && <>
+        <div className="ev-metrics">{[{ label: "Battery reserve", value: getReading(frame, "SOC")?.value.toFixed(1) ?? "?", unit: "%", icon: Battery, hint: "Measured state of charge" }, { label: "Wheel speed", value: getReading(frame, "WHEEL")?.value.toFixed(1) ?? "?", unit: "km/h", icon: Gauge, hint: "Compare with driver demand" }, { label: "Pack temperature", value: getReading(frame, "TEMP")?.value.toFixed(1) ?? "?", unit: "°C", icon: Thermometer, hint: `Reference ${getReading(frame, "TEMP")?.expected.toFixed(1)} °C` }, { label: "Anomalous signals", value: String(alerts), unit: `/ ${snapshot.components.length}`, icon: Zap, hint: frame.analysis.candidates[0] ? `Leading hypothesis: ${frame.analysis.candidates[0].id}` : "No persistent residual" }].map(({ label, value, unit, icon: Icon, hint }) => <div className="ev-metric" key={label}><div><span>{label}</span><Icon size={18} aria-hidden /></div><strong>{value}<small>{unit}</small></strong><p>{hint}</p></div>)}</div>
+        {view === "twin" && <><div className="ev-primary-grid"><EvCard title="Vehicle systems" detail="Measured signals & inferred dependencies"><EvTwin snapshot={snapshot} frame={frame} /></EvCard><EvInspector snapshot={snapshot} frame={frame} /></div><div className="ev-secondary-grid"><EvLocalization snapshot={snapshot} frame={frame} /><div className="ev-stacked"><DrivingProfile snapshot={snapshot} /><EvCard title="Investigation state" detail={snapshot.incident?.id ?? "No incident"}><div className="ev-health">{alerts ? <TriangleAlert size={24} aria-hidden /> : <CheckCircle2 size={24} aria-hidden />}<div><h3>{alerts ? "Telemetry requires investigation" : "Signals within model reference"}</h3><p>{alerts ? `${alerts} signals have persistent residuals. Compare the ranked hypotheses before revealing the injected target.` : "A healthy residual baseline does not prove that every possible attack is detectable."}</p></div></div><button className="ev-text-button" onClick={() => navigate("/ev?view=lab")}>Configure an attack scenario <ArrowRight size={15} aria-hidden /></button></EvCard></div></div></>}
+        {view === "components" && <div className="ev-primary-grid"><EvCard title="Component explorer" detail={`${filtered.length} of ${snapshot.components.length}`}><div className="ev-component-tools"><label><span className="sr-only">Search components</span><input aria-label="Search components" placeholder="Search component or system…" value={search} onChange={(e) => setSearch(e.target.value)} /></label><label><span className="sr-only">Component type</span><select aria-label="Component type" value={kind} onChange={(e) => setKind(e.target.value as ComponentKind | "All")}>{["All", "Sensor", "Actuator", "Controller"].map((k) => <option key={k}>{k}</option>)}</select></label></div><div className="ev-component-list">{filtered.map((c) => <button key={c.id} aria-pressed={c.id === ev.selected} onClick={() => ev.select(c.id)}><Cpu size={20} aria-hidden /><span><strong>{c.name}</strong><small>{c.id} · {c.kind} · {componentStatus(frame, c.id)}</small></span><span>{formatReading(getReading(frame, c.id))}</span><ChevronRight size={16} aria-hidden /></button>)}{filtered.length === 0 && <p role="status">No matching components. Try another name or type.</p>}</div></EvCard><EvInspector snapshot={snapshot} frame={frame} /></div>}
+        {view === "telemetry" && <div className="ev-secondary-grid"><Telemetry snapshot={snapshot} frame={frame} /></div>}
+        {view === "lab" && <><div className="ev-primary-grid"><EvAttackLab snapshot={snapshot} /><div className="ev-stacked"><EvInspector snapshot={snapshot} frame={frame} /><DrivingProfile snapshot={snapshot} /></div></div><EvLocalization snapshot={snapshot} frame={frame} /></>}
+        {view === "pilot" && <><div className="ev-primary-grid"><EvPilotPanel frame={frame} /><div className="ev-stacked"><EvInspector snapshot={snapshot} frame={frame} /><EvCard title="EV evidence tools" detail="Server supplied"><ul className="ev-tool-list"><li>get_ev_telemetry</li><li>inspect_ev_component</li><li>get_ev_localization</li><li>get_ev_evidence</li></ul><p>Tool results come from this EV session and selected snapshot. Injection truth and water plant data are excluded.</p></EvCard></div></div><EvLocalization snapshot={snapshot} frame={frame} /></>}
+        <div className="ev-secondary-grid ev-bottom-grid"><EvEvidence snapshot={snapshot} frame={frame} /><div className="ev-pilot-invite"><div className="ev-inspector-icon"><Bot size={25} aria-hidden /></div><h2>Investigate with the EV AI Pilot.</h2><p>Give the model measured signals, clean references and ranked evidence. See which model answered and when it used an evidence-only fallback.</p><button className="ev-button" onClick={() => navigate("/ev?view=pilot")}>Open EV AI Pilot <ArrowRight size={16} aria-hidden /></button></div></div>
+      </>}
+      <footer className="ev-footer"><span>Educational EV sandbox · model-based detection</span><span>2 Hz simulator · 120s replay · no hardware connection · no trained EV GNN</span></footer>
+    </>}
+  </main></div>;
+}

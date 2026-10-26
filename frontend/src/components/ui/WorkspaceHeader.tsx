@@ -1,4 +1,4 @@
-import { Activity, Bell, Boxes, ChartColumn, Database, FlaskConical, Info, Menu, Search, Settings, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
+import { Activity, Bell, Boxes, CarFront, ChartColumn, Cpu, Database, Droplets, FlaskConical, Info, Menu, Search, Settings, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { navigate } from "../../lib/navigation";
 import { useUi } from "../../store/ui";
@@ -19,6 +19,14 @@ const NAV_PAGES = [
 ];
 
 export function WorkspaceHeader({ current }: { current: string }) {
+  const ev = current.startsWith("/ev");
+  const pages = ev ? [
+    { href: "/ev", label: "Vehicle twin", icon: CarFront },
+    { href: "/ev?view=components", label: "Components", icon: Cpu },
+    { href: "/ev?view=telemetry", label: "Telemetry", icon: ChartColumn },
+    { href: "/ev?view=lab", label: "Attack lab", icon: FlaskConical },
+    { href: "/ev?view=pilot", label: "EV AI Pilot", icon: ShieldCheck },
+  ] : NAV_PAGES;
   const sound = useUi((s) => s.soundEnabled);
   const toggleSound = useUi((s) => s.toggleSound);
   const copilot = useUi((s) => s.copilotOpen);
@@ -47,11 +55,17 @@ export function WorkspaceHeader({ current }: { current: string }) {
     if (menuOpen) menuRef.current?.querySelector<HTMLElement>("a")?.focus();
   }, [menuOpen]);
 
-  const allPages = [...NAV_PAGES, { href: "/settings", label: "Settings", icon: Settings }];
+  const allPages = [...pages, { href: "/settings", label: "Settings", icon: Settings }];
 
   return (
     <header className="workspace-header" role="banner">
       <a className="skip-link" href="#main-workspace">Skip to content</a>
+      <nav className="system-switch" aria-label="System selection">
+        <span className="system-switch-label">Workspace</span>
+        <a href="/" aria-current={!ev ? "true" : undefined} onClick={() => useUi.getState().setCopilotOpen(false)}><Droplets size={16} aria-hidden />Water Plant</a>
+        <a href="/ev" aria-current={ev ? "true" : undefined} onClick={() => useUi.getState().setCopilotOpen(false)}><CarFront size={16} aria-hidden />EV Vehicle</a>
+        <span className="system-switch-context">{ev ? "Vehicle systems · simulation" : "Industrial process security"}</span>
+      </nav>
 
       <div className="workspace-topbar">
         {/* Brand */}
@@ -60,7 +74,7 @@ export function WorkspaceHeader({ current }: { current: string }) {
           <span>
             <strong>AttackTrace</strong>
             <span className="brand-caption flex items-center gap-1.5">
-              Process security
+              {ev ? "Vehicle security" : "Process security"}
               <span className="inline-flex h-1.5 w-1.5 rounded-full bg-normal animate-pulse" title="Telemetry live 2 Hz" />
             </span>
           </span>
@@ -68,7 +82,7 @@ export function WorkspaceHeader({ current }: { current: string }) {
 
         {/* Primary nav – wide screens */}
         <nav aria-label="Workspace navigation" className="workspace-links">
-          {NAV_PAGES.map(({ href, label, icon: Icon }) => (
+          {pages.map(({ href, label, icon: Icon }) => (
             <a key={href} href={href} aria-current={href === current ? "page" : undefined} className="relative">
               <Icon size={15} aria-hidden />
               <span>{label}</span>
@@ -97,8 +111,8 @@ export function WorkspaceHeader({ current }: { current: string }) {
             type="button"
             className={`copilot-trigger${copilot ? " is-selected" : ""}`}
             aria-label="Toggle AI Pilot"
-            aria-pressed={copilot}
-            onClick={toggleCopilot}
+            aria-pressed={ev ? current === "/ev?view=pilot" : copilot}
+            onClick={ev ? () => navigate("/ev?view=pilot") : toggleCopilot}
           >
             <img src={pilotIcon} alt="" className="aip-trigger-emblem" />
             <span className="copilot-label">AI Pilot</span>

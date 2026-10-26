@@ -15,6 +15,7 @@ const WorkspacePage = lazy(() => import("../features/investigation/WorkspacePage
 const SocPage = lazy(() => import("../features/investigation/SocPage").then((m) => ({ default: m.SocPage })));
 const VoiceSettingsPage = lazy(() => import("../features/voice/VoiceSettingsPage").then((m) => ({ default: m.VoiceSettingsPage })));
 const AboutPage = lazy(() => import("../features/about/AboutPage").then((m) => ({ default: m.AboutPage })));
+const EvWorkspace = lazy(() => import("../features/ev/EvWorkspace").then((m) => ({ default: m.EvWorkspace })));
 
 function WorkspaceLoading({ current }: { current: string }) {
   return (
@@ -31,6 +32,7 @@ function WorkspaceLoading({ current }: { current: string }) {
 
 function Route() {
   const path = window.location.pathname.replace(/\/$/, "");
+  if (path === "/ev") return <Suspense fallback={<WorkspaceLoading current="/ev" />}><EvWorkspace /></Suspense>;
   if (path === "/settings") return <Suspense fallback={<WorkspaceLoading current={path} />}><VoiceSettingsPage /></Suspense>;
   if (path === "/about") return <Suspense fallback={<WorkspaceLoading current={path} />}><AboutPage /></Suspense>;
   if (path === "/alerts" || path === "/assets" || path === "/lab") {
@@ -74,7 +76,7 @@ export function Root() {
         <Route />
       </div>
       <NoticeToast />
-      <CopilotDrawer />
+      <div hidden={window.location.pathname.replace(/\/$/, "") === "/ev"}><CopilotDrawer /></div>
     </div>
   );
 }

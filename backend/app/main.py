@@ -15,7 +15,7 @@ from uuid import uuid4
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import authentication, copilot, investigation, lab, live_voice, rest, voice, ws
+from app.api import authentication, copilot, ev, investigation, lab, live_voice, rest, voice, ws
 from app.api.gateway import GatewayBoundary
 from app.api.live_attack import LiveAttackLauncher
 from app.api.security import RateLimiter
@@ -263,6 +263,7 @@ def create_app(
         return {"status": "ok"}
 
     application.state.hub = ws.Hub()
+    application.state.ev_sessions = ev.Sessions()
     application.state.settings = settings
     application.state.attack_limiter = RateLimiter(settings.attack_rate_per_min)
     application.state.live_voice_limiter = RateLimiter(3)
@@ -294,6 +295,7 @@ def create_app(
     application.include_router(live_voice.router)
     application.include_router(investigation.router)
     application.include_router(lab.router)
+    application.include_router(ev.router)
     return application
 
 
