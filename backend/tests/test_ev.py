@@ -28,6 +28,42 @@ def test_clean_baseline_and_driver_change():
     assert runtime.incident is None
 
 
+def test_drive_cycle_varies_speed_without_false_alarms():
+    runtime = EvRuntime()
+    speeds = []
+    for _ in range(120):
+        runtime.step()
+        speeds.append(runtime.actual_speed)
+    assert max(speeds) - min(speeds) > 6
+    assert abs(sum(speeds) / len(speeds) - runtime.speed) < 3
+    assert runtime.incident is None
+
+
+@pytest.mark.parametrize("speed", [0, 20, 120])
+def test_hard_cruise_changes_including_braking_stay_clean(speed):
+    runtime = EvRuntime()
+    step(runtime, 10)
+    runtime.speed = speed
+    step(runtime, 80)
+    assert runtime.incident is None
+    assert abs(runtime.actual_speed - speed) < speed * 0.15 + 1
+
+
+@pytest.mark.parametrize("kind,target", [("freeze", "PEDAL"), ("replay", "WHEEL")])
+def test_stale_signal_attacks_detect_without_operator_help(kind, target):
+    runtime = EvRuntime()
+    step(runtime, 40)
+    runtime.launch(kind, target, 0, 30)
+    first_lead = None
+    for _ in range(20):
+        runtime.step()
+        if first_lead is None and runtime.analysis["candidates"]:
+            first_lead = runtime.analysis["candidates"][0]["id"]
+    # A stale signal crosses the live value now and then, so judge the first detection.
+    assert runtime.incident is not None
+    assert first_lead == target
+
+
 @pytest.mark.parametrize(
     "kind,target,magnitude",
     [

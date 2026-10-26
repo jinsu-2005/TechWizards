@@ -60,9 +60,9 @@ const GHOST_FRAGMENT = /* glsl */ `
   varying float vWorldY;
   void main() {
     float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 2.3);
-    float scan = 0.84 + 0.16 * sin(vWorldY * 64.0 - uTime * 1.4);
-    float a = (0.03 + f * 0.6) * scan * uOpacity;
-    gl_FragColor = vec4(uColor * (0.55 + f * 1.7), a);
+    float scan = 0.9 + 0.1 * sin(vWorldY * 64.0 - uTime * 1.4);
+    float a = (0.015 + f * 0.42) * scan * uOpacity;
+    gl_FragColor = vec4(uColor * (0.35 + f * 1.05), a);
   }
 `;
 
@@ -106,10 +106,10 @@ export function createEvMaterials(): EvMaterialBank {
   const trim = new THREE.MeshStandardMaterial({ color: 0x0b0f14, roughness: 0.55, metalness: 0.5 });
 
   const headlight = new THREE.MeshStandardMaterial({
-    color: 0xffffff, emissive: 0xcfe9ff, emissiveIntensity: 0.9, roughness: 0.2,
+    color: 0xffffff, emissive: 0xcfe9ff, emissiveIntensity: 0.6, roughness: 0.2,
   });
   const taillight = new THREE.MeshStandardMaterial({
-    color: 0xff2a3d, emissive: 0xff1230, emissiveIntensity: 2.0, roughness: 0.3,
+    color: 0xff2a3d, emissive: 0xff1230, emissiveIntensity: 1.2, roughness: 0.3,
   });
 
   const tire = new THREE.MeshStandardMaterial({ color: 0x0d0f12, roughness: 0.92, metalness: 0.02 });
@@ -117,8 +117,8 @@ export function createEvMaterials(): EvMaterialBank {
   const caliper = new THREE.MeshStandardMaterial({ color: 0x22d3ee, metalness: 0.5, roughness: 0.35, emissive: 0x0a5560, emissiveIntensity: 0.8 });
   const rotor = new THREE.MeshStandardMaterial({ color: 0x9aa5ad, metalness: 0.95, roughness: 0.4 });
 
-  const ghostBody = ghost(0x37d6ff, 1.0);
-  const ghostGlass = ghost(0x5fb8ff, 0.55);
+  const ghostBody = ghost(0x37d6ff, 0.8);
+  const ghostGlass = ghost(0x5fb8ff, 0.4);
 
   const housing = new THREE.MeshStandardMaterial({ color: 0x232c37, metalness: 0.85, roughness: 0.38 });
   const housingDim = new THREE.MeshStandardMaterial({
@@ -130,7 +130,7 @@ export function createEvMaterials(): EvMaterialBank {
     accent[sys] = new THREE.MeshStandardMaterial({
       color: new THREE.Color(hex),
       emissive: new THREE.Color(hex),
-      emissiveIntensity: 1.35,
+      emissiveIntensity: 0.75,
       metalness: 0.2,
       roughness: 0.4,
     });
@@ -152,13 +152,13 @@ export function createEvMaterials(): EvMaterialBank {
   const leaderLine = new THREE.LineBasicMaterial({ color: 0x38a1ff, transparent: true, opacity: 0.35 });
 
   const hvBusbar = new THREE.MeshStandardMaterial({
-    color: 0xff7a1a, emissive: 0xff5a00, emissiveIntensity: 0.9, metalness: 0.6, roughness: 0.35,
+    color: 0xff7a1a, emissive: 0xff5a00, emissiveIntensity: 0.55, metalness: 0.6, roughness: 0.35,
   });
   const coolant = new THREE.MeshStandardMaterial({
-    color: 0x38a1ff, emissive: 0x1b78d6, emissiveIntensity: 0.9, transparent: true, opacity: 0.7, roughness: 0.3,
+    color: 0x38a1ff, emissive: 0x1b78d6, emissiveIntensity: 0.55, transparent: true, opacity: 0.7, roughness: 0.3,
   });
   const canWire = new THREE.MeshStandardMaterial({
-    color: 0xc77dff, emissive: 0xa855f7, emissiveIntensity: 1.1, transparent: true, opacity: 0.85,
+    color: 0xc77dff, emissive: 0xa855f7, emissiveIntensity: 0.7, transparent: true, opacity: 0.85,
   });
 
   return {

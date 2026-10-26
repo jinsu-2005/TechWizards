@@ -1,4 +1,4 @@
-import { Activity, Bell, Boxes, CarFront, ChartColumn, Cpu, Database, Droplets, FlaskConical, Info, Menu, Search, Settings, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
+import { Activity, Bell, Boxes, CarFront, ChartColumn, Database, Droplets, FlaskConical, Info, Menu, Search, Settings, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { navigate } from "../../lib/navigation";
 import { useUi } from "../../store/ui";
@@ -22,10 +22,9 @@ export function WorkspaceHeader({ current }: { current: string }) {
   const ev = current.startsWith("/ev");
   const pages = ev ? [
     { href: "/ev", label: "Vehicle twin", icon: CarFront },
-    { href: "/ev?view=components", label: "Components", icon: Cpu },
-    { href: "/ev?view=telemetry", label: "Telemetry", icon: ChartColumn },
     { href: "/ev?view=lab", label: "Attack lab", icon: FlaskConical },
     { href: "/ev?view=pilot", label: "EV AI Pilot", icon: ShieldCheck },
+    { href: "/ev?view=data", label: "Data", icon: ChartColumn },
   ] : NAV_PAGES;
   const sound = useUi((s) => s.soundEnabled);
   const toggleSound = useUi((s) => s.toggleSound);
@@ -55,7 +54,8 @@ export function WorkspaceHeader({ current }: { current: string }) {
     if (menuOpen) menuRef.current?.querySelector<HTMLElement>("a")?.focus();
   }, [menuOpen]);
 
-  const allPages = [...pages, { href: "/settings", label: "Settings", icon: Settings }];
+  const settingsHref = ev ? "/ev?view=settings" : "/settings";
+  const allPages = [...pages, { href: settingsHref, label: "Settings", icon: Settings }];
 
   return (
     <header className="workspace-header" role="banner">
@@ -69,7 +69,7 @@ export function WorkspaceHeader({ current }: { current: string }) {
 
       <div className="workspace-topbar">
         {/* Brand */}
-        <a href="/" className="workspace-brand" aria-label="AttackTrace monitoring home">
+        <a href={ev ? "/ev" : "/"} className="workspace-brand" aria-label={ev ? "AttackTrace vehicle twin" : "AttackTrace monitoring home"}>
           <span className="brand-glyph"><ShieldCheck size={20} aria-hidden /></span>
           <span>
             <strong>AttackTrace</strong>
@@ -119,11 +119,11 @@ export function WorkspaceHeader({ current }: { current: string }) {
           </button>
 
           <a
-            href="/settings"
-            className={`utility-icon utility-settings${current === "/settings" ? " is-active" : ""}`}
+            href={settingsHref}
+            className={`utility-icon utility-settings${current === settingsHref ? " is-active" : ""}`}
             aria-label="Settings"
             title="Settings"
-            aria-current={current === "/settings" ? "page" : undefined}
+            aria-current={current === settingsHref ? "page" : undefined}
           >
             <Settings size={17} aria-hidden />
           </a>

@@ -83,6 +83,7 @@ export class Ev3dScene {
   private rafId: number | null = null;
   private clock = new THREE.Clock();
   private disposed = false;
+  private declutterFrame = 0;
 
   public getSubsystem(): SubsystemKind {
     return this.activeSubsystem;
@@ -105,7 +106,7 @@ export class Ev3dScene {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
     this.renderer.setSize(width, height);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = 0.95;
     this.container.appendChild(this.renderer.domElement);
 
     // Image-based lighting so paint, glass and metal reflect a studio instead of rendering black
@@ -150,7 +151,7 @@ export class Ev3dScene {
     this.composer.setPixelRatio(this.renderer.getPixelRatio());
     this.composer.setSize(width, height);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(width, height), 0.45, 0.6, 1.0);
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(width, height), 0.28, 0.45, 1.0);
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
 
@@ -163,7 +164,34 @@ export class Ev3dScene {
     this.resizeObserver.observe(this.container);
 
     this.applyViewMode(this.viewMode);
-    this.animate();
+    // Compile shaders off the main thread first; a synchronous first frame froze the page ~0.8 s.
+    void this.warmUp().finally(() => {
+      if (this.disposed) return;
+      this.container.dataset.ready = "1";
+      this.animate();
+    });
+  }
+
+  /** Pre-compile every material the twin can switch to (view modes, attack states) without blocking. */
+  private async warmUp(): Promise<void> {
+    const m = this.materials;
+    const mats: THREE.Material[] = [
+      m.paint, m.glass, m.trim, m.headlight, m.taillight, m.tire, m.rim, m.caliper, m.rotor,
+      m.ghostBody, m.ghostGlass, m.housing, m.housingDim, ...Object.values(m.accent), m.accentDim,
+      m.statusAffected, m.statusOrigin, m.hvBusbar, m.coolant, m.canWire,
+    ];
+    const geo = new THREE.BoxGeometry(0.001, 0.001, 0.001);
+    const warm = new THREE.Group();
+    for (const mat of mats) warm.add(new THREE.Mesh(geo, mat));
+    this.scene.add(warm);
+    try {
+      await this.renderer.compileAsync(this.scene, this.camera);
+    } catch {
+      // Falls back to compiling on first render.
+    } finally {
+      this.scene.remove(warm);
+      geo.dispose();
+    }
   }
 
   // ---------------------------------------------------------------- setup
@@ -380,15 +408,15 @@ export class Ev3dScene {
     this.car.lightsGroup.visible = showShell;
     this.sub.root.visible = mode !== "exterior";
     this.explodedTarget = mode === "exploded" ? 1 : 0;
-    this.bloom.strength = mode === "exterior" ? 0.1 : 0.45;
+    this.bloom.strength = mode === "exterior" ? 0.08 : 0.28;
   }
 
   // ---------------------------------------------------------------- per-frame state
 
   private refreshComponentStates(time: number): void {
     const m = this.materials;
-    m.statusOrigin.emissiveIntensity = 2.4 + Math.sin(time * 6) * 1.1;
-    m.statusAffected.emissiveIntensity = 1.7 + Math.sin(time * 3) * 0.5;
+    m.statusOrigin.emissiveIntensity = 1.8 + Math.sin(time * 6) * 0.8;
+    m.statusAffected.emissiveIntensity = 1.2 + Math.sin(time * 3) * 0.4;
 
     const attackFocus = this.viewMode === "investigation" && (this.affected.size > 0 || this.originId !== null);
     let labelsShown = 0;
@@ -505,7 +533,26 @@ export class Ev3dScene {
     this.controls.update();
     this.composer.render();
     this.labelRenderer.render(this.scene, this.camera);
+    this.declutterLabels();
   };
+
+  /** Fade out lower-priority labels that collide on screen (origin > selected > affected). */
+  private declutterLabels(): void {
+    if (++this.declutterFrame % 6) return;
+    const rank = (el: HTMLElement) =>
+      el.classList.contains("is-origin") ? 0 : el.classList.contains("is-selected") ? 1 : el.classList.contains("is-affected") ? 2 : 3;
+    const labels = Object.values(this.sub.components)
+      .filter((c) => c.label.visible)
+      .map((c) => c.labelEl)
+      .sort((a, b) => rank(a) - rank(b));
+    const placed: DOMRect[] = [];
+    for (const el of labels) {
+      const r = el.getBoundingClientRect();
+      const hit = placed.some((p) => r.left < p.right + 6 && r.right > p.left - 6 && r.top < p.bottom + 3 && r.bottom > p.top - 3);
+      el.classList.toggle("is-occluded", hit);
+      if (!hit) placed.push(r);
+    }
+  }
 
   public dispose(): void {
     this.disposed = true;
@@ -538,6 +585,8 @@ export class Ev3dScene {
     this.envTarget.dispose();
     this.composer.dispose();
     this.renderer.dispose();
+    // Release the GPU context now; browsers cap live WebGL contexts (~16) and evict the oldest.
+    this.renderer.forceContextLoss();
 
     dom.parentElement?.removeChild(dom);
     this.labelRenderer.domElement.parentElement?.removeChild(this.labelRenderer.domElement);

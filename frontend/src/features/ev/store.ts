@@ -10,6 +10,7 @@ function session(): string {
   if (!sessionId) { sessionId = crypto.randomUUID(); try { sessionStorage.setItem("attacktrace.ev.session", sessionId); } catch { /* memory fallback */ } }
   return sessionId;
 }
+export const evSessionId = session;
 async function request<T>(path: string, body?: unknown, timeout = 10000): Promise<T> {
   const key = (import.meta.env.VITE_API_KEY as string | undefined) || "change-me-demo-key";
   const response = await fetch(`/api/ev/${path}`, { method: body === undefined ? "GET" : "POST", signal: AbortSignal.timeout(timeout),
@@ -19,17 +20,26 @@ async function request<T>(path: string, body?: unknown, timeout = 10000): Promis
 }
 interface EvStore {
   snapshot: Snapshot | null; selected: string; replayTime: number | null; error: string | null; busy: boolean; connected: boolean; lastReceived: number;
-  messages: Message[]; pilotBusy: boolean; pilotError: string | null;
+  messages: Message[]; pilotBusy: boolean; pilotError: string | null; twinMode: "3d" | "2d"; setTwinMode: (mode: "3d" | "2d") => void;
+  /** What the pilot is saying right now (live call or spoken alert); shown as on-stage subtitles. */
+  caption: { text: string; live: boolean } | null; showCaption: (text: string, holdMs: number, live?: boolean) => void;
   select: (id: string) => void; replay: (time: number | null) => void; poll: () => Promise<void>;
   control: (action: string, speed?: number) => Promise<void>; launch: (config: AttackConfig) => Promise<void>;
-  ask: (question: string) => Promise<void>; clearChat: () => void;
+  ask: (question: string) => Promise<void>; clearChat: () => void; addMessages: (items: Message[]) => void;
 }
 let polling = false;
+let captionTimer = 0;
 let revision = 0;
 const messageOf = (error: unknown) => error instanceof Error ? error.message : "EV backend unavailable";
 export const useEv = create<EvStore>()(persist((set, get) => ({
   snapshot: null, selected: "BMS", replayTime: null, error: null, busy: false, connected: false, lastReceived: 0,
-  messages: [], pilotBusy: false, pilotError: null,
+  messages: [], pilotBusy: false, pilotError: null, twinMode: "3d", setTwinMode: (twinMode) => set({ twinMode }),
+  caption: null,
+  showCaption: (text, holdMs, live = false) => {
+    window.clearTimeout(captionTimer);
+    set({ caption: { text, live } });
+    captionTimer = window.setTimeout(() => set({ caption: null }), holdMs);
+  },
   select: (selected) => set({ selected }), replay: (replayTime) => set({ replayTime }),
   poll: async () => {
     if (polling || get().busy) return;
@@ -62,4 +72,5 @@ export const useEv = create<EvStore>()(persist((set, get) => ({
     finally { set({ pilotBusy: false }); }
   },
   clearChat: () => set({ messages: [], pilotError: null }),
-}), { name: "attacktrace.ev.workspace.v2", storage: createJSONStorage(() => sessionStorage), partialize: (s) => ({ messages: s.messages, selected: s.selected }) }));
+  addMessages: (items) => set((s) => ({ messages: [...s.messages, ...items].slice(-40) })),
+}), { name: "attacktrace.ev.workspace.v2", storage: createJSONStorage(() => sessionStorage), partialize: (s) => ({ messages: s.messages, selected: s.selected, twinMode: s.twinMode }) }));

@@ -1650,9 +1650,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/ui/WorkspaceHeader.tsx": {
-    "mtime": 1793044032.4720585,
-    "seen": 1793047887.1423297,
-    "ast_hash": "195b5b52b38a335445f65b1a456fbc71",
+    "mtime": 1793051573.2769659,
+    "seen": 1793051886.6340196,
+    "ast_hash": "95a666860e939b90e60439406692f268",
     "semantic_hash": ""
   },
   "frontend/src/features/auth/AuthGate.tsx": {
@@ -3438,9 +3438,9 @@
     "semantic_hash": ""
   },
   "backend/app/api/live_voice.py": {
-    "mtime": 1792763699.00464,
-    "seen": 1792764074.4399457,
-    "ast_hash": "c248b3a482f463a919186a77e890a5d1",
+    "mtime": 1793050685.1531875,
+    "seen": 1793051886.6340196,
+    "ast_hash": "e8823c0cbb98ed460cfc55579c9d7291",
     "semantic_hash": ""
   },
   "backend/tests/test_live_voice.py": {
@@ -3456,9 +3456,9 @@
     "semantic_hash": "2d3ebd77939643b7d31f21b88328525c"
   },
   "frontend/src/features/copilot/LiveVoicePanel.tsx": {
-    "mtime": 1792763939.5479975,
-    "seen": 1792764074.4399457,
-    "ast_hash": "95c21a16fc72817a042eefbe3cc886f9",
+    "mtime": 1793051654.2845445,
+    "seen": 1793051886.6340196,
+    "ast_hash": "b0231c7379662c32b35beca557f81395",
     "semantic_hash": ""
   },
   "docs/ai-pilot-concept.png": {
@@ -3996,9 +3996,9 @@
     "semantic_hash": ""
   },
   "frontend/e2e/ev.spec.ts": {
-    "mtime": 1793047429.7359345,
-    "seen": 1793047887.1423297,
-    "ast_hash": "3cb8b679bd9eba2c6aac8301a125b20d",
+    "mtime": 1793051679.8728075,
+    "seen": 1793051886.6340196,
+    "ast_hash": "e26267da33d8c7c8a64befb82871cc9c",
     "semantic_hash": ""
   },
   "frontend/src/features/ev/3d/Ev3dScene.ts": {
@@ -4008,9 +4008,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/ev/3d/EvCanvas.tsx": {
-    "mtime": 1793049241.120968,
-    "seen": 1793050008.2642403,
-    "ast_hash": "d2009bdab9be01d3d6261ed1917688ce",
+    "mtime": 1793051581.4049897,
+    "seen": 1793051886.6340196,
+    "ast_hash": "f57aeb1d66b51ef12ff754e3b7d199bb",
     "semantic_hash": ""
   },
   "frontend/src/features/ev/3d/carGeometry.ts": {
@@ -4050,15 +4050,15 @@
     "semantic_hash": ""
   },
   "frontend/src/features/ev/EvTwin.tsx": {
-    "mtime": 1793046929.3864224,
-    "seen": 1793047887.1423297,
-    "ast_hash": "7fc3deca13b59313f87083bf413c2473",
+    "mtime": 1793051581.3955555,
+    "seen": 1793051886.6340196,
+    "ast_hash": "057b57a8e7be56f1834d9b7b3a4f95d0",
     "semantic_hash": ""
   },
   "frontend/src/features/ev/EvWorkspace.tsx": {
-    "mtime": 1793044032.4720585,
-    "seen": 1793047887.1423297,
-    "ast_hash": "c378801c2be5d5de5f4012c092171167",
+    "mtime": 1793051862.7266784,
+    "seen": 1793051886.6340196,
+    "ast_hash": "4105cb9ba0aa824d77125c27f1ff8d44",
     "semantic_hash": ""
   },
   "frontend/src/features/ev/model.test.ts": {
@@ -4074,9 +4074,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/ev/store.ts": {
-    "mtime": 1793044117.8785734,
-    "seen": 1793047887.1423297,
-    "ast_hash": "5d6307e7b95fa6c8eb99756eadf06bc3",
+    "mtime": 1793051487.0656078,
+    "seen": 1793051886.6340196,
+    "ast_hash": "65d59a0b94a6f34c099f9606ffb8724c",
     "semantic_hash": ""
   },
   "docs/EV_3D_DESIGN.md": {
@@ -4134,9 +4134,9 @@
     "semantic_hash": ""
   },
   "docs/ui-review/ev-3d-twin-screenshot.png": {
-    "mtime": 1793049984.0233743,
-    "seen": 1793050008.2642403,
-    "ast_hash": "4311b7eb53897548772eec72570bbf96",
+    "mtime": 1793051850.0902302,
+    "seen": 1793051886.6340196,
+    "ast_hash": "fd055d6269d0a8ad43defd9eedad8fba",
     "semantic_hash": ""
   },
   "docs/ui-review/ev-attack-lab.png": {
@@ -4161,6 +4161,42 @@
     "mtime": 1793044286.9078314,
     "seen": 1793047887.1423297,
     "ast_hash": "5c965cee3c1970fcb0c5ca07117b75e1",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/ev/EvAttackDrawer.tsx": {
+    "mtime": 1793051755.695381,
+    "seen": 1793051886.6340196,
+    "ast_hash": "d909d2aef15b167c74413a423517375b",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/ev/EvData.tsx": {
+    "mtime": 1793051510.1026402,
+    "seen": 1793051886.6340196,
+    "ast_hash": "1e9db6445be741d529bc0c65d2e49124",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/ev/EvDock.tsx": {
+    "mtime": 1793051532.1123476,
+    "seen": 1793051886.6340196,
+    "ast_hash": "0a99d432ef5580ac49c04e9294b0ec87",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/ev/EvPilotDock.tsx": {
+    "mtime": 1793051520.5441432,
+    "seen": 1793051886.6340196,
+    "ast_hash": "d75eb0362fad5d32fabf94f4a9b675b5",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/ev/useEvVoice.ts": {
+    "mtime": 1793051654.2956803,
+    "seen": 1793051886.6340196,
+    "ast_hash": "69ede598e1f71106fef3c4e3f0637f43",
+    "semantic_hash": ""
+  },
+  "frontend/src/lib/pcmAudio.ts": {
+    "mtime": 1793051654.289069,
+    "seen": 1793051886.6340196,
+    "ast_hash": "506d3ab9362946777123f8bd4f77de00",
     "semantic_hash": ""
   }
 }

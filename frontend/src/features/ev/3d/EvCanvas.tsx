@@ -53,28 +53,34 @@ export function EvCanvas({ snapshot, frame, className = "" }: EvCanvasProps) {
   const [viewMode, setViewMode] = useState<EvViewMode>("xray");
   const [subsystem, setSubsystem] = useState<SubsystemKind>("All");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [sceneReady, setSceneReady] = useState(0);
 
+  // Build the scene one frame after the page paints: the first shader compile blocks the main
+  // thread, so the header, HUD and layout appear instantly and the car fades in a moment later.
   useEffect(() => {
-    if (!containerRef.current) return;
-    const scene = new Ev3dScene({
-      container: containerRef.current,
-      onSelectComponent: (id) => select(id),
+    const container = containerRef.current;
+    if (!container) return;
+    let scene: Ev3dScene | null = null;
+    const frame = requestAnimationFrame(() => {
+      scene = new Ev3dScene({ container, onSelectComponent: (id) => select(id) });
+      sceneRef.current = scene;
+      if (prevSelected.current) scene.selectComponent(prevSelected.current, false);
+      setSceneReady((n) => n + 1);
     });
-    sceneRef.current = scene;
-    if (prevSelected.current) scene.selectComponent(prevSelected.current, false);
     return () => {
-      scene.dispose();
+      cancelAnimationFrame(frame);
+      scene?.dispose();
       sceneRef.current = null;
     };
   }, [select]);
 
   useEffect(() => {
     sceneRef.current?.setViewMode(viewMode);
-  }, [viewMode]);
+  }, [viewMode, sceneReady]);
 
   useEffect(() => {
     sceneRef.current?.setSubsystem(subsystem);
-  }, [subsystem]);
+  }, [subsystem, sceneReady]);
 
   // Selection from anywhere (3D click, quick bar, ranked list) drives the camera.
   // The persisted selection on first mount is highlighted without moving the camera.
@@ -84,6 +90,11 @@ export function EvCanvas({ snapshot, frame, className = "" }: EvCanvasProps) {
     sceneRef.current?.selectComponent(selected, true);
     setViewMode((m) => (m === "exterior" ? "xray" : m));
   }, [selected]);
+
+  // An injection starting switches to Attack View so the origin and propagation read immediately.
+  useEffect(() => {
+    if (snapshot.attack_active) setViewMode("investigation");
+  }, [snapshot.attack_active]);
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(document.fullscreenElement === containerRef.current);
@@ -99,7 +110,7 @@ export function EvCanvas({ snapshot, frame, className = "" }: EvCanvasProps) {
       paths: (frame.analysis.path || []).map((p) => ({ source: p.source, target: p.target, onset_s: p.onset_s })),
       isAttackActive: snapshot.attack_active,
     });
-  }, [frame, snapshot.attack_active, snapshot.actual_speed]);
+  }, [frame, snapshot.attack_active, snapshot.actual_speed, sceneReady]);
 
   const toggleFullscreen = () => {
     const el = containerRef.current;
@@ -115,7 +126,8 @@ export function EvCanvas({ snapshot, frame, className = "" }: EvCanvasProps) {
   const isAttack = snapshot.attack_active;
   const anomalous = frame.analysis.affected.length;
   const selectedAnomalous = !!selected && frame.analysis.affected.includes(selected);
-  const demandChanged = Math.abs(snapshot.speed - snapshot.actual_speed) > 0.5;
+  // The drive cycle swings about ±13% around cruise; only a real setpoint change counts.
+  const demandChanged = Math.abs(snapshot.speed - snapshot.actual_speed) > snapshot.speed * 0.16 + 2;
 
   return (
     <div

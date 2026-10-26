@@ -8,6 +8,7 @@ import json
 import logging
 import time
 from typing import Any
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from google import genai
@@ -53,6 +54,75 @@ LIVE_SYSTEM_PROMPT = (
 )
 
 
+EV_SYSTEM_PROMPT = (
+    "You are AttackTrace EV AI Pilot, a voice investigator for a simulated electric vehicle. "
+    "Be brief: answer in one sentence, two at most, under 30 words. Lead with the answer; no "
+    "preamble, lists, or repeating the question. Give detail only when asked. Before stating "
+    "readings, incidents or origins, call read_ev_status and quote one number with its unit. "
+    "Ranked origins are hypotheses, not confirmed causes; say so in a few words. Physical "
+    "anomalies do not prove an attacker. This is a sandbox: never claim to control hardware. "
+    "Water plant data is out of scope.\n\n"
+    "STRICT LANGUAGE POLICY:"
+    + LIVE_SYSTEM_PROMPT.split("STRICT LANGUAGE POLICY:", 1)[1]
+)
+
+
+def ev_status(state: Any, session_key: str, selected: str) -> dict[str, Any]:
+    """Server-built EV evidence. Never includes injection ground truth."""
+    from uuid import UUID
+
+    from app.ev.pilot import tools
+    from app.ev.runtime import BY_ID
+
+    pool = state.ev_sessions
+    try:
+        key = str(UUID(session_key))
+    except ValueError:
+        return {"error": "EV session unavailable"}
+    with pool.lock:
+        entry = pool.items.get(key)
+        if entry is None or entry[1] != "local-demo":
+            return {"error": "EV session unavailable"}
+        runtime = pool.get(key, "local-demo")
+        return tools(runtime.snapshot(), selected if selected in BY_ID else "BMS", None)
+
+
+def ev_opening(status: dict[str, Any], history: list[dict[str, str]] | None) -> str:
+    lead = None
+    if "get_ev_localization" in status:
+        candidates = status["get_ev_localization"].get("candidates") or []
+        lead = candidates[0]["id"] if candidates else None
+    state_text = (
+        f"A persistent anomaly is detected; the leading hypothesis is {lead}, not confirmed."
+        if lead
+        else "No persistent anomaly is detected."
+    )
+    prefix = "AI Pilot is back." if history else "AI Pilot here."
+    return (
+        "Start this user-requested voice conversation now. Speak exactly one short greeting: "
+        f"'{prefix} {state_text} What should we investigate?' "
+        "Do not claim any other live facts without the read_ev_status tool."
+    )
+
+
+def ev_alert(status: dict[str, Any]) -> str | None:
+    """Server-built spoken alert for a new detection; the browser only signals a change."""
+    candidates = (status.get("get_ev_localization") or {}).get("candidates") or []
+    if not candidates:
+        return None
+    lead = candidates[0]
+    readings = (status.get("get_ev_telemetry") or {}).get("readings") or []
+    r = next((x for x in readings if x.get("id") == lead["id"]), None)
+    reading = (
+        f", reading {r['value']:.0f} {r['unit']} against {r['expected']:.0f} expected" if r else ""
+    )
+    return (
+        "A new anomaly was just detected. These facts are current, so do not call any tool. "
+        "Announce it now in one short sentence: anomaly detected, leading hypothesis "
+        f"{lead['id']}{reading}, not confirmed. Then ask if they want to trace it."
+    )
+
+
 def process_snapshot(state: Any) -> dict[str, Any]:
     """Only reported process evidence; never include SIM ground truth or secrets."""
     runtime = active_runtime(state)
@@ -91,7 +161,7 @@ def process_snapshot(state: Any) -> dict[str, Any]:
     }
 
 
-def session_config(voice: str, model: str = "gemini-3.8-live") -> dict[str, Any]:
+def session_config(voice: str, model: str = "gemini-3.8-live", ev: bool = False) -> dict[str, Any]:
     config: dict[str, Any] = {
         "response_modalities": ["AUDIO"],
         "input_audio_transcription": {"language_codes": ["en", "ta"]},
@@ -99,32 +169,45 @@ def session_config(voice: str, model: str = "gemini-3.8-live") -> dict[str, Any]
         "speech_config": {
             "voice_config": {"prebuilt_voice_config": {"voice_name": voice}},
         },
-        "system_instruction": LIVE_SYSTEM_PROMPT,
+        "system_instruction": EV_SYSTEM_PROMPT if ev else LIVE_SYSTEM_PROMPT,
         "tools": [
             {
                 "function_declarations": [
                     {
-                        "name": "read_attacktrace_status",
+                        "name": "read_ev_status" if ev else "read_attacktrace_status",
                         "description": (
-                            "Read reported process readings and incident hypotheses. No writes."
+                            "Read EV telemetry, the selected component and ranked origins. "
+                            "No writes."
+                            if ev
+                            else "Read reported process readings and incident hypotheses. "
+                            "No writes."
                         ),
                     }
                 ]
             }
         ],
     }
+    if ev:
+        # Snappier turn-taking: end the user's turn after a short pause.
+        config["realtime_input_config"] = {
+            "automatic_activity_detection": {
+                "end_of_speech_sensitivity": "END_SENSITIVITY_HIGH",
+                "silence_duration_ms": 500,
+                "prefix_padding_ms": 100,
+            }
+        }
     if model == "gemini-3.8-live-extended-thinking":
         config["thinking_config"] = {"thinking_level": "HIGH"}
     return config
 
 
-async def connect_model(client: genai.Client, voice: str) -> tuple[Any, Any, str]:
+async def connect_model(client: genai.Client, voice: str, ev: bool = False) -> tuple[Any, Any, str]:
     """Connect once per compatible candidate; never swap an active session silently."""
     candidates = model_router.candidates("live")
     if not candidates:
         raise HTTPException(503, "Live models are cooling down; try later")
     for model in candidates:
-        manager = client.aio.live.connect(model=model, config=session_config(voice, model))
+        manager = client.aio.live.connect(model=model, config=session_config(voice, model, ev))
         try:
             session = await manager.__aenter__()
         except Exception as exc:
@@ -170,9 +253,21 @@ def opening_prompt(state: Any, history: list[dict[str, str]] | None = None) -> s
     )
 
 
+LOOPBACK = {"localhost", "127.0.0.1", "::1"}
+
+
+def trusted_origin(origin: str | None, settings: Any) -> bool:
+    """Configured origins, plus any loopback dev port when the demo itself is loopback-only."""
+    if origin in settings.cors_origins:
+        return True
+    if not origin or settings.auth_enabled or settings.host not in LOOPBACK:
+        return False
+    return urlparse(origin).hostname in LOOPBACK
+
+
 async def _authenticate(ws: WebSocket, hello: dict[str, Any]) -> str:
     settings = ws.app.state.settings
-    if ws.headers.get("origin") not in settings.cors_origins:
+    if not trusted_origin(ws.headers.get("origin"), settings):
         raise HTTPException(403, "Untrusted origin")
     if settings.auth_enabled:
         await websocket_identity(ws)
@@ -184,9 +279,13 @@ async def _authenticate(ws: WebSocket, hello: dict[str, Any]) -> str:
     if key:
         if not hmac.compare_digest(supplied.encode(), key.encode()):
             raise HTTPException(401, "API key required")
-    elif settings.host not in {"localhost", "127.0.0.1", "::1"} or not settings.demo_mode:
+    elif settings.host not in LOOPBACK or not settings.demo_mode:
         raise HTTPException(503, "Local voice access is unavailable")
     return "local:" + (ws.client.host if ws.client else "unknown")
+
+
+def state_auth_enabled(ws: WebSocket) -> bool:
+    return bool(ws.app.state.settings.auth_enabled)
 
 
 @router.websocket("/ws/voice")
@@ -201,6 +300,11 @@ async def live_voice(ws: WebSocket) -> None:
         voice = str(hello.get("voice", "Kore"))
         if voice not in VOICES:
             raise HTTPException(422, "Unsupported voice")
+        ev_mode = hello.get("mode") == "ev"
+        ev_key = str(hello.get("ev_session", ""))
+        ev_selected = str(hello.get("selected", "BMS"))
+        if ev_mode and state_auth_enabled(ws):
+            raise HTTPException(503, "EV voice is available in demo mode only")
         key = gemini_key()
         if not key:
             raise HTTPException(503, "Gemini Live is not configured")
@@ -213,7 +317,7 @@ async def live_voice(ws: WebSocket) -> None:
             raise HTTPException(429, "Live voice is busy") from exc
         try:
             with genai.Client(api_key=key) as client:
-                manager, session, model = await connect_model(client, voice)
+                manager, session, model = await connect_model(client, voice, ev_mode)
                 try:
                     await ws.send_json(
                         {
@@ -243,8 +347,20 @@ async def live_voice(ws: WebSocket) -> None:
                             + json.dumps(history, ensure_ascii=False),
                             end_of_turn=False,
                         )
-                    await session.send(input=opening_prompt(state, history), end_of_turn=True)
+                    opening = (
+                        ev_opening(ev_status(state, ev_key, ev_selected), history)
+                        if ev_mode
+                        else opening_prompt(state, history)
+                    )
+                    await session.send(input=opening, end_of_turn=True)
                     deadline = time.monotonic() + MAX_SESSION_S
+
+                    def tool_reply(name: str | None) -> dict[str, Any]:
+                        if ev_mode and name == "read_ev_status":
+                            return ev_status(state, ev_key, ev_selected)
+                        if not ev_mode and name == "read_attacktrace_status":
+                            return process_snapshot(state)
+                        return {"error": "Tool unavailable"}
 
                     async def browser_to_gemini() -> str | None:
                         total = 0
@@ -272,6 +388,13 @@ async def live_voice(ws: WebSocket) -> None:
                                 command = json.loads(packet["text"])
                                 if command.get("type") == "audio_end":
                                     await session.send_realtime_input(audio_stream_end=True)
+                                elif command.get("type") == "select" and ev_mode:
+                                    nonlocal ev_selected
+                                    ev_selected = str(command.get("id", ev_selected))[:16]
+                                elif command.get("type") == "incident" and ev_mode:
+                                    alert = ev_alert(ev_status(state, ev_key, ev_selected))
+                                    if alert:
+                                        await session.send(input=alert, end_of_turn=True)
                                 elif command.get("type") == "stop":
                                     return
                             if time.monotonic() >= next_auth:
@@ -291,11 +414,7 @@ async def live_voice(ws: WebSocket) -> None:
                                         types.FunctionResponse(
                                             name=call.name,
                                             id=call.id,
-                                            response=(
-                                                process_snapshot(state)
-                                                if call.name == "read_attacktrace_status"
-                                                else {"error": "Tool unavailable"}
-                                            ),
+                                            response=tool_reply(call.name),
                                         )
                                         for call in response.tool_call.function_calls
                                     ]

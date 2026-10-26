@@ -18,7 +18,11 @@ actor from physical anomalies. The clean reference is a simplified model, not a 
 Never claim to operate real hardware or execute commands. Suggest UI sandbox controls only.
 No water plant data or controls are in scope. If evidence is insufficient say so.
 For historical requests use only evidence supplied at or before the snapshot.
-Answer directly, then at most four evidence points and a useful next check.
+Be precise and brief: answer in at most three short sentences (under 60 words), leading with
+the direct answer. Quote the key number with its unit and one component or event ID. No headings,
+no bullet lists, no preamble, no restating the question. Add one next check only if useful.
+Give longer detail only when the user explicitly asks for it.
+When ranked origins exist, always name the leading hypothesis ID and say it is unconfirmed.
 """
 
 
@@ -51,30 +55,16 @@ def tools(snapshot: dict[str, Any], selected: str, as_of: float | None) -> dict[
 
 def evidence_reply(context: dict[str, Any]) -> str:
     telemetry = context["get_ev_telemetry"]
-    component = context["inspect_ev_component"]
-    r = component["reading"]
+    r = context["inspect_ev_component"]["reading"]
     candidates = context["get_ev_localization"]["candidates"]
-    reply = (
-        f"EV snapshot T+{telemetry['time_s']:.1f}s: {r['id']} measures "
-        f"{r['value']:.2f} {r['unit']} against {r['expected']:.2f} expected "
-        f"({r['residual']:.2f} normalized residual). "
+    reading = f"{r['id']} reads {r['value']:.1f} {r['unit']} (expected {r['expected']:.1f})"
+    if not candidates:
+        return f"T+{telemetry['time_s']:.0f}s: all signals within reference; {reading}."
+    lead = candidates[0]
+    return (
+        f"T+{telemetry['time_s']:.0f}s: leading hypothesis {lead['id']} "
+        f"(score {lead['score']:.2f}, onset {lead['onset_s']:.1f}s), not confirmed; {reading}."
     )
-    if candidates:
-        reply += (
-            "Ranked hypotheses: "
-            + "; ".join(
-                f"{c['id']} score {c['score']:.3f}, onset {c['onset_s']:.1f}s "
-                f"(deviation {c['deviation']}, onset term {c['onset']}, topology {c['topology']})"
-                for c in candidates[:3]
-            )
-            + ". "
-        )
-        reply += "Compare the earliest deviating signal with its downstream effects. "
-    else:
-        reply += "No persistent residual currently crosses the detector threshold. "
-    refs = [e["id"] for e in context["get_ev_evidence"][:3]]
-    reply += f"Evidence: {', '.join(refs) or 'telemetry snapshot only'}. "
-    return reply + "These are model-based hypotheses, not proof of a cyberattack."
 
 
 class EvPilot:
@@ -84,7 +74,7 @@ class EvPilot:
         if key:
             from google import genai
 
-            self.client = genai.Client(api_key=key, http_options={"timeout": 12000})
+            self.client = genai.Client(api_key=key, http_options={"timeout": 9000})
 
     def chat(
         self, message: str, context: dict[str, Any], history: list[dict[str, str]]
@@ -112,7 +102,7 @@ class EvPilot:
                     contents=json.dumps(
                         dict(question=message, conversation=history[-10:], tool_results=context)
                     ),
-                    config=dict(system_instruction=SYSTEM, temperature=0.1, max_output_tokens=700),
+                    config=dict(system_instruction=SYSTEM, temperature=0.1, max_output_tokens=260),
                 )
                 if response.text:
                     model_router.succeeded("text", model)

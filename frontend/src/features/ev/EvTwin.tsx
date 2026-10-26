@@ -1,116 +1,79 @@
-import { useState } from "react";
-import { Box, Network, Radio } from "lucide-react";
+import { Box, Network } from "lucide-react";
 import type { Frame, Snapshot } from "./model";
 import { useEv } from "./store";
 import { EvCanvas } from "./3d/EvCanvas";
 
+// Causal flow: columns are stages (left to right), chassis runs in its own lane.
+const COLS = [110, 350, 590, 830, 1070] as const;
+const COL_TITLES = ["Sensors", "Controllers", "Actuators", "Effects", "Feedback"];
 const positions: Record<string, [number, number]> = {
-  WHEEL: [100, 80], BRAKE: [290, 80], PRESSURE: [480, 80], ANGLE: [670, 80], EPS: [860, 80],
-  PEDAL: [100, 205], VCU: [290, 205], INV: [480, 205], MOTOR: [670, 205], RPM: [860, 205],
-  PACK: [100, 330], CURRENT: [290, 330], BMS: [480, 330], CELL: [670, 330], SOC: [860, 330],
-  CAN: [100, 455], COOL: [290, 455], FLOW: [480, 455], CTEMP: [670, 455], TEMP: [860, 455],
-  MTEMP: [670, 267], DCDC: [100, 267],
+  PEDAL: [COLS[0], 92], TEMP: [COLS[0], 160], PACK: [COLS[0], 228], CURRENT: [COLS[0], 296], CELL: [COLS[0], 364], SOC: [COLS[0], 432],
+  VCU: [COLS[1], 126], CAN: [COLS[1], 228], BMS: [COLS[1], 330],
+  INV: [COLS[2], 126], COOL: [COLS[2], 330], DCDC: [COLS[2], 432],
+  MOTOR: [COLS[3], 126], FLOW: [COLS[3], 330],
+  RPM: [COLS[4], 92], MTEMP: [COLS[4], 160], CTEMP: [COLS[4], 330],
+  WHEEL: [COLS[0], 548], BRAKE: [COLS[1], 548], PRESSURE: [COLS[2], 548], ANGLE: [COLS[3], 548], EPS: [COLS[4], 548],
 };
+const W = 196;
+const H = 52;
+
+function edgePath(a: [number, number], b: [number, number]): string {
+  if (b[0] > a[0]) {
+    const sx = a[0] + W / 2, tx = b[0] - W / 2, mid = (sx + tx) / 2;
+    return `M${sx} ${a[1]}C${mid} ${a[1]},${mid} ${b[1]},${tx} ${b[1]}`;
+  }
+  if (b[0] === a[0]) {
+    // Same column: hop along the left edge.
+    const sx = a[0] - W / 2, bend = sx - 40;
+    return `M${sx} ${a[1]}C${bend} ${a[1]},${bend} ${b[1]},${sx} ${b[1]}`;
+  }
+  // Feedback loop (coolant temperature back to pack temperature): route under the graph body.
+  const sy = a[1] + H / 2, ty = b[1] + H / 2, low = Math.max(sy, ty) + 90;
+  return `M${a[0]} ${sy}C${a[0]} ${low},${b[0]} ${low},${b[0]} ${ty}`;
+}
 
 export function EvTwin({ snapshot, frame }: { snapshot: Snapshot; frame: Frame }) {
   const selected = useEv((s) => s.selected);
   const select = useEv((s) => s.select);
   const leader = frame.analysis.candidates[0]?.id;
 
-  // Toggle between 3D Digital Twin and 2D Causal Schematic
-  const [twinMode, setTwinMode] = useState<"3d" | "2d">("3d");
+  // 3D twin or 2D causal schematic; kept in the store so drawers and attacks don't reset it.
+  const twinMode = useEv((s) => s.twinMode);
+  const setTwinMode = useEv((s) => s.setTwinMode);
 
   return (
-    <div className="ev-twin">
-      <div className="ev-twin-caption">
-        <div className="ev-twin-title-group">
-          <span>
-            <Radio size={14} aria-hidden /> EV DIGITAL TWIN
-          </span>
-          <span className="ev-sub-caption">
-            {twinMode === "3d"
-              ? "Photorealistic 3D Skateboard Architecture · Interactive Subsystems"
-              : "Causal Dependency Graph · Inferred Propagation Topology"}
-          </span>
-        </div>
-
-        {/* View Switcher: 3D Twin vs 2D Schematic */}
-        <div className="ev-twin-view-toggle" role="group" aria-label="Digital Twin View Style">
-          <button
-            type="button"
-            className={twinMode === "3d" ? "is-active" : ""}
-            onClick={() => setTwinMode("3d")}
-            title="Interactive 3D Vehicle Twin"
-          >
-            <Box size={13} aria-hidden />
-            <span>3D Twin</span>
-          </button>
-          <button
-            type="button"
-            className={twinMode === "2d" ? "is-active" : ""}
-            onClick={() => setTwinMode("2d")}
-            title="2D Causal Dependency Schematic"
-          >
-            <Network size={13} aria-hidden />
-            <span>2D Schematic</span>
-          </button>
-        </div>
+    <div className="ev-twin evs-twin">
+      <div className="evs-viewtoggle" role="group" aria-label="Digital Twin View Style">
+        <button type="button" className={twinMode === "3d" ? "is-active" : ""} onClick={() => setTwinMode("3d")} title="3D vehicle twin">
+          <Box size={13} aria-hidden />
+          <span>3D Twin</span>
+        </button>
+        <button type="button" className={twinMode === "2d" ? "is-active" : ""} onClick={() => setTwinMode("2d")} title="Causal dependency graph">
+          <Network size={13} aria-hidden />
+          <span>2D Schematic</span>
+        </button>
       </div>
 
       {twinMode === "3d" ? (
         <div className="ev-3d-wrap">
           <EvCanvas snapshot={snapshot} frame={frame} />
-          {/* Quick Component Accessible Bar */}
-          <div className="ev-accessible-quick-select" role="group" aria-label="Selectable vehicle components">
-            {snapshot.components.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                className={`ev-quick-btn ${selected === c.id ? "is-selected" : ""}`}
-                onClick={() => select(c.id)}
-                aria-label={`Inspect ${c.name}`}
-              >
-                {c.name}
-              </button>
-            ))}
-          </div>
         </div>
       ) : (
-        <div className="ev-diagram-scroll" tabIndex={0} role="region" aria-label="Scrollable interactive EV diagram">
-          <svg viewBox="0 0 960 540" role="group" aria-label="EV sensors, controllers and actuators with inferred propagation">
+        <div className="ev-diagram-scroll evs-schematic" tabIndex={0} role="region" aria-label="Scrollable interactive EV diagram">
+          <svg viewBox="0 0 1180 600" preserveAspectRatio="xMidYMid meet" role="group" aria-label="EV sensors, controllers and actuators with inferred propagation">
             <defs>
-              <pattern id="ev-grid" width="24" height="24" patternUnits="userSpaceOnUse">
-                <path d="M24 0H0V24" fill="none" stroke="currentColor" strokeOpacity=".06" />
-              </pattern>
-              <marker id="ev-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                <path d="M0 0L7 3.5L0 7" fill="var(--ev-accent)" />
-              </marker>
+              <marker id="ev-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--origin)" /></marker>
+              <marker id="ev-arrow-dim" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="#4b6275" /></marker>
             </defs>
-            <rect width="960" height="540" fill="url(#ev-grid)" />
-            <path
-              d="M195 147Q195 117 240 117H730Q770 120 778 170L792 267L778 364Q770 414 730 417H240Q195 417 195 387Z"
-              fill="var(--bg)"
-              stroke="var(--muted)"
-              strokeOpacity=".24"
-              strokeWidth="2"
-            />
-            <rect x="370" y="243" width="226" height="110" rx="12" fill="var(--ev-accent)" fillOpacity=".035" stroke="var(--ev-accent)" strokeOpacity=".15" />
+            {COL_TITLES.map((t, i) => <text key={t} className="evs-sch-col" x={COLS[i]} y="40" textAnchor="middle">{t}</text>)}
+            <rect className="evs-sch-lane" x="8" y="508" width="1164" height="80" rx="14" />
+            <text className="evs-sch-lane-label" x="20" y="500">Chassis</text>
             {snapshot.edges.map((e) => {
               const a = positions[e.source];
               const b = positions[e.target];
               if (!a || !b) return null;
               const active = frame.analysis.path.some((p) => p.source === e.source && p.target === e.target);
-              return (
-                <path
-                  key={`${e.source}-${e.target}`}
-                  d={`M${a[0]} ${a[1]}C${a[0]} ${(a[1] + b[1]) / 2},${b[0]} ${(a[1] + b[1]) / 2},${b[0]} ${b[1]}`}
-                  stroke={active ? "var(--ev-accent)" : "var(--muted)"}
-                  strokeWidth={active ? 2.5 : 1}
-                  opacity={active ? 0.85 : 0.16}
-                  fill="none"
-                  markerEnd={active ? "url(#ev-arrow)" : undefined}
-                />
-              );
+              return <path key={`${e.source}-${e.target}`} className={`evs-sch-edge${active ? " is-active" : ""}`} d={edgePath(a, b)} markerEnd={active ? "url(#ev-arrow)" : "url(#ev-arrow-dim)"} />;
             })}
             {snapshot.components.map((c) => {
               const pos = positions[c.id];
@@ -118,8 +81,10 @@ export function EvTwin({ snapshot, frame }: { snapshot: Snapshot; frame: Frame }
               const [x, y] = pos;
               const origin = leader === c.id;
               const affected = frame.analysis.affected.includes(c.id);
-              const color = origin ? "var(--origin)" : affected ? "var(--suspect)" : "var(--ev-accent)";
+              const state = origin ? "origin" : affected ? "affected" : "ok";
               const reading = frame.readings.find((r) => r.id === c.id);
+              const left = x - W / 2;
+              const top = y - H / 2;
               return (
                 <g
                   key={c.id}
@@ -127,7 +92,7 @@ export function EvTwin({ snapshot, frame }: { snapshot: Snapshot; frame: Frame }
                   tabIndex={0}
                   aria-label={`Inspect ${c.name}`}
                   aria-pressed={selected === c.id}
-                  className="ev-node"
+                  className={`ev-node evs-sch-node is-${state}${selected === c.id ? " is-selected" : ""}`}
                   onClick={() => select(c.id)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -136,53 +101,19 @@ export function EvTwin({ snapshot, frame }: { snapshot: Snapshot; frame: Frame }
                     }
                   }}
                 >
-                  <title>
-                    {c.name} · {c.kind} · {origin ? "Leading hypothesis" : affected ? "Anomalous" : "Within reference"}
-                  </title>
-                  <rect
-                    x={x - 67}
-                    y={y - 27}
-                    width="134"
-                    height="54"
-                    rx="8"
-                    fill="var(--surface)"
-                    stroke={color}
-                    strokeOpacity={selected === c.id ? 1 : 0.5}
-                    strokeWidth={selected === c.id ? 3 : 1}
-                  />
-                  <text x={x - 54} y={y - 9} fontSize="11" fontWeight="600" fill={color}>
-                    {c.id}
-                    <tspan x={x + 54} textAnchor="end" fontSize="8" fontWeight="400">
-                      {c.kind.toUpperCase()}
-                    </tspan>
-                  </text>
-                  <text x={x - 54} y={y + 7} fontSize="10" fill="var(--text)">
-                    {c.name}
-                  </text>
-                  <text x={x - 54} y={y + 20} fontSize="9" fill="var(--muted)">
-                    {reading?.value.toFixed(1)} {c.unit}
-                  </text>
+                  <title>{c.name} · {c.kind} · {origin ? "Leading hypothesis" : affected ? "Anomalous" : "Within reference"}</title>
+                  {origin && <rect className="evs-sch-pulse" x={left} y={top} width={W} height={H} rx="12" />}
+                  <rect className="evs-sch-card" x={left} y={top} width={W} height={H} rx="12" />
+                  <rect className="evs-sch-bar" x={left} y={top + 10} width="3" height={H - 20} rx="1.5" />
+                  <text className="evs-sch-id" x={left + 14} y={top + 21}>{c.id}</text>
+                  <text className="evs-sch-value" x={left + W - 12} y={top + 21} textAnchor="end">{reading?.value.toFixed(1)} {c.unit}</text>
+                  <text className="evs-sch-name" x={left + 14} y={top + 40}>{c.name.length > 24 ? `${c.name.slice(0, 23)}…` : c.name}</text>
                 </g>
               );
             })}
-            <text x="480" y="523" textAnchor="middle" fill="var(--muted)" fontSize="11">
-              Dependency model · inferred paths use observed onset order
-            </text>
           </svg>
         </div>
       )}
-
-      <div className="ev-legend">
-        <span>
-          <i /> Within reference
-        </span>
-        <span>
-          <i className="ev-dot-warning" /> Anomalous
-        </span>
-        <span>
-          <i className="ev-dot-danger" /> Leading hypothesis
-        </span>
-      </div>
     </div>
   );
 }

@@ -308,3 +308,7 @@ body {
 @media (max-width: 639px) {
   .workspace-nav nav a, .workspace-nav nav button { justify-content: flex-start; }
 }
+/* Page switches: content eases in while the header stays put. */
+.page-enter main { animation: page-enter .28s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes page-enter { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .page-enter main { animation: none; } }

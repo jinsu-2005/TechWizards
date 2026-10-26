@@ -226,7 +226,10 @@ class EvRuntime:
         a = self.attack
         previous = {r["id"]: r["value"] for r in self.readings}
         wave = math.sin(self.t / 5)
-        pedal = self.speed / 1.2 + 4 * wave
+        # Driver profile: traffic-like speed swings around the cruise setpoint. Plant and clean
+        # reference share it, so it is driver input, not an anomaly, and stale signals diverge.
+        demand = self.speed * (1 + 0.09 * math.sin(self.t / 6) + 0.04 * math.sin(self.t / 2.3))
+        pedal = demand / 1.2 + 4 * wave
         pump_request = min(100, max(30, 38 + (previous.get("TEMP", 34) - 34) * 4))
         battery_alarm = (
             previous.get("TEMP", 34) > 45
@@ -287,8 +290,10 @@ class EvRuntime:
             WHEEL=self.reference_speed,
             RPM=self.reference_speed * 82,
             MTEMP=38 + baseline_torque * 0.08,
-            BRAKE=0,
-            PRESSURE=0,
+            BRAKE=12
+            if abs(clean.get("WHEEL", self.reference_speed) - self.reference_speed) > 8
+            else 0,
+            PRESSURE=clean.get("BRAKE", 0),
             COOL=38,
             FLOW=4.56,
             CTEMP=34 - 4.56 * 0.3,
@@ -311,10 +316,10 @@ class EvRuntime:
                 values[target] = 0
         # Coupled state advances from actuator feedback, after tampering.
         self.actual_speed += (
-            (self.speed - self.actual_speed) * 0.3 + (values["MOTOR"] - baseline_torque) * 0.012
+            (demand - self.actual_speed) * 0.3 + (values["MOTOR"] - baseline_torque) * 0.012
         ) * DT
         self.actual_speed = max(0, self.actual_speed)
-        self.reference_speed += (self.speed - self.reference_speed) * 0.3 * DT
+        self.reference_speed += (demand - self.reference_speed) * 0.3 * DT
         target_temp = 34 + max(0, 38 - values["COOL"]) * 0.43
         self.temperature += (target_temp - self.temperature) * 0.15 * DT
         self.soc = max(0, self.soc - (3 + abs(torque) * 0.48) * DT / 3600 / 150 * 100)
