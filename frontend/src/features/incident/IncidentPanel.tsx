@@ -69,7 +69,7 @@ export function PlantIntegrityGuard({ latest, stale, calibrating = false }: { la
       </div>
       <div>
         <p className="mb-2 text-xs font-medium text-muted">{latest.mode === "hai" ? "HAI reference readings" : "Reported process telemetry by stage"}</p>
-        <div className="flex flex-col gap-2">
+        <div className={`flex flex-col gap-2 ${latest.mode === "hai" ? "hai-readings-scroll" : ""}`}>
           {stageReadings.map(({ stage, tags }) => (
             <div key={stage} className="rounded-md border border-border/80 bg-bg/40 p-2">
               <span className="block text-[10px] font-mono uppercase tracking-wider text-muted/80 mb-1.5">{stage}</span>
@@ -101,7 +101,26 @@ export function PlantIntegrityGuard({ latest, stale, calibrating = false }: { la
         <span className="text-muted">Virtual sensor fallback</span>
         <span className={virtual ? "text-suspect" : "text-muted"}>{virtual ? "Active" : "Inactive"}</span>
       </div>}
-      {latest.mode === "hai" && <div className="rounded-lg border border-border bg-bg/30 p-3 text-xs"><p className="mb-2 font-medium text-muted">Model status · recorded tags</p><div className="grid grid-cols-2 gap-2">{(["normal", "suspect", "affected", "origin"] as const).map((status) => <div key={status} className="flex items-center justify-between gap-2"><span className="capitalize" style={{ color: `var(--${status})` }}>{status}</span><span className="font-mono">{nodes.filter((n) => n.status === status).length}</span></div>)}</div><p className="mt-3 leading-relaxed text-muted">Flags are detector estimates. Recorded telemetry alone does not verify the attacked component.</p></div>}
+      {latest.mode === "hai" && (
+        <details className="hai-fold">
+          <summary>
+            {/* The counts are the point; the caveat is read once, so it folds away. */}
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              {(["normal", "suspect", "affected", "origin"] as const).map((status) => (
+                <span key={status} className="font-mono" style={{ color: `var(--${status})` }}>
+                  {nodes.filter((n) => n.status === status).length} {status}
+                </span>
+              ))}
+            </span>
+          </summary>
+          <div className="hai-fold-body">
+            <p className="leading-relaxed text-muted">
+              Flags are detector estimates over recorded tags. Recorded telemetry alone does not
+              verify the attacked component.
+            </p>
+          </div>
+        </details>
+      )}
     </div>
   );
 }

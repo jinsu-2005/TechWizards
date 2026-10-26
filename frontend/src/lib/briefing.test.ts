@@ -83,6 +83,7 @@ describe("sensor freeze", () => {
 
   it("marks the direction as held rather than up or down", () => {
     expect(describe_("sensor_freeze", "FIT201", 0).direction).toBe("hold");
+    expect(describe_("sensor_freeze", "FIT201", 0).directionLabel).toBe("Reading held still");
   });
 });
 
@@ -121,6 +122,12 @@ describe("sensor ramp", () => {
     const story = describe_("sensor_ramp", "LIT101", 30);
     expect(story.what).toContain("growing toward 30 %");
     expect(story.next).toContain("still building");
+  });
+
+  it("keeps tag names capitalised when joining the clause", () => {
+    expect(describe_("sensor_ramp", "LIT101", 30).next).toContain("PLC1 believes it");
+    expect(describe_("sensor_ramp", "LIT101", 30).next).not.toContain("pLC1");
+    expect(describe_("sensor_ramp", "LIT301", -30).next).toContain("PLC2 believes it");
   });
 
   it("carries the same control consequences as an offset of the same sign", () => {
@@ -162,6 +169,20 @@ describe("actuator force", () => {
   it("forcing the outlet pump on drains T2 and off fills it", () => {
     expect(describe_("actuator_force", "P301", 1).next).toContain("tends to drain");
     expect(describe_("actuator_force", "P301", 0).next).toContain("tends to fill");
+  });
+});
+
+describe("direction labels speak each component's own language", () => {
+  it("calls a sensor change a reading and an actuator change a command", () => {
+    expect(describe_("sensor_offset", "LIT101", 25).directionLabel).toBe("Reading pushed up");
+    expect(describe_("sensor_ramp", "LIT101", -30).directionLabel).toBe("Reading drifting down");
+    expect(describe_("actuator_force", "MV101", 1).directionLabel).toBe("Command forced open");
+    expect(describe_("actuator_force", "P301", 0).directionLabel).toBe("Command forced off");
+  });
+
+  it("calls a setpoint change a target, not a reading", () => {
+    expect(describe_("rogue_setpoint", "PLC1", 25).directionLabel).toBe("Target raised");
+    expect(describe_("rogue_setpoint", "PLC2", -25).directionLabel).toBe("Target lowered");
   });
 });
 

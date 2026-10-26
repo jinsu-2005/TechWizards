@@ -175,7 +175,17 @@ class LiveRuntime:
         st = self.source.status()
         if st.connected:
             return True, None
-        return False, st.reason or "waiting for the plant source"
+        reason = st.reason or "waiting for the plant source"
+        # "connection refused" alone leaves an operator with nowhere to go. Name the address
+        # nothing answered on and the one command that starts a source there.
+        if "refused" in reason.lower():
+            where = f"{self.cfg.host}:{self.cfg.port}"
+            return False, (
+                f"No Modbus source is answering on {where}. "
+                "Start the plant emulator with `make emulator`, "
+                "or set AT_EMBED_EMULATOR=true to run one inside the backend."
+            )
+        return False, reason
 
     def source_info(self) -> SourceInfo:
         st = self.source.status()

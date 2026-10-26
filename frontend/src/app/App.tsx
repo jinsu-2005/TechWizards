@@ -100,7 +100,9 @@ export function App() {
   // Match every value transition to the real gap between samples, so the twin never draws a
   // reading the backend did not send. Capped so a slow source does not feel frozen.
   const emitPeriodS = useLive((s) => s.status?.emit_period_s ?? 0.5);
-  const telemetryMs = Math.round(Math.min(600, Math.max(70, emitPeriodS * 1000 * 0.85)));
+  // The floor has to sit below the fastest demo pace (16x is a sample every 31 ms), or the
+  // transition would outlast the gap and the twin would trail the data it is drawing.
+  const telemetryMs = Math.round(Math.min(600, Math.max(28, emitPeriodS * 1000 * 0.85)));
   const { layout, isDragging, startDrag, resetLeft, resetRight, resetBottom, toggleCollapse, focusCenter } =
     useDashboardLayout();
   const allCollapsed = layout.leftCollapsed && layout.rightCollapsed && layout.bottomCollapsed;

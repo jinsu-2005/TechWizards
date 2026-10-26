@@ -135,12 +135,14 @@ export function GraphView() {
         </div>
       </details>
       {(query || kind !== "all" || flagged || direction !== "all" || process !== "all") && <button className={field} onClick={() => { setQuery(""); setKind("all"); setFlagged(false); setDirection("all"); setProcess("all"); }}>Reset filters</button>}
-    </div>
-      <div className="flex shrink-0 items-center justify-end gap-1 border-b border-border bg-surface px-2 py-1" aria-label="Graph zoom controls">
+      {/* Zoom sits on the filter row rather than a row of its own: a second full-width bar cost
+          the canvas about forty pixels of height on every screen. */}
+      <div className="ml-auto flex shrink-0 items-center gap-1" aria-label="Graph zoom controls">
         <output className="min-w-10 px-1 text-center font-mono text-xs" aria-label="Graph zoom level">{Math.round(zoom * 100)}%</output>
         <button className={field} onClick={readable} title="Center on the selected or first asset at readable scale">100%</button>
         <button className={field} onClick={() => { autoFit.current = true; void flow.current?.fitView({ padding: .15, minZoom: .08, maxZoom: 1, duration: motionDuration }); }}>Overview</button>
       </div>
+    </div>
     <div ref={canvas} className="graph-viewport relative min-h-0 flex-1">
       {nodes.length === 0 && <div role="status" className="absolute inset-0 z-10 flex items-center justify-center bg-bg/90 p-4 text-sm text-muted">No assets match these filters.</div>}
       <span className="pointer-events-none absolute bottom-2 left-12 z-10 rounded bg-surface/90 px-2 py-1 text-[11px] text-muted">{zoom < .65 ? "Overview · choose 100% to read labels" : "Drag to explore · pinch to zoom"}</span>

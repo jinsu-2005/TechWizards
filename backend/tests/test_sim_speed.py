@@ -45,6 +45,13 @@ def test_pacing_returns_to_normal(client: TestClient) -> None:
     assert status.emit_period_s == pytest.approx(0.5)
 
 
+def test_every_offered_speed_is_accepted(client: TestClient) -> None:
+    for speed in SIM_SPEEDS:
+        status = Status.model_validate(client.post("/api/sim/speed", json={"speed": speed}).json())
+        assert status.sim_speed == speed
+        assert status.emit_period_s == pytest.approx(0.5 / speed)
+
+
 def test_unlisted_speeds_are_refused(client: TestClient) -> None:
     assert client.post("/api/sim/speed", json={"speed": 3}).status_code == 422
     assert client.post("/api/sim/speed", json={"speed": 0.5}).status_code == 422

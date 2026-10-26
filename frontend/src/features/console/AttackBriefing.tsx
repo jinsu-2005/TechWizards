@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, CircleCheck, Minus, Radio, RotateCcw, Siren, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buildBriefing, narrationFor, type AttackPhase } from "../../lib/briefing";
-import { speak, stopSpeech, isLiveConversationActive } from "../../lib/voice";
+import { speak, stopSpeech, isLiveConversationActive, useVoice } from "../../lib/voice";
 import { nodeMap, useLive } from "../../store/live";
 import { useAttackRun } from "../../store/attackRun";
 import { useUi } from "../../store/ui";
@@ -26,12 +26,10 @@ const PHASE_TONE: Record<AttackPhase, string> = {
 };
 
 const DIRECTION_ICON = { up: ArrowUp, down: ArrowDown, hold: Minus, none: null } as const;
-const DIRECTION_LABEL = {
-  up: "Reading pushed up",
-  down: "Reading pushed down",
-  hold: "Reading held still",
-  none: "",
-} as const;
+
+/** Shortest gap between two spoken lines, so phases that land together do not talk over
+ *  each other and a demo does not spend a hosted speech quota on lines nobody hears. */
+const NARRATION_GAP_MS = 4000;
 
 /**
  * Plain-language account of the running test, next to the console that launched it.
@@ -50,6 +48,7 @@ export function AttackBriefing() {
   const toggleNarrate = useUi((s) => s.toggleNarrateAttacks);
   const [spoken, setSpoken] = useState<string | null>(null);
   const lastSeq = useRef(-1);
+  const lastSpokenAt = useRef(0);
 
   const topo = useMemo(() => nodeMap(topology), [topology]);
   const brief = useMemo(() => {
@@ -71,9 +70,24 @@ export function AttackBriefing() {
     if (!brief || !narrate || phaseSeq === lastSeq.current) return;
     lastSeq.current = phaseSeq;
     if (isLiveConversationActive() || document.visibilityState !== "visible") return;
+    // Accepted and active can land within a second of each other in fast demo mode. Speaking
+    // both would talk over itself and, on a hosted Gemini quota, burn a request for a line
+    // nobody hears. The newest phase always wins.
+    const sinceLast = Date.now() - lastSpokenAt.current;
+    const wait = Math.max(0, NARRATION_GAP_MS - sinceLast);
     const line = narrationFor(brief);
     setSpoken(line);
-    void speak(line).catch(() => setSpoken(null));
+    const timer = window.setTimeout(() => {
+      lastSpokenAt.current = Date.now();
+      // Gemini speech is the default voice; if it is unconfigured or rate limited, fall back
+      // to the browser's own synthesiser rather than dropping the narration silently.
+      void speak(line).catch(() =>
+        speak(line, { ...useVoice.getState(), speechProvider: "browser" }).catch(() =>
+          setSpoken(null),
+        ),
+      );
+    }, wait);
+    return () => window.clearTimeout(timer);
   }, [brief, narrate, phaseSeq]);
 
   useEffect(() => {
@@ -98,9 +112,9 @@ export function AttackBriefing() {
           {brief.state}
         </span>
         {Direction && (
-          <span className="attack-briefing-direction" title={DIRECTION_LABEL[brief.direction]}>
+          <span className="attack-briefing-direction" title={`${brief.directionLabel} on ${run.target}`}>
             <Direction size={12} aria-hidden />
-            <span className="sr-only">{DIRECTION_LABEL[brief.direction]}</span>
+            <span className="sr-only">{brief.directionLabel} on</span>
             {run.target}
           </span>
         )}

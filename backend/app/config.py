@@ -70,6 +70,9 @@ class Settings(BaseModel):
     # Attacker tool (Phase 13 Part D): extra allowed write targets, beyond loopback and the
     # docker-compose service name, as a comma-separated list. Empty by default.
     attacker_allowlist: str = ""
+    # Run a loopback-only Modbus plant emulator inside the backend when nothing already answers
+    # on live_port, so LIVE needs no second terminal. A real PLC network leaves this false.
+    embed_emulator: bool = False
 
 
 def _from_env() -> dict[str, object]:

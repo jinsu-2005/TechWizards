@@ -146,7 +146,13 @@ def create_app(
                         shutil.copy2(item, dest)
             except Exception:
                 pass
-    embed_emulator = os.environ.get("AT_EMBED_EMULATOR", "").lower() in {"1", "true", "yes"}
+    # Accept the bare environment variable as well, so an operator can switch it on for one
+    # run without editing settings.
+    embed_emulator = settings.embed_emulator or os.environ.get("AT_EMBED_EMULATOR", "").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
     if embed_emulator:
         settings = settings.model_copy(update={"live_host": "127.0.0.1"})
     if settings.auth_enabled and os.environ.get("FIREBASE_AUTH_EMULATOR_HOST"):

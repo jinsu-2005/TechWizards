@@ -57,7 +57,9 @@ export function PulseEdgeView(props: EdgeProps<PulseEdgeT>) {
   const [curve] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition });
   const d = data?.feedback ? `M ${sourceX},${sourceY} C ${sourceX + 60},${sourceY - 110} ${targetX - 60},${targetY - 110} ${targetX},${targetY}` : curve;
   const onPath = data?.delay !== null && data?.delay !== undefined;
-  const isHealthyActive = !onPath && !data?.dimmed && !data?.uncertain && !data?.learned;
+  // A recorded dataset has no P&ID, so every edge it draws is a learned association. Excluding
+  // learned edges from the ambient flow left HAI with a completely static graph.
+  const isHealthyActive = !onPath && !data?.dimmed && !data?.uncertain;
 
   return (
     <g>
@@ -79,10 +81,14 @@ export function PulseEdgeView(props: EdgeProps<PulseEdgeT>) {
           pathLength={1}
           className="graph-ambient-particle"
           stroke="var(--accent)"
-          strokeWidth={2}
+          strokeWidth={data?.learned ? 1.6 : 2}
           strokeLinecap="round"
           fill="none"
-          style={{ animationDelay: `${((sourceX + sourceY) % 300) / 100}s` }}
+          style={{
+            // A learned link is an inference, so its flow reads fainter than a configured one.
+            opacity: data?.learned ? 0.5 : 1,
+            animationDelay: `${((sourceX + sourceY) % 300) / 100}s`,
+          }}
         />
       )}
       {/* Dynamic threat propagation wave */}

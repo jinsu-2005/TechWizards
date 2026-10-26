@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Incident, LiveMessage, NodeState, TopologyNode } from "../lib/types";
-import { effectVisible, QUIET_SAMPLES_TO_END, useAttackRun, type AttackRun } from "./attackRun";
+import { ACCEPTED_DWELL_MS, effectVisible, QUIET_MS_TO_END, useAttackRun, type AttackRun } from "./attackRun";
 
 const TOPO = new Map<string, TopologyNode>([
   ["LIT101", { id: "LIT101", type: "sensor", label: "Tank T1 level", unit: "%", lo: 0, hi: 100 }],
@@ -8,7 +8,8 @@ const TOPO = new Map<string, TopologyNode>([
   ["PLC1", { id: "PLC1", type: "controller", label: "T1 controller", unit: "out", lo: 0, hi: 1 }],
 ]);
 
-const LAUNCH_AT = 1_000_000;
+/** Far enough in the past that the acceptance dwell has elapsed in every test but its own. */
+const LAUNCH_AT = Date.now() - 10_000;
 
 const run = (over: Partial<AttackRun> = {}): AttackRun => ({
   attackId: "atk_001",
@@ -65,6 +66,14 @@ describe("effectVisible", () => {
     expect(effectVisible(forced, msg([node({ id: "MV101", value: 0.4, truth: 0.4 })]), TOPO)).toBe(false);
   });
 
+  it("sees a freeze by the reading not moving, even while it sits near the real value", () => {
+    const frozen = run({ scenario: "sensor_freeze", magnitude: 0 });
+    const held = msg([node({ id: "LIT101", value: 50.68, truth: 50.7 })]);
+    expect(effectVisible(frozen, held, TOPO, 50.68)).toBe(true);
+    // Released, the reading moves again with the plant's own noise.
+    expect(effectVisible(frozen, msg([node({ id: "LIT101", value: 50.71, truth: 50.7 })]), TOPO, 50.68)).toBe(false);
+  });
+
   it("sees a displaced setpoint", () => {
     const rogue = run({ scenario: "rogue_setpoint", target: "PLC1", magnitude: 25 });
     expect(effectVisible(rogue, msg([node({ id: "PLC1" })], null, { PLC1: 75 }), TOPO)).toBe(true);
@@ -81,6 +90,13 @@ describe("attack run phases", () => {
   it("starts at accepted the moment the backend takes the test", () => {
     useAttackRun.getState().start(run());
     expect(phase()).toBe("accepted");
+  });
+
+  it("holds the acceptance long enough to be read, even when telemetry is instant", () => {
+    useAttackRun.getState().start(run({ launchedAt: Date.now() }));
+    observe(msg([node({ id: "LIT101", value: 50, truth: 78 })]));
+    expect(phase()).toBe("accepted");
+    expect(ACCEPTED_DWELL_MS).toBeGreaterThan(300);
   });
 
   it("moves to active only once the effect is visible in telemetry", () => {
@@ -105,37 +121,94 @@ describe("attack run phases", () => {
     expect(useAttackRun.getState().detectedOrigin).toBeNull();
   });
 
-  it("ends after the effect has been gone for several samples, not on a timer", () => {
-    useAttackRun.getState().start(run());
-    observe(msg([node({ id: "LIT101", value: 50, truth: 78 })]));
-    expect(phase()).toBe("active");
-    for (let i = 0; i < QUIET_SAMPLES_TO_END; i++) {
-      observe(msg([node({ id: "LIT101", value: 50, truth: 50 })]));
+  const quiet = () => msg([node({ id: "LIT101", value: 50, truth: 50 })]);
+  const acting = () => msg([node({ id: "LIT101", value: 50, truth: 78 })]);
+
+  it("ends once the effect has been gone for the full quiet window", () => {
+    vi.useFakeTimers();
+    try {
+      useAttackRun.getState().start(run({ launchedAt: Date.now() - 10_000 }));
+      observe(acting());
+      expect(phase()).toBe("active");
+      observe(quiet());
+      vi.advanceTimersByTime(QUIET_MS_TO_END + 10);
+      observe(quiet());
+      expect(phase()).toBe("ended");
+    } finally {
+      vi.useRealTimers();
     }
-    expect(phase()).toBe("ended");
+  });
+
+  it("survives a reading that momentarily matches reality, as a freeze does", () => {
+    useAttackRun.getState().start(run({ scenario: "sensor_freeze", magnitude: 0 }));
+    observe(acting());
+    for (let i = 0; i < 20; i++) observe(quiet()); // many samples, but no elapsed time
+    expect(phase()).toBe("active");
+  });
+
+  it("keeps a freeze active on a noisy tag whose real value wanders past the held one", () => {
+    vi.useFakeTimers();
+    try {
+      useAttackRun.getState().start(run({ scenario: "sensor_freeze", target: "LIT101", magnitude: 0, launchedAt: Date.now() - 10_000 }));
+      // The reported value never changes; the real one drifts across it.
+      for (const truth of [78, 50.4, 50.1, 50.2, 50.3, 50.5, 44]) {
+        observe(msg([node({ id: "LIT101", value: 50.25, truth })]));
+        vi.advanceTimersByTime(1000);
+      }
+      expect(phase()).toBe("active");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("does not end a run that has not started acting yet", () => {
-    useAttackRun.getState().start(run());
-    for (let i = 0; i < QUIET_SAMPLES_TO_END + 3; i++) {
-      observe(msg([node({ id: "LIT101", value: 50, truth: 50 })]));
+    vi.useFakeTimers();
+    try {
+      useAttackRun.getState().start(run({ launchedAt: Date.now() - 10_000 }));
+      observe(quiet());
+      vi.advanceTimersByTime(QUIET_MS_TO_END * 3);
+      observe(quiet());
+      expect(phase()).toBe("accepted");
+    } finally {
+      vi.useRealTimers();
     }
-    expect(phase()).toBe("accepted");
   });
 
   it("stays ended once it has ended", () => {
-    useAttackRun.getState().start(run());
-    observe(msg([node({ id: "LIT101", value: 50, truth: 78 })]));
-    for (let i = 0; i < QUIET_SAMPLES_TO_END; i++) observe(msg([node({ id: "LIT101" })]));
-    observe(msg([node({ id: "LIT101", value: 50, truth: 78 })]));
-    expect(phase()).toBe("ended");
+    vi.useFakeTimers();
+    try {
+      useAttackRun.getState().start(run({ launchedAt: Date.now() - 10_000 }));
+      observe(acting());
+      observe(quiet());
+      vi.advanceTimersByTime(QUIET_MS_TO_END + 10);
+      observe(quiet());
+      expect(phase()).toBe("ended");
+      observe(acting());
+      expect(phase()).toBe("ended");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
-  it("reset clears the run and reports its own phase", () => {
+  it("reset reports its own phase and keeps the run so the card can say so", () => {
     useAttackRun.getState().start(run());
     useAttackRun.getState().markReset();
     expect(phase()).toBe("reset");
+    expect(useAttackRun.getState().run?.target).toBe("LIT101");
+  });
+
+  it("telemetry cannot drag a reset run back into active", () => {
+    useAttackRun.getState().start(run());
+    useAttackRun.getState().markReset();
+    observe(msg([node({ id: "LIT101", value: 50, truth: 78 })]));
+    expect(phase()).toBe("reset");
+  });
+
+  it("leaving SIM clears the run entirely", () => {
+    useAttackRun.getState().start(run());
+    useAttackRun.getState().clear();
     expect(useAttackRun.getState().run).toBeNull();
+    expect(phase()).toBe("idle");
   });
 
   it("bumps the phase sequence once per change, so narration speaks once", () => {

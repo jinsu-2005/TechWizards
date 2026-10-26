@@ -33,7 +33,7 @@ class Hub:
 # Fast demo: how much sooner each SIM sample is delivered. The plant physics, the sample
 # sequence and every detector window are unchanged -- only the wall-clock gap between samples
 # shrinks, so what the detector sees is bit-for-bit what it sees at 1x, just sooner.
-SIM_SPEEDS: tuple[float, ...] = (1.0, 6.0)
+SIM_SPEEDS: tuple[float, ...] = (1.0, 6.0, 12.0, 16.0)
 MAX_SIM_SPEED = max(SIM_SPEEDS)
 
 

@@ -20,8 +20,15 @@ import { NodeScores } from "./NodeScores";
  *  delivers these same plant seconds sooner; it does not shorten the test. */
 const ATTACK_DURATION_S = 180;
 
-/** Fast demo pacing, mirroring the backend's allowed speeds. */
-const FAST_SPEED = 6;
+/** Fast demo pacing, mirroring the backend's allowed speeds. Clicking cycles through them
+ *  and wraps back to normal, so one control covers every pace. */
+const SPEEDS = [1, 6, 12, 16] as const;
+
+function nextSpeed(current: number, offered: readonly number[]): number {
+  const options = offered.length > 1 ? offered : SPEEDS;
+  const i = options.indexOf(current);
+  return options[(i + 1) % options.length] ?? 1;
+}
 
 const field = "h-9 rounded-md border border-border bg-bg px-2.5 font-mono text-xs text-text shadow-inner focus:border-accent focus:outline-none transition-colors";
 
@@ -41,6 +48,7 @@ export function AttackConsole() {
   const [resetting, setResetting] = useState(false);
   const [note, setNote] = useState<{ text: string; error: boolean } | null>(null);
   const simSpeed = useLive((s) => s.status?.sim_speed ?? 1);
+  const speedOptions = useLive((s) => s.status?.sim_speed_options);
   const canPace = useLive((s) => s.status?.mode === "sim");
   const [pacing, setPacing] = useState(false);
   const startRun = useAttackRun((s) => s.start);
@@ -74,7 +82,7 @@ export function AttackConsole() {
     if (!canPace || pacing) return;
     setPacing(true);
     try {
-      await setSimSpeed(simSpeed > 1 ? 1 : FAST_SPEED);
+      await setSimSpeed(nextSpeed(simSpeed, speedOptions ?? SPEEDS));
       useLive.getState().setStatus(await getStatus());
     } catch (cause) {
       if (!noticeIfLocked(cause)) {
@@ -173,7 +181,7 @@ export function AttackConsole() {
               onClick={() => void togglePace()}
               title={
                 simSpeed > 1
-                  ? "Back to normal pacing: one sample every half second"
+                  ? `Fast demo at ${simSpeed}x. Click for ${nextSpeed(simSpeed, speedOptions ?? SPEEDS)}x; the same simulated samples simply arrive sooner.`
                   : "Fast demo: the same simulated samples arrive sooner, so effects show in seconds"
               }
               className="demo-pace-toggle"
@@ -182,8 +190,8 @@ export function AttackConsole() {
               <span>{simSpeed > 1 ? `Fast demo · ${simSpeed}x` : "Fast demo"}</span>
               <span className="sr-only">
                 {simSpeed > 1
-                  ? "Fast demo is on. The simulation delivers the same samples sooner."
-                  : "Fast demo is off."}
+                  ? `Fast demo is on at ${simSpeed} times. The simulation delivers the same samples sooner. Selecting this moves to ${nextSpeed(simSpeed, speedOptions ?? SPEEDS)} times.`
+                  : `Fast demo is off. Selecting this moves to ${nextSpeed(simSpeed, speedOptions ?? SPEEDS)} times.`}
               </span>
             </button>
           )}

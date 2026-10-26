@@ -20,6 +20,8 @@ export interface AttackBriefing {
   next: string;
   /** Which way the injected change pushes the reading or command, for the twin highlight. */
   direction: "up" | "down" | "hold" | "none";
+  /** That direction in the component's own language, for the chip and screen readers. */
+  directionLabel: string;
   /** Live reported-versus-true line, or null when there is nothing to compare. */
   evidence: string | null;
 }
@@ -111,6 +113,8 @@ interface Sentences {
   what: string;
   next: string;
   direction: AttackBriefing["direction"];
+  /** A valve is forced open, a controller's target is raised; neither is a reading pushed up. */
+  directionLabel: string;
 }
 
 /** The causal story for one scenario/target/magnitude, independent of phase. */
@@ -130,12 +134,14 @@ export function describeAttack(
         what: `${name} is now repeating one captured reading while the real value keeps moving.`,
         next: freezeEffect(target),
         direction: "hold",
+        directionLabel: "Reading held still",
       };
     case "sensor_offset":
       return {
         what: `${name} is reporting ${amount(magnitude, unit)} ${high ? "above" : "below"} its real value.`,
         next: controls ? levelLie(target, high) : NO_CONTROL_NOTE,
         direction: high ? "up" : "down",
+        directionLabel: `Reading pushed ${high ? "up" : "down"}`,
       };
     case "sensor_ramp":
       return {
@@ -144,6 +150,7 @@ export function describeAttack(
           ? `The error is still building, and ${lowerFirst(levelLie(target, high))}`
           : `${NO_CONTROL_NOTE} Only the reported trend moves.`,
         direction: high ? "up" : "down",
+        directionLabel: `Reading drifting ${high ? "up" : "down"}`,
       };
     case "actuator_force": {
       const on = magnitude >= 0.5;
@@ -153,6 +160,7 @@ export function describeAttack(
         next:
           FORCE_EFFECT[target]?.[on ? "on" : "off"] ?? "Downstream equipment follows this command.",
         direction: on ? "up" : "down",
+        directionLabel: `Command forced ${word}`,
       };
     }
     case "rogue_setpoint": {
@@ -164,12 +172,16 @@ export function describeAttack(
         what: `${name} has been asked to hold ${tank} ${amount(magnitude, "%")} ${high ? "above" : "below"} its authorized target.`,
         next: `${effect} The target moved, not the tank level itself.`,
         direction: high ? "up" : "down",
+        directionLabel: `Target ${high ? "raised" : "lowered"}`,
       };
     }
   }
 }
 
+/** Join a sentence onto a clause without lowercasing a tag name like PLC1 into pLC1. */
 function lowerFirst(sentence: string): string {
+  const second = sentence.charAt(1);
+  if (second && second === second.toUpperCase() && second !== second.toLowerCase()) return sentence;
   return sentence.charAt(0).toLowerCase() + sentence.slice(1);
 }
 
@@ -211,11 +223,16 @@ export function buildBriefing(input: BriefingInput): AttackBriefing {
   const { scenario, target, magnitude, phase, mode, message, topo, detectedOrigin } = input;
   const story = describeAttack(scenario, target, magnitude, topo);
   const evidence = evidenceLine(mode, target, message, topo);
-  const base = { state: PHASE_LABEL[phase], direction: story.direction, evidence };
+  const base = {
+    state: PHASE_LABEL[phase],
+    direction: story.direction,
+    directionLabel: story.directionLabel,
+    evidence,
+  };
 
   switch (phase) {
     case "idle":
-      return { ...base, phase, direction: "none", evidence: null, what: "No test is running.", next: "" };
+      return { ...base, phase, direction: "none", directionLabel: "", evidence: null, what: "No test is running.", next: "" };
     case "accepted":
       return {
         ...base,
@@ -239,6 +256,7 @@ export function buildBriefing(input: BriefingInput): AttackBriefing {
         ...base,
         phase,
         direction: "none",
+        directionLabel: "",
         what: `The test on ${target} has ended.`,
         next: "It is reporting honestly again, and the plant settles back under normal control.",
       };
@@ -247,6 +265,7 @@ export function buildBriefing(input: BriefingInput): AttackBriefing {
         ...base,
         phase,
         direction: "none",
+        directionLabel: "",
         evidence: null,
         what: "Scenario reset.",
         next: "The plant is back at its starting state. Saved investigations are kept.",

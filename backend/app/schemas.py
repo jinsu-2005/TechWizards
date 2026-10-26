@@ -174,7 +174,7 @@ class ModeRequest(BaseModel):
 class SimSpeedRequest(BaseModel):
     """Fast demo pacing for SIM. Refused in HAI and LIVE, which have their own timing."""
 
-    speed: float = Field(ge=1.0, le=12.0)
+    speed: float = Field(ge=1.0, le=16.0)
 
 
 class AttackRequest(BaseModel):
