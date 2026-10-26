@@ -105,6 +105,9 @@ class LiveMessage(BaseModel):
     incident: Incident | None
     impact: Impact | None
     source_latency_ms: float | None = None  # Phase 13: age of the newest LIVE sample at emit time
+    # Phase 15 (additive, optional): controller setpoints as the controllers currently hold them,
+    # so the twin can draw a rogue setpoint. None outside SIM.
+    setpoints: dict[str, float] | None = None
 
 
 # ---------------------------------------------------------------------------------- REST
@@ -155,10 +158,23 @@ class Status(BaseModel):
     source: SourceInfo | None = None  # Phase 13
     live_available: bool = False  # Phase 13: the LIVE source answers right now
     live_reason: str | None = None  # Phase 13: why LIVE is not available
+    # Phase 15: SIM-only demo pacing. 1.0 is normal; above 1.0 the same samples are delivered
+    # proportionally sooner. Always 1.0 in HAI and LIVE.
+    sim_speed: float = 1.0
+    sim_speed_options: list[float] = [1.0]
+    # Seconds of wall clock between samples at the current speed, so the UI can match its
+    # animation to the real telemetry rate instead of inventing intermediate readings.
+    emit_period_s: float = 0.5
 
 
 class ModeRequest(BaseModel):
     mode: Mode
+
+
+class SimSpeedRequest(BaseModel):
+    """Fast demo pacing for SIM. Refused in HAI and LIVE, which have their own timing."""
+
+    speed: float = Field(ge=1.0, le=12.0)
 
 
 class AttackRequest(BaseModel):

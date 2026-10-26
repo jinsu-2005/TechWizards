@@ -1,4 +1,6 @@
 import type { NodeState, TopologyNode } from "../../lib/types";
+import { NOMINAL_SETPOINT, type NodeAttack } from "./attack";
+import { TargetLock } from "./AttackMarks";
 import { Pump, Tank, Valve } from "./Equipment";
 import { ANCHOR, FILTER, TANKS, anchorOf } from "./geometry";
 import { NodeBadge } from "./NodeBadge";
@@ -9,12 +11,29 @@ interface Props {
   onFocusFilter?: () => void;
   /** LIVE only: node_id -> age of its last reading, for the quality tooltip. */
   ageByNode?: ReadonlyMap<string, number | null>;
+  /** node_id -> what an active attack is doing to it, for the twin's attack overlay. */
+  attacks?: ReadonlyMap<string, NodeAttack>;
+  /** Controller setpoints as held right now (SIM only). */
+  setpoints?: Record<string, number> | null;
+  /** node_id -> physical value when the open incident was raised. */
+  atDetection?: ReadonlyMap<string, NodeState>;
+  /** A test just accepted for this node, drawn before any telemetry could have moved. */
+  pending?: { target: string; direction: "up" | "down" | "hold" | "none" } | null;
 }
 
 const truth = (n: NodeState | undefined): number => n?.truth ?? n?.value ?? 0;
 
-export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
+export function Equipment({ nodes, topo, ageByNode, attacks, setpoints, atDetection, pending, onFocusFilter }: Props) {
   const get = (id: string) => nodes.get(id);
+  const atk = (id: string) => attacks?.get(id);
+  // A level sensor and the controller that reads it share a tank, so a rogue setpoint on the
+  // controller has to show on the tank it moves.
+  const tankAttack = (sensor: string, controller: string) => atk(sensor) ?? atk(controller);
+  const startLevel = (id: string) => {
+    const n = atDetection?.get(id);
+    const v = n?.truth ?? n?.value;
+    return v === undefined || v === null ? null : v;
+  };
   const lit101 = get("LIT101");
   const lit301 = get("LIT301");
   const mv = get("MV101");
@@ -33,6 +52,10 @@ export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
           level={truth(lit101)}
           reported={lit101.value}
           status={lit101.status}
+          attack={tankAttack("LIT101", "PLC1")}
+          setpoint={setpoints?.PLC1 ?? null}
+          nominalSetpoint={NOMINAL_SETPOINT.PLC1}
+          levelAtDetection={startLevel("LIT101")}
         />
       )}
       {lit301 && (
@@ -42,6 +65,10 @@ export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
           level={truth(lit301)}
           reported={lit301.value}
           status={lit301.status}
+          attack={tankAttack("LIT301", "PLC2")}
+          setpoint={setpoints?.PLC2 ?? null}
+          nominalSetpoint={NOMINAL_SETPOINT.PLC2}
+          levelAtDetection={startLevel("LIT301")}
         />
       )}
       {/* Industrial Multimedia Pressure Vessel Filter */}
@@ -189,9 +216,13 @@ export function Equipment({ nodes, topo, ageByNode, onFocusFilter }: Props) {
           width={FILTER.w + 4} height={FILTER.h + 12} rx={10} fill="transparent"
           stroke="var(--accent)" strokeWidth={2} />
       </g>}
-      {mv && <Valve at={ANCHOR.MV101} open={truth(mv)} status={mv.status} />}
-      {p101 && <Pump at={ANCHOR.P101} speed={truth(p101)} status={p101.status} />}
-      {p301 && <Pump at={ANCHOR.P301} speed={truth(p301)} status={p301.status} />}
+      {mv && <Valve at={ANCHOR.MV101} open={truth(mv)} status={mv.status} attack={atk("MV101")} />}
+      {p101 && <Pump at={ANCHOR.P101} speed={truth(p101)} status={p101.status} attack={atk("P101")} />}
+      {p301 && <Pump at={ANCHOR.P301} speed={truth(p301)} status={p301.status} attack={atk("P301")} />}
+      {(() => {
+        const at = pending ? anchorOf(pending.target) : undefined;
+        return at && pending ? <TargetLock x={at.x} y={at.y} direction={pending.direction} /> : null;
+      })()}
       {[...nodes.values()].map((n) => {
         const a = anchorOf(n.id);
         if (!a) return null;

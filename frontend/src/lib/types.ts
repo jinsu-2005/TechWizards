@@ -94,6 +94,8 @@ export interface LiveMessage {
   incident: Incident | null;
   impact: Impact | null;
   source_latency_ms?: number | null; // Phase 13: age of the newest LIVE sample
+  /** Phase 15 (additive): controller setpoints as held right now; absent outside SIM. */
+  setpoints?: Record<string, number> | null;
 }
 
 // ---- REST
@@ -153,6 +155,11 @@ export interface Status {
   source?: SourceInfo | null; // Phase 13
   live_available?: boolean; // Phase 13: the LIVE source answers right now
   live_reason?: string | null;
+  /** Phase 15: SIM demo pacing; 1 is normal. Always 1 in HAI and LIVE. */
+  sim_speed?: number;
+  sim_speed_options?: number[];
+  /** Wall-clock seconds between samples right now, for matching animation to telemetry. */
+  emit_period_s?: number;
 }
 
 export interface AttackRequest {

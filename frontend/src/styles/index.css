@@ -123,16 +123,74 @@ body {
   animation: bubble-rise 3.6s ease-in infinite 0.4s;
 }
 
+/* ---- attack overlay: each scenario gets a motion that says what it is doing */
+@keyframes attack-chip-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* A frozen reading does not move, so its marker blinks instead of sliding. */
+@keyframes freeze-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+/* A ramp grows, so its hatching crawls in the direction of the drift. */
+@keyframes spoof-drift {
+  to { transform: translateY(7px); }
+}
+/* A forced actuator turns against its own command. */
+@keyframes forced-spin {
+  to { transform: rotate(-360deg); }
+}
+@keyframes hazard-halo {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.04); }
+}
+@keyframes setpoint-slide {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.attack-chip {
+  animation: attack-chip-in 200ms ease-out both;
+}
+.target-lock {
+  animation: attack-chip-in 160ms ease-out both;
+}
+.freeze-blink {
+  animation: freeze-blink 1.6s ease-in-out infinite;
+}
+.spoof-band-drift {
+  animation: spoof-drift 1.2s linear infinite;
+}
+.forced-ring {
+  animation: forced-spin 4s linear infinite;
+}
+.hazard-halo {
+  animation: hazard-halo 1.8s ease-in-out infinite;
+}
+.setpoint-slide {
+  animation: setpoint-slide 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .flow,
   .spin,
   .pulse-ring,
-  .attack-pulse {
+  .attack-pulse,
+  .attack-chip,
+  .target-lock,
+  .freeze-blink,
+  .spoof-band-drift,
+  .forced-ring,
+  .hazard-halo,
+  .setpoint-slide {
     animation: none;
   }
   .attack-pulse {
     stroke-dasharray: none;
   }
+  /* Without the halo animation the ring would sit at its faint keyframe value. */
+  .hazard-halo { opacity: 0.6; }
 }
 
 /* ---- React Flow on the dark SOC theme */

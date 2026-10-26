@@ -17,6 +17,9 @@ interface UiState {
   soundEnabled: boolean;
   /** AI Pilot slide-out drawer state. */
   copilotOpen: boolean;
+  /** Speak each attack-briefing phase aloud through the Gemini voice. */
+  narrateAttacks: boolean;
+  toggleNarrateAttacks: () => void;
   /** Whether the digital twin toolbar is condensed/hidden. */
   twinToolbarCollapsed: boolean;
   setTwinToolbarCollapsed: (collapsed: boolean) => void;
@@ -31,6 +34,23 @@ interface UiState {
 
 let noticeId = 0;
 
+function readFlag(key: string, fallback: boolean): boolean {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved === null ? fallback : saved === "true";
+  } catch {
+    return fallback;
+  }
+}
+
+function writeFlag(key: string, value: boolean): void {
+  try {
+    localStorage.setItem(key, String(value));
+  } catch {
+    // storage unavailable; the choice simply does not persist
+  }
+}
+
 export const useUi = create<UiState>((set) => ({
   view: "twin",
   selectedAsset: null,
@@ -42,6 +62,13 @@ export const useUi = create<UiState>((set) => ({
   notice: null,
   soundEnabled: true,
   copilotOpen: false,
+  narrateAttacks: readFlag("attacktrace.narrateAttacks", true),
+  toggleNarrateAttacks: () =>
+    set((s) => {
+      const narrateAttacks = !s.narrateAttacks;
+      writeFlag("attacktrace.narrateAttacks", narrateAttacks);
+      return { narrateAttacks };
+    }),
   twinToolbarCollapsed: false,
   setTwinToolbarCollapsed: (twinToolbarCollapsed) => set({ twinToolbarCollapsed }),
   toggleTwinToolbar: () => set((s) => ({ twinToolbarCollapsed: !s.twinToolbarCollapsed })),

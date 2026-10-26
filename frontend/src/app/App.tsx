@@ -1,6 +1,6 @@
 import { useFreshness } from "./useFreshness";
 import { useState } from "react";
-import { Radar, Waypoints, WifiOff } from "lucide-react";
+import { Maximize2, Minimize2, Radar, Waypoints, WifiOff } from "lucide-react";
 import { CalibratingState } from "../components/ui/CalibratingState";
 import { EmptyState } from "../components/ui/EmptyState";
 import { BackendConnectionBanner } from "../components/ui/BackendConnectionBanner";
@@ -47,7 +47,7 @@ function ViewToggle() {
   );
 }
 
-function Center({ live }: { live: boolean }) {
+function Center({ live, expanded, onToggleExpand }: { live: boolean; expanded: boolean; onToggleExpand: () => void }) {
   const chosen = useUi((s) => s.view);
   const hai = useLive((s) => s.latest?.mode === "hai");
   const view = hai ? "graph" : chosen; // a dataset replay has no twin
@@ -69,7 +69,21 @@ function Center({ live }: { live: boolean }) {
       title={view === "twin" ? "Digital twin" : "Process graph"}
       className="center-panel"
       icon={view === "twin" ? Radar : Waypoints}
-      actions={calibrating ? undefined : <ViewToggle />}
+      actions={
+        <div className="flex items-center gap-1.5">
+          {!calibrating && <ViewToggle />}
+          <button
+            type="button"
+            onClick={onToggleExpand}
+            aria-pressed={expanded}
+            title={expanded ? "Restore the side panels and timeline" : "Hide the side panels and timeline"}
+            className="center-expand-button"
+          >
+            {expanded ? <Minimize2 size={12} aria-hidden /> : <Maximize2 size={12} aria-hidden />}
+            <span>{expanded ? "Restore" : "Expand"}</span>
+          </button>
+        </div>
+      }
     >
       {body}
     </Panel>
@@ -83,10 +97,16 @@ export function App() {
   const conn = useLive((s) => s.conn);
   const live = (conn === "live" || hasLatest) && hasLatest;
   const { stale, ageSeconds, replaying } = useFreshness();
-  const { layout, isDragging, startDrag, resetLeft, resetRight, resetBottom } = useDashboardLayout();
+  // Match every value transition to the real gap between samples, so the twin never draws a
+  // reading the backend did not send. Capped so a slow source does not feel frozen.
+  const emitPeriodS = useLive((s) => s.status?.emit_period_s ?? 0.5);
+  const telemetryMs = Math.round(Math.min(600, Math.max(70, emitPeriodS * 1000 * 0.85)));
+  const { layout, isDragging, startDrag, resetLeft, resetRight, resetBottom, toggleCollapse, focusCenter } =
+    useDashboardLayout();
+  const allCollapsed = layout.leftCollapsed && layout.rightCollapsed && layout.bottomCollapsed;
 
   return (
-    <div className="dashboard-shell">
+    <div className="dashboard-shell" style={{ "--telemetry-ms": `${telemetryMs}ms` } as React.CSSProperties}>
       <TopBar />
       {(!hasLatest || conn !== "live") && <BackendConnectionBanner />}
       {stale && !replaying && <div role="status" className="flex flex-wrap items-center gap-2 rounded-md border border-suspect/40 bg-suspect/10 px-3 py-2 text-sm text-suspect"><WifiOff size={16} aria-hidden /><span>Connection interrupted. Showing last received readings ({ageSeconds}s ago).</span></div>}
@@ -97,40 +117,55 @@ export function App() {
         id="main-workspace"
         tabIndex={-1}
         data-mobile-panel={mobilePanel}
+        data-collapse-left={layout.leftCollapsed ? "true" : undefined}
+        data-collapse-right={layout.rightCollapsed ? "true" : undefined}
+        data-collapse-bottom={layout.bottomCollapsed ? "true" : undefined}
         style={{
-          "--left-width": `${layout.leftWidth}px`,
-          "--right-width": `${layout.rightWidth}px`,
-          "--timeline-height": `${layout.timelineHeight}px`,
+          "--left-width": layout.leftCollapsed ? "0px" : `${layout.leftWidth}px`,
+          "--right-width": layout.rightCollapsed ? "0px" : `${layout.rightWidth}px`,
+          "--timeline-height": layout.bottomCollapsed ? "0px" : `${layout.timelineHeight}px`,
+          "--left-rail": layout.leftCollapsed ? "22px" : "8px",
+          "--right-rail": layout.rightCollapsed ? "22px" : "8px",
+          "--bottom-rail": layout.bottomCollapsed ? "22px" : "8px",
         } as React.CSSProperties}
         className={`dashboard-main ${stale && !replaying ? "stale-telemetry" : ""} ${isDragging ? "dashboard-is-resizing" : ""}`}
       >
         <AttackConsole />
         <ResizeHandle
           orientation="vertical"
-          label="Attack Console Sidebar"
+          label="Attack console"
+          side="left"
           className="splitter-left"
           isDragging={isDragging === "left"}
           valueNow={layout.leftWidth}
+          collapsed={layout.leftCollapsed}
+          onToggleCollapse={() => toggleCollapse("left")}
           onPointerDown={(e) => startDrag("left", e)}
           onDoubleClick={resetLeft}
         />
-        <Center live={live} />
+        <Center live={live} expanded={allCollapsed} onToggleExpand={focusCenter} />
         <ResizeHandle
           orientation="vertical"
-          label="Incident Panel Sidebar"
+          label="Incident panel"
+          side="right"
           className="splitter-right"
           isDragging={isDragging === "right"}
           valueNow={layout.rightWidth}
+          collapsed={layout.rightCollapsed}
+          onToggleCollapse={() => toggleCollapse("right")}
           onPointerDown={(e) => startDrag("right", e)}
           onDoubleClick={resetRight}
         />
         <IncidentPanel />
         <ResizeHandle
           orientation="horizontal"
-          label="Timeline Panel Height"
+          label="Timeline"
+          side="bottom"
           className="splitter-bottom"
           isDragging={isDragging === "bottom"}
           valueNow={layout.timelineHeight}
+          collapsed={layout.bottomCollapsed}
+          onToggleCollapse={() => toggleCollapse("bottom")}
           onPointerDown={(e) => startDrag("bottom", e)}
           onDoubleClick={resetBottom}
         />

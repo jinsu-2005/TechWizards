@@ -28,6 +28,7 @@ playwright-report/
 submission/AttackTrace_Submission.zip
 submission/evidence/videos/*.webm
 # Internal working notes, not part of the project itself (same exclusion the submission zip uses)
+.claude/
 /CLAUDE.md
 /PLAN.md
 /ENHANCE_PLAN.md

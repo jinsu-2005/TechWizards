@@ -30,6 +30,22 @@ class Hub:
                 self.clients.discard(c)
 
 
+# Fast demo: how much sooner each SIM sample is delivered. The plant physics, the sample
+# sequence and every detector window are unchanged -- only the wall-clock gap between samples
+# shrinks, so what the detector sees is bit-for-bit what it sees at 1x, just sooner.
+SIM_SPEEDS: tuple[float, ...] = (1.0, 6.0)
+MAX_SIM_SPEED = max(SIM_SPEEDS)
+
+
+def emit_period(state: Any, base_period_s: float) -> float:
+    """Seconds to wait before the next sample. Only SIM may be accelerated: LIVE is paced by a
+    real Modbus source and HAI carries its own replay speed control."""
+    if getattr(state, "mode", None) != "sim":
+        return base_period_s
+    speed = float(getattr(state, "sim_speed", 1.0))
+    return base_period_s / min(MAX_SIM_SPEED, max(1.0, speed))
+
+
 async def run_loop(state: Any, hub: Hub, period_s: float) -> None:
     """Drive the active engine at a fixed real-time cadence without drifting. Only the active
     engine advances. An already-started LIVE calibration continues collecting in background."""
@@ -54,7 +70,9 @@ async def run_loop(state: Any, hub: Hub, period_s: float) -> None:
             await hub.broadcast(message.model_dump_json())
         except Exception:
             log.exception("live tick failed; continuing")
-        next_t += period_s
+        next_t += emit_period(state, period_s)
+        # A speed change must not make the loop burn through a backlog of missed deadlines.
+        next_t = max(next_t, time.monotonic())
         await asyncio.sleep(max(0.0, next_t - time.monotonic()))
 
 

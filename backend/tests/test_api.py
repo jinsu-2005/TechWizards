@@ -87,8 +87,18 @@ def test_ws_sends_latest_on_connect(client: TestClient, engine: Engine) -> None:
         msg = LiveMessage.model_validate_json(ws.receive_text())
     assert msg.mode == "sim" and len(msg.nodes) == len(NODE_IDS)
     keys = set(json.loads(msg.model_dump_json()))
-    # Phase 13 added `source_latency_ms` (null outside LIVE); nothing else changed.
-    assert keys == {"t", "mode", "nodes", "alert", "incident", "impact", "source_latency_ms"}
+    # Phase 13 added `source_latency_ms` (null outside LIVE) and Phase 15 `setpoints` (the
+    # controller targets the twin draws, null outside SIM); nothing else changed.
+    assert keys == {
+        "t",
+        "mode",
+        "nodes",
+        "alert",
+        "incident",
+        "impact",
+        "source_latency_ms",
+        "setpoints",
+    }
     assert json.loads(msg.model_dump_json())["source_latency_ms"] is None
     assert all(n.quality is None for n in msg.nodes)  # LIVE-only field
 

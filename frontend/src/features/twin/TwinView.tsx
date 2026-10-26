@@ -2,12 +2,20 @@ import { ChevronDown, ChevronUp, Hand, ScanSearch } from "lucide-react";
 import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { nodeMap, selectView, useLive } from "../../store/live";
 import { useUi } from "../../store/ui";
+import { useAttackRun } from "../../store/attackRun";
+import { describeAttack } from "../../lib/briefing";
+import { attacksByNode, stateAtDetection } from "./attack";
 import { Equipment } from "./EquipmentLayer";
 import { Links } from "./Links";
 import { FILTER, VIEW } from "./geometry";
 
+export interface TwinViewProps {
+  hideToolbar?: boolean;
+  hideHint?: boolean;
+}
+
 /** Pure-SVG plant: tanks fill with the physical level, pipes flow, pumps spin. */
-export function TwinView() {
+export function TwinView({ hideToolbar = false, hideHint = false }: TwinViewProps = {}) {
   const [zoom, setZoom] = useState(1);
   const [panEnabled, setPanEnabled] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -15,6 +23,7 @@ export function TwinView() {
   const svg = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: number; x: number; y: number; left: number; top: number } | null>(null);
   const latest = useLive(selectView);
+  const buffer = useLive((s) => s.buffer);
   const topology = useLive((s) => s.topology);
   const liveHealth = useLive((s) => s.cursor === null ? s.liveHealth : null);
   const nodes = useMemo(() => new Map((latest?.nodes ?? []).map((n) => [n.id, n])), [latest]);
@@ -23,6 +32,20 @@ export function TwinView() {
     () => new Map((liveHealth ?? []).map((h) => [h.node_id, h.age_ms])),
     [liveHealth],
   );
+  const attacks = useMemo(() => attacksByNode(latest, topo, buffer), [latest, topo, buffer]);
+  // The instant a test is accepted the twin points at the component, before the plant moves.
+  const run = useAttackRun((s) => s.run);
+  const runPhase = useAttackRun((s) => s.phase);
+  const pending = useMemo(() => {
+    if (!run || (runPhase !== "accepted" && runPhase !== "active")) return null;
+    if (attacks.has(run.target)) return null; // the real attack mark has taken over
+    return {
+      target: run.target,
+      direction: describeAttack(run.scenario, run.target, run.magnitude, topo.get(run.target)).direction,
+    };
+  }, [run, runPhase, attacks, topo]);
+  const incidentId = latest?.incident && latest.incident.status !== "closed" ? latest.incident.id : null;
+  const atDetection = useMemo(() => stateAtDetection(buffer, incidentId), [buffer, incidentId]);
   const isHazard = Boolean(
     latest?.incident &&
     latest.incident.status !== "closed" &&
@@ -85,7 +108,7 @@ export function TwinView() {
   if (!latest) return null;
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {!toolbarCollapsed && (
+      {!hideToolbar && !toolbarCollapsed && (
         <div className="twin-toolbar flex flex-wrap items-center gap-2 border-b border-border px-3 py-1.5 text-xs text-muted">
           <span className="mr-auto truncate">Equipment and process flow · select a tag for evidence</span>
           <div className="flex items-center gap-1">
@@ -118,10 +141,12 @@ export function TwinView() {
         onPointerDown={startPan} onPointerMove={movePan} onPointerUp={stopPan} onPointerCancel={stopPan}
         className={`twin-viewport relative min-h-0 flex-1 overflow-auto rounded-md ${panEnabled ? "twin-pan-enabled" : ""} ${dragging ? "twin-dragging" : ""} ${isHazard ? "ring-1 ring-origin/40" : ""}`}>
         <div className="pointer-events-none sticky left-3 top-2 z-10 flex items-center justify-between pr-4 h-0">
-          <span className="twin-hint inline-block rounded bg-surface/90 px-2 py-1 text-xs text-muted">
-            {panEnabled ? "Drag to move · arrow keys also work" : zoom > 1 ? "Select the hand to move the view" : "Select FIL-01 to zoom into the filter"}
-          </span>
-          {toolbarCollapsed && (
+          {!hideHint && (
+            <span className="twin-hint inline-block rounded bg-surface/90 px-2 py-1 text-xs text-muted">
+              {panEnabled ? "Drag to move · arrow keys also work" : zoom > 1 ? "Select the hand to move the view" : "Select FIL-01 to zoom into the filter"}
+            </span>
+          )}
+          {!hideToolbar && toolbarCollapsed && (
             <div className="pointer-events-auto flex items-center gap-1.5 rounded-md border border-border/80 bg-surface/95 px-2 py-1 shadow-md backdrop-blur-sm">
               <button
                 type="button"
@@ -202,7 +227,16 @@ export function TwinView() {
         </g>
 
         <Links nodes={nodes} incident={latest.incident} />
-        <Equipment nodes={nodes} topo={topo} ageByNode={ageByNode} onFocusFilter={focusFilter} />
+        <Equipment
+          nodes={nodes}
+          topo={topo}
+          ageByNode={ageByNode}
+          attacks={attacks}
+          setpoints={latest.setpoints}
+          atDetection={atDetection}
+          pending={pending}
+          onFocusFilter={focusFilter}
+        />
       </svg>
     </div></div>
   );

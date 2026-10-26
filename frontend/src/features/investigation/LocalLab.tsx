@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import {
   Activity, AlertTriangle, CheckCircle2,
   Flame, Hash, Play, RotateCcw,
@@ -9,7 +9,12 @@ import {
   postAttack, postReset
 } from "../../lib/api";
 import type { Scenario } from "../../lib/types";
-import { useLive } from "../../store/live";
+import { useLive, selectView } from "../../store/live";
+import { useUi } from "../../store/ui";
+import { TwinView } from "../twin/TwinView";
+import { AssetInspector } from "./AssetInspector";
+
+const GraphView = lazy(() => import("../graph/GraphView").then((m) => ({ default: m.GraphView })));
 
 interface LabStatus {
   enabled: boolean;
@@ -60,6 +65,11 @@ export function LocalLab() {
   const [result, setResult] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [resetting, setResetting] = useState(false);
+
+  // Digital Twin state
+  const [twinTab, setTwinTab] = useState<"twin" | "graph">("twin");
+  const view = useLive(selectView);
+  const selectedAsset = useUi((s) => s.selectedAsset);
 
   const clearLive = useLive((s) => s.clear);
 
@@ -188,241 +198,317 @@ export function LocalLab() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════
-          1. ATTACK SIMULATION TRIGGER CARDS (ONE-CLICK INJECTION)
+          WORKBENCH: BIG DIGITAL TWIN (LEFT) & ATTACK SCENARIOS (RIGHT)
           ══════════════════════════════════════════════════════════════════ */}
-      <div>
-        <div className="flex items-center justify-between mb-2.5">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-            <Zap size={13} className="text-accent" />
-            <span>Attack Scenarios · One-Click Injection</span>
-          </h3>
-          <span className="text-[11px] text-muted font-mono">Modbus TCP / RTU</span>
-        </div>
-
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
-          {/* CARD 1: Rogue Setpoint */}
-          <article className="lab-card">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2">
-                <div className="lab-card-icon text-origin bg-origin/10 border-origin/20">
-                  <Flame size={16} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-text">Rogue Setpoint</h4>
-                  <p className="text-[11px] text-muted">Controller PLC1 Level Control</p>
-                </div>
+      <div className="grid gap-4 lg:grid-cols-12 items-stretch">
+        {/* LEFT COLUMN: BIG DIGITAL TWIN */}
+        <section className="lg:col-span-7 xl:col-span-8 lab-panel-card !p-0 overflow-hidden flex flex-col border border-border/80 bg-surface/90 shadow-md rounded-xl h-full">
+          {/* Digital Twin Top Bar */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-surface/70 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="text-accent flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-accent shrink-0">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8" />
+                  <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" />
+                  <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+                </svg>
               </div>
-              <span className="soc-asset-type soc-asset-ctrl">PLC</span>
+              <h3 className="text-xs font-bold font-mono uppercase tracking-wider text-text">
+                Digital Twin
+              </h3>
             </div>
 
-            <p className="text-xs text-muted leading-relaxed">
-              Manipulates internal control setpoint, forcing tank overflow or drainage.
-            </p>
+            <div className="flex items-center rounded-lg bg-bg/90 p-0.5 border border-border/70">
+              <button
+                type="button"
+                onClick={() => setTwinTab("twin")}
+                className={`px-3 py-1 rounded text-[11px] font-mono font-bold uppercase tracking-wider transition-all ${
+                  twinTab === "twin"
+                    ? "bg-[#2563EB] text-white shadow-sm"
+                    : "text-muted hover:text-text hover:bg-surface/60"
+                }`}
+              >
+                TWIN
+              </button>
+              <button
+                type="button"
+                onClick={() => setTwinTab("graph")}
+                className={`px-3 py-1 rounded text-[11px] font-mono font-bold uppercase tracking-wider transition-all ${
+                  twinTab === "graph"
+                    ? "bg-[#2563EB] text-white shadow-sm"
+                    : "text-muted hover:text-text hover:bg-surface/60"
+                }`}
+              >
+                GRAPH
+              </button>
+            </div>
+          </div>
 
-            {/* Presets */}
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {[
-                { label: "+10% Delta", val: 10 },
-                { label: "+25% Overflow", val: 25 },
-                { label: "-20% Drain", val: -20 },
-              ].map((p) => (
+          {/* Digital Twin Viewport */}
+          <div className="relative w-full flex-1 min-h-[500px] lg:min-h-[580px] bg-bg/70 overflow-hidden flex flex-col">
+            {!view ? (
+              <div className="flex h-full min-h-[500px] items-center justify-center flex-col gap-2.5 text-muted">
+                <div className="w-8 h-8 rounded-full border-2 border-accent/20 border-t-accent animate-spin" />
+                <span className="text-xs font-mono tracking-wider">Synchronizing Digital Twin Stream…</span>
+              </div>
+            ) : (
+              <div className={`process-canvas h-full min-h-0 flex-1 ${selectedAsset ? "has-inspector" : ""}`}>
+                <div className="process-primary h-full min-h-0 min-w-0">
+                  {twinTab === "graph" ? (
+                    <Suspense fallback={<p className="p-4 text-sm text-muted">Loading process graph…</p>}>
+                      <GraphView key={view.mode} />
+                    </Suspense>
+                  ) : (
+                    <TwinView hideToolbar={true} hideHint={true} />
+                  )}
+                </div>
+                <AssetInspector />
+              </div>
+            )}
+          </div>
+
+          {/* Digital Twin Footer */}
+          <div className="px-4 py-2 border-t border-border/50 bg-surface/40 text-[10px] font-mono tracking-wider text-muted flex items-center justify-between shrink-0">
+            <span>EQUIPMENT AND PROCESS FLOW • HOVER A TAG FOR DETAIL</span>
+            <span className="text-[10px] text-muted/70 hidden sm:inline">REAL-TIME TWIN TELEMETRY</span>
+          </div>
+        </section>
+
+        {/* RIGHT COLUMN: ATTACK SCENARIOS · ONE-CLICK INJECTION */}
+        <section className="lg:col-span-5 xl:col-span-4 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+              <Zap size={13} className="text-accent" />
+              <span>Attack Scenarios · One-Click Injection</span>
+            </h3>
+            <span className="text-[11px] text-muted font-mono">Modbus TCP / RTU</span>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {/* CARD 1: Rogue Setpoint */}
+            <article className="lab-card">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="lab-card-icon text-origin bg-origin/10 border-origin/20">
+                    <Flame size={16} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-text">Rogue Setpoint</h4>
+                    <p className="text-[11px] text-muted">Controller PLC1 Level Control</p>
+                  </div>
+                </div>
+                <span className="soc-asset-type soc-asset-ctrl">PLC</span>
+              </div>
+
+              <p className="text-xs text-muted leading-relaxed">
+                Manipulates internal control setpoint, forcing tank overflow or drainage.
+              </p>
+
+              {/* Presets */}
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {[
+                  { label: "+10% Delta", val: 10 },
+                  { label: "+25% Overflow", val: 25 },
+                  { label: "-20% Drain", val: -20 },
+                ].map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => setSetpointDelta(p.val)}
+                    className={`lab-preset-btn ${setpointDelta === p.val ? "active" : ""}`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Control & Trigger */}
+              <div className="mt-4 pt-3 border-t border-border/70 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-muted font-mono">Delta:</span>
+                  <input
+                    type="number"
+                    min={-45}
+                    max={45}
+                    step={5}
+                    value={setpointDelta}
+                    onChange={(e) => setSetpointDelta(Number(e.target.value))}
+                    className="lab-num-input"
+                  />
+                  <span className="text-xs text-muted font-mono">%</span>
+                </div>
                 <button
-                  key={p.label}
                   type="button"
-                  onClick={() => setSetpointDelta(p.val)}
-                  className={`lab-preset-btn ${setpointDelta === p.val ? "active" : ""}`}
+                  disabled={busy}
+                  onClick={() =>
+                    void handleInjectAttack("rogue_setpoint", "PLC1", setpointDelta, `Rogue Setpoint (${setpointDelta}%)`)
+                  }
+                  className="lab-inject-btn"
                 >
-                  {p.label}
+                  <Play size={12} fill="currentColor" />
+                  <span>Inject</span>
                 </button>
-              ))}
-            </div>
-
-            {/* Control & Trigger */}
-            <div className="mt-4 pt-3 border-t border-border/70 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-muted font-mono">Delta:</span>
-                <input
-                  type="number"
-                  min={-45}
-                  max={45}
-                  step={5}
-                  value={setpointDelta}
-                  onChange={(e) => setSetpointDelta(Number(e.target.value))}
-                  className="lab-num-input"
-                />
-                <span className="text-xs text-muted font-mono">%</span>
               </div>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() =>
-                  void handleInjectAttack("rogue_setpoint", "PLC1", setpointDelta, `Rogue Setpoint (${setpointDelta}%)`)
-                }
-                className="lab-inject-btn"
-              >
-                <Play size={12} fill="currentColor" />
-                <span>Inject</span>
-              </button>
-            </div>
-          </article>
+            </article>
 
-          {/* CARD 2: Sensor Drift / Offset */}
-          <article className="lab-card">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2">
-                <div className="lab-card-icon text-accent bg-accent/10 border-accent/20">
-                  <Activity size={16} />
+            {/* CARD 2: Sensor Drift / Offset */}
+            <article className="lab-card">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="lab-card-icon text-accent bg-accent/10 border-accent/20">
+                    <Activity size={16} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-text">Sensor Drift &amp; Offset</h4>
+                    <p className="text-[11px] text-muted">Analog Transmitter</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-text">Sensor Drift &amp; Offset</h4>
-                  <p className="text-[11px] text-muted">Analog Transmitter</p>
-                </div>
+                <span className="soc-asset-type soc-asset-sensor">Sensor</span>
               </div>
-              <span className="soc-asset-type soc-asset-sensor">Sensor</span>
-            </div>
 
-            <p className="text-xs text-muted leading-relaxed">
-              Injects static bias into sensor register, inducing controller overcompensation.
-            </p>
+              <p className="text-xs text-muted leading-relaxed">
+                Injects static bias into sensor register, inducing controller overcompensation.
+              </p>
 
-            {/* Target & Presets */}
-            <div className="mt-3 flex items-center gap-2">
-              <select
-                className="lab-select-input flex-1"
-                value={sensorTarget}
-                onChange={(e) => setSensorTarget(e.target.value)}
-              >
-                <option value="LIT101">LIT101 (Level Sensor)</option>
-                <option value="LIT301">LIT301 (Level Sensor 3)</option>
-                <option value="FIT201">FIT201 (Flow Sensor)</option>
-                <option value="PIT301">PIT301 (Pressure Sensor)</option>
-              </select>
-            </div>
+              {/* Target & Presets */}
+              <div className="mt-3 flex items-center gap-2">
+                <select
+                  className="lab-select-input flex-1"
+                  value={sensorTarget}
+                  onChange={(e) => setSensorTarget(e.target.value)}
+                >
+                  <option value="LIT101">LIT101 (Level Sensor)</option>
+                  <option value="LIT301">LIT301 (Level Sensor 3)</option>
+                  <option value="FIT201">FIT201 (Flow Sensor)</option>
+                  <option value="PIT301">PIT301 (Pressure Sensor)</option>
+                </select>
+              </div>
 
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {[
-                { label: "-25 mm Offset", val: -25 },
-                { label: "+35 mm Offset", val: 35 },
-                { label: "-50 mm Drift", val: -50 },
-              ].map((p) => (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {[
+                  { label: "-25 mm Offset", val: -25 },
+                  { label: "+35 mm Offset", val: 35 },
+                  { label: "-50 mm Drift", val: -50 },
+                ].map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => setSensorOffsetVal(p.val)}
+                    className={`lab-preset-btn ${sensorOffsetVal === p.val ? "active" : ""}`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Control & Trigger */}
+              <div className="mt-4 pt-3 border-t border-border/70 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-muted font-mono">Offset:</span>
+                  <input
+                    type="number"
+                    min={-100}
+                    max={100}
+                    step={5}
+                    value={sensorOffsetVal}
+                    onChange={(e) => setSensorOffsetVal(Number(e.target.value))}
+                    className="lab-num-input"
+                  />
+                </div>
                 <button
-                  key={p.label}
                   type="button"
-                  onClick={() => setSensorOffsetVal(p.val)}
-                  className={`lab-preset-btn ${sensorOffsetVal === p.val ? "active" : ""}`}
+                  disabled={busy}
+                  onClick={() =>
+                    void handleInjectAttack(
+                      "sensor_offset",
+                      sensorTarget,
+                      sensorOffsetVal,
+                      `Sensor Offset (${sensorTarget} ${sensorOffsetVal})`
+                    )
+                  }
+                  className="lab-inject-btn"
                 >
-                  {p.label}
+                  <Play size={12} fill="currentColor" />
+                  <span>Inject</span>
                 </button>
-              ))}
-            </div>
-
-            {/* Control & Trigger */}
-            <div className="mt-4 pt-3 border-t border-border/70 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-muted font-mono">Offset:</span>
-                <input
-                  type="number"
-                  min={-100}
-                  max={100}
-                  step={5}
-                  value={sensorOffsetVal}
-                  onChange={(e) => setSensorOffsetVal(Number(e.target.value))}
-                  className="lab-num-input"
-                />
               </div>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() =>
-                  void handleInjectAttack(
-                    "sensor_offset",
-                    sensorTarget,
-                    sensorOffsetVal,
-                    `Sensor Offset (${sensorTarget} ${sensorOffsetVal})`
-                  )
-                }
-                className="lab-inject-btn"
-              >
-                <Play size={12} fill="currentColor" />
-                <span>Inject</span>
-              </button>
-            </div>
-          </article>
+            </article>
 
-          {/* CARD 3: Actuator Force Override */}
-          <article className="lab-card">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2">
-                <div className="lab-card-icon text-suspect bg-suspect/10 border-suspect/20">
-                  <ZapOff size={16} />
+            {/* CARD 3: Actuator Force Override */}
+            <article className="lab-card">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="lab-card-icon text-suspect bg-suspect/10 border-suspect/20">
+                    <ZapOff size={16} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-text">Actuator Force Override</h4>
+                    <p className="text-[11px] text-muted">Discrete Output</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-text">Actuator Force Override</h4>
-                  <p className="text-[11px] text-muted">Discrete Output</p>
-                </div>
+                <span className="soc-asset-type soc-asset-act">Actuator</span>
               </div>
-              <span className="soc-asset-type soc-asset-act">Actuator</span>
-            </div>
 
-            <p className="text-xs text-muted leading-relaxed">
-              Forces discrete coil state, locking inflow valves or disabling pumps.
-            </p>
+              <p className="text-xs text-muted leading-relaxed">
+                Forces discrete coil state, locking inflow valves or disabling pumps.
+              </p>
 
-            {/* Target Select */}
-            <div className="mt-3 flex items-center gap-2">
-              <select
-                className="lab-select-input flex-1"
-                value={actuatorTarget}
-                onChange={(e) => setActuatorTarget(e.target.value)}
-              >
-                <option value="MV101">MV101 (Motor Inflow Valve)</option>
-                <option value="MV201">MV201 (Transfer Valve)</option>
-                <option value="P101">P101 (Raw Water Pump)</option>
-              </select>
-            </div>
+              {/* Target Select */}
+              <div className="mt-3 flex items-center gap-2">
+                <select
+                  className="lab-select-input flex-1"
+                  value={actuatorTarget}
+                  onChange={(e) => setActuatorTarget(e.target.value)}
+                >
+                  <option value="MV101">MV101 (Motor Inflow Valve)</option>
+                  <option value="MV201">MV201 (Transfer Valve)</option>
+                  <option value="P101">P101 (Raw Water Pump)</option>
+                </select>
+              </div>
 
-            {/* State Toggle Buttons */}
-            <div className="mt-2 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setActuatorState(1)}
-                className={`lab-toggle-btn flex-1 ${actuatorState === 1 ? "active-open" : ""}`}
-              >
-                Force OPEN (1)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActuatorState(0)}
-                className={`lab-toggle-btn flex-1 ${actuatorState === 0 ? "active-closed" : ""}`}
-              >
-                Force CLOSED (0)
-              </button>
-            </div>
+              {/* State Toggle Buttons */}
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActuatorState(1)}
+                  className={`lab-toggle-btn flex-1 ${actuatorState === 1 ? "active-open" : ""}`}
+                >
+                  Force OPEN (1)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActuatorState(0)}
+                  className={`lab-toggle-btn flex-1 ${actuatorState === 0 ? "active-closed" : ""}`}
+                >
+                  Force CLOSED (0)
+                </button>
+              </div>
 
-            {/* Control & Trigger */}
-            <div className="mt-4 pt-3 border-t border-border/70 flex items-center justify-between gap-2">
-              <span className="text-xs text-muted font-mono">
-                {actuatorTarget} → {actuatorState === 1 ? "FORCE ON" : "FORCE OFF"}
-              </span>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() =>
-                  void handleInjectAttack(
-                    "actuator_force",
-                    actuatorTarget,
-                    actuatorState,
-                    `Force ${actuatorTarget} ${actuatorState === 1 ? "OPEN" : "CLOSED"}`
-                  )
-                }
-                className="lab-inject-btn"
-              >
-                <Play size={12} fill="currentColor" />
-                <span>Inject</span>
-              </button>
-            </div>
-          </article>
-        </div>
+              {/* Control & Trigger */}
+              <div className="mt-4 pt-3 border-t border-border/70 flex items-center justify-between gap-2">
+                <span className="text-xs text-muted font-mono">
+                  {actuatorTarget} → {actuatorState === 1 ? "FORCE ON" : "FORCE OFF"}
+                </span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() =>
+                    void handleInjectAttack(
+                      "actuator_force",
+                      actuatorTarget,
+                      actuatorState,
+                      `Force ${actuatorTarget} ${actuatorState === 1 ? "OPEN" : "CLOSED"}`
+                    )
+                  }
+                  className="lab-inject-btn"
+                >
+                  <Play size={12} fill="currentColor" />
+                  <span>Inject</span>
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════

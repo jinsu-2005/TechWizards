@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.security import limit_attacks, require_demo, require_key
+from app.api.ws import SIM_SPEEDS, emit_period
 from app.data.hai import hai_paths
 from app.engine import Engine
 from app.engine_hai import HaiEngine
@@ -24,6 +25,7 @@ from app.schemas import (
     IsolateRequest,
     IsolateResponse,
     ModeRequest,
+    SimSpeedRequest,
     SourceInfo,
     Status,
     TagHealth,
@@ -77,6 +79,11 @@ def _hai_availability(state: Any) -> tuple[bool, str | None]:
     return False, "HAI dataset files not found"
 
 
+def _sim_speed(state: Any) -> float:
+    """Demo pacing in force right now. HAI and LIVE always report 1.0: only SIM is paced here."""
+    return float(getattr(state, "sim_speed", 1.0)) if state.mode == "sim" else 1.0
+
+
 def _status(request: Request) -> Status:
     state = request.app.state
     rt = active_runtime(state)
@@ -91,6 +98,9 @@ def _status(request: Request) -> Status:
         source=_source(state),
         live_available=live_ok,
         live_reason=live_reason,
+        sim_speed=_sim_speed(state),
+        sim_speed_options=list(SIM_SPEEDS),
+        emit_period_s=emit_period(state, state.settings.ws_period_s),
     )
 
 
@@ -121,6 +131,21 @@ def set_mode(body: ModeRequest, request: Request) -> Status:
         if not ok:
             raise HTTPException(status_code=409, detail=f"LIVE unavailable: {reason}")
     state.mode = body.mode
+    return _status(request)
+
+
+@router.post("/sim/speed", dependencies=[Depends(require_key), Depends(require_demo)])
+def set_sim_speed(body: SimSpeedRequest, request: Request) -> Status:
+    """Fast demo pacing. The plant, the sample sequence and the detector are untouched; the
+    same samples are simply delivered sooner, so an attack's real effect shows up in seconds
+    instead of a minute. Refused outside SIM, where timing belongs to the source."""
+    state = request.app.state
+    if state.mode != "sim":
+        raise HTTPException(status_code=409, detail="Demo pacing applies to SIM only")
+    if body.speed not in SIM_SPEEDS:
+        allowed = ", ".join(f"{s:g}x" for s in SIM_SPEEDS)
+        raise HTTPException(status_code=422, detail=f"Unsupported demo speed; allowed: {allowed}")
+    state.sim_speed = float(body.speed)
     return _status(request)
 
 

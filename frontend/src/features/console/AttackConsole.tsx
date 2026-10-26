@@ -1,16 +1,27 @@
 import { useAccess } from "../auth/access";
-import { CheckCircle2, Crosshair, LoaderCircle, Rocket, RotateCcw, WifiOff } from "lucide-react";
+import { CheckCircle2, Crosshair, FastForward, LoaderCircle, Rocket, RotateCcw, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Panel } from "../../components/ui/Panel";
-import { postAttack, postReset } from "../../lib/api";
+import { getStatus, postAttack, postReset, setSimSpeed } from "../../lib/api";
 import { SCENARIOS, SCENARIO_LABEL, magnitudeFor, validTargets } from "../../lib/scenarios";
 import type { Scenario } from "../../lib/types";
 import { useLive } from "../../store/live";
 import { noticeIfLocked, useUi } from "../../store/ui";
+import { useAttackRun } from "../../store/attackRun";
+import { AttackBriefing } from "./AttackBriefing";
 import { HaiReplayPanel } from "./HaiReplayPanel";
 import { MagnitudeField } from "./MagnitudeField";
 import { NodeScores } from "./NodeScores";
+
+/** The plant integrates slowly: a tank needs roughly a minute of plant time to move far enough
+ *  to read off the twin, and the operator then needs time to work the incident. The backend
+ *  default of 60 s ended the attack about when its effect became visible. Fast demo mode
+ *  delivers these same plant seconds sooner; it does not shorten the test. */
+const ATTACK_DURATION_S = 180;
+
+/** Fast demo pacing, mirroring the backend's allowed speeds. */
+const FAST_SPEED = 6;
 
 const field = "h-9 rounded-md border border-border bg-bg px-2.5 font-mono text-xs text-text shadow-inner focus:border-accent focus:outline-none transition-colors";
 
@@ -29,6 +40,12 @@ export function AttackConsole() {
   const [attackId, setAttackId] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
   const [note, setNote] = useState<{ text: string; error: boolean } | null>(null);
+  const simSpeed = useLive((s) => s.status?.sim_speed ?? 1);
+  const canPace = useLive((s) => s.status?.mode === "sim");
+  const [pacing, setPacing] = useState(false);
+  const startRun = useAttackRun((s) => s.start);
+  const markReset = useAttackRun((s) => s.markReset);
+  const clearRun = useAttackRun((s) => s.clear);
 
   const targets = useMemo(() => validTargets(scenario, topology?.nodes ?? []), [scenario, topology]);
   const node = targets.find((n) => n.id === target) ?? targets[0];
@@ -48,6 +65,25 @@ export function AttackConsole() {
     setAttackId(null);
     setNote(null);
   }, [scenario, node?.id, magnitude]);
+  // Leaving SIM ends any demo pacing claim; the briefing belongs to the run that is gone.
+  useEffect(() => {
+    if (!canPace) clearRun();
+  }, [canPace, clearRun]);
+
+  const togglePace = async () => {
+    if (!canPace || pacing) return;
+    setPacing(true);
+    try {
+      await setSimSpeed(simSpeed > 1 ? 1 : FAST_SPEED);
+      useLive.getState().setStatus(await getStatus());
+    } catch (cause) {
+      if (!noticeIfLocked(cause)) {
+        setNote({ text: cause instanceof Error ? cause.message : "Demo pacing unavailable", error: true });
+      }
+    } finally {
+      setPacing(false);
+    }
+  };
 
   const launch = async () => {
     if (!node || calibrating || busy || resetting) return;
@@ -55,10 +91,18 @@ export function AttackConsole() {
     setLaunchState("idle");
     setNote(null);
     try {
-      const result = await postAttack({ scenario, target: node.id, magnitude });
+      const result = await postAttack({ scenario, target: node.id, magnitude, duration_s: ATTACK_DURATION_S });
       setAttackId(result.attack_id);
       setLaunchState("launched");
-      setNote({ text: `Test accepted for ${node.id}. Watch the process and incident panel for its effect.`, error: false });
+      // The briefing below takes over from here; this note only confirms the request landed.
+      setNote(null);
+      startRun({
+        attackId: result.attack_id,
+        scenario,
+        target: node.id,
+        magnitude,
+        launchedAt: Date.now(),
+      });
     } catch (e) {
       setLaunchState("failed");
       if (!noticeIfLocked(e)) setNote({ text: e instanceof Error ? e.message : "Failed", error: true });
@@ -70,9 +114,9 @@ export function AttackConsole() {
     if (busy || resetting) return;
     setResetting(true);
     try {
-      await postReset(); clear();
+      await postReset(); clear(); markReset();
       setLaunchState("idle"); setAttackId(null);
-      setNote({ text: "Scenario reset. Saved investigation records are retained.", error: false });
+      setNote(null);
     } catch (cause) {
       if (!noticeIfLocked(cause)) setNote({ text: cause instanceof Error ? cause.message : "Reset failed. Your readings have been retained.", error: true });
     } finally { setResetting(false); }
@@ -121,6 +165,28 @@ export function AttackConsole() {
             {busy ? <LoaderCircle size={16} className="shrink-0 animate-spin motion-reduce:animate-none" aria-hidden /> : launchState === "launched" ? <CheckCircle2 size={16} className="shrink-0" aria-hidden /> : <Rocket size={16} className="shrink-0" aria-hidden />}
             {calibrating ? "Calibration in progress" : busy ? "Launching test…" : launchState === "launched" ? "Launch again" : "Launch attack"}
           </button>
+          {canPace && (
+            <button
+              type="button"
+              aria-pressed={simSpeed > 1}
+              disabled={pacing || calibrating}
+              onClick={() => void togglePace()}
+              title={
+                simSpeed > 1
+                  ? "Back to normal pacing: one sample every half second"
+                  : "Fast demo: the same simulated samples arrive sooner, so effects show in seconds"
+              }
+              className="demo-pace-toggle"
+            >
+              <FastForward size={14} aria-hidden />
+              <span>{simSpeed > 1 ? `Fast demo · ${simSpeed}x` : "Fast demo"}</span>
+              <span className="sr-only">
+                {simSpeed > 1
+                  ? "Fast demo is on. The simulation delivers the same samples sooner."
+                  : "Fast demo is off."}
+              </span>
+            </button>
+          )}
           <button
             type="button"
             disabled={!canAdmin || busy || resetting || calibrating}
@@ -134,6 +200,7 @@ export function AttackConsole() {
             <span className="flex items-start gap-2">{busy ? <LoaderCircle size={14} className="mt-0.5 shrink-0 animate-spin motion-reduce:animate-none" aria-hidden /> : launchState === "launched" ? <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-normal" aria-hidden /> : null}<span>{busy ? `Sending ${SCENARIO_LABEL[scenario]} to ${node?.id}…` : note?.text}</span></span>
             {attackId && launchState === "launched" && <span className="mt-1 block break-all font-mono text-[10px] text-muted">Test ID: {attackId}</span>}
           </div>}
+          <AttackBriefing />
           {calibrating ? <p className="text-xs leading-relaxed text-muted">Test attacks and scores are unavailable until a LIVE detector is ready. Keep the emulator in normal operation while collecting the baseline.</p> : <NodeScores />}
         </form>
       )}

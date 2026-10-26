@@ -1,17 +1,32 @@
 import { useState, useCallback, useRef } from "react";
 
-const STORAGE_KEY = "attacktrace_dashboard_layout_v1";
+const STORAGE_KEY = "attacktrace_dashboard_layout_v2";
 
 export interface DashboardLayoutState {
   leftWidth: number;
   rightWidth: number;
   timelineHeight: number;
+  /** Collapsed panels give their space to the digital twin; the splitter keeps a reopen rail. */
+  leftCollapsed: boolean;
+  rightCollapsed: boolean;
+  bottomCollapsed: boolean;
 }
+
+export type Splitter = "left" | "right" | "bottom";
+
+const COLLAPSE_KEY = {
+  left: "leftCollapsed",
+  right: "rightCollapsed",
+  bottom: "bottomCollapsed",
+} as const satisfies Record<Splitter, keyof DashboardLayoutState>;
 
 export const DEFAULT_LAYOUT: DashboardLayoutState = {
   leftWidth: 260,
   rightWidth: 320,
   timelineHeight: 190,
+  leftCollapsed: false,
+  rightCollapsed: false,
+  bottomCollapsed: false,
 };
 
 export const CONSTRAINTS = {
@@ -30,6 +45,9 @@ export function useDashboardLayout() {
           leftWidth: Math.min(Math.max(parsed.leftWidth ?? DEFAULT_LAYOUT.leftWidth, CONSTRAINTS.left.min), CONSTRAINTS.left.max),
           rightWidth: Math.min(Math.max(parsed.rightWidth ?? DEFAULT_LAYOUT.rightWidth, CONSTRAINTS.right.min), CONSTRAINTS.right.max),
           timelineHeight: Math.min(Math.max(parsed.timelineHeight ?? DEFAULT_LAYOUT.timelineHeight, CONSTRAINTS.bottom.min), CONSTRAINTS.bottom.max),
+          leftCollapsed: parsed.leftCollapsed === true,
+          rightCollapsed: parsed.rightCollapsed === true,
+          bottomCollapsed: parsed.bottomCollapsed === true,
         };
       }
     } catch {
@@ -67,7 +85,21 @@ export function useDashboardLayout() {
     persist({ ...layoutRef.current, timelineHeight: DEFAULT_LAYOUT.timelineHeight });
   }, [persist]);
 
-  const startDrag = useCallback((splitter: "left" | "right" | "bottom", startEvent: React.PointerEvent) => {
+  /** Collapse or reopen one panel. The width it had is kept, so reopening restores it. */
+  const toggleCollapse = useCallback((splitter: Splitter) => {
+    const key = COLLAPSE_KEY[splitter];
+    persist({ ...layoutRef.current, [key]: !layoutRef.current[key] });
+  }, [persist]);
+
+  /** Give every pixel to the twin, or put the workspace back the way it was. */
+  const focusCenter = useCallback(() => {
+    const l = layoutRef.current;
+    const anyOpen = !l.leftCollapsed || !l.rightCollapsed || !l.bottomCollapsed;
+    persist({ ...l, leftCollapsed: anyOpen, rightCollapsed: anyOpen, bottomCollapsed: anyOpen });
+  }, [persist]);
+
+  const startDrag = useCallback((splitter: Splitter, startEvent: React.PointerEvent) => {
+    if (layoutRef.current[COLLAPSE_KEY[splitter]]) return; // a collapsed panel has no width to drag
     startEvent.preventDefault();
     setIsDragging(splitter);
 
@@ -125,5 +157,7 @@ export function useDashboardLayout() {
     resetLeft,
     resetRight,
     resetBottom,
+    toggleCollapse,
+    focusCenter,
   };
 }

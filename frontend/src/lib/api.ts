@@ -62,6 +62,8 @@ export const getLiveHealth = (): Promise<TagHealth[]> => json<TagHealth[]>("/api
 export const restartLiveCalibration = (): Promise<SourceInfo> => post<SourceInfo>("/api/live/calibration/restart");
 export const getTopology = (): Promise<Topology> => json<Topology>("/api/topology");
 export const setMode = (mode: Mode): Promise<Status> => post<Status>("/api/mode", { mode });
+/** SIM-only demo pacing. The same samples arrive sooner; the plant and detector are untouched. */
+export const setSimSpeed = (speed: number): Promise<Status> => post<Status>("/api/sim/speed", { speed });
 export const postAttack = (req: AttackRequest): Promise<AttackResponse> =>
   post<AttackResponse>("/api/attack", req);
 export const postReset = (): Promise<Status> => post<Status>("/api/reset");

@@ -288,6 +288,7 @@ class Engine:
             else None,
             incident=inc.model_copy(deep=True) if inc else None,
             impact=impact,
+            setpoints=self._setpoints(),
         )
         self.latest = msg
         return msg
@@ -415,6 +416,12 @@ class Engine:
                 )
             )
         return out
+
+    def _setpoints(self) -> dict[str, float] | None:
+        """Controller setpoints as the controllers currently hold them (SIM only). A rogue
+        setpoint moves these, which is otherwise invisible in the reported telemetry."""
+        sp = getattr(getattr(self, "_plant", None), "setpoints", None)
+        return {k: float(v) for k, v in sp.items()} if isinstance(sp, dict) else None
 
     def _impact(self) -> Impact | None:
         im = self._plant.impact()

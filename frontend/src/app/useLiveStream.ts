@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { getStatus, getTopology } from "../lib/api";
+import type { Topology, TopologyNode } from "../lib/types";
 import { createLiveClient, liveUrl } from "../lib/ws";
-import { useLive } from "../store/live";
+import { nodeMap, useLive } from "../store/live";
+import { useAttackRun } from "../store/attackRun";
 
 import { playContainmentChime, playIncidentAlarm } from "../lib/audio";
 import { useUi } from "../store/ui";
@@ -9,6 +11,17 @@ import { incidentBrief, isLiveConversationActive, speak, useVoice } from "../lib
 
 const narrated = new Set<string>();
 let lastBriefAt = 0;
+
+// The topology changes once per session; rebuilding its index on every sample would be waste.
+let topoSource: Topology | null = null;
+let topoIndex = new Map<string, TopologyNode>();
+function topologyIndex(topology: Topology | null): Map<string, TopologyNode> {
+  if (topology !== topoSource) {
+    topoSource = topology;
+    topoIndex = nodeMap(topology);
+  }
+  return topoIndex;
+}
 
 /** Connects the WebSocket once, feeds the store, and refreshes REST state on (re)connect. */
 export function useLiveStream(): void {
@@ -28,6 +41,9 @@ export function useLiveStream(): void {
         }
         previousMode = m.mode;
         push(m);
+        // Advance the launched test's phase from telemetry, so "detected" only ever comes
+        // from the detector actually raising an incident.
+        useAttackRun.getState().observe(m, topologyIndex(useLive.getState().topology));
         const currStatus = m.incident?.status ?? null;
         if (currStatus !== prevStatus) {
           const sound = useUi.getState().soundEnabled;

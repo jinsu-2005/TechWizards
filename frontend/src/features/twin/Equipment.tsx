@@ -1,5 +1,7 @@
 import { clamp01 } from "../../lib/format";
 import type { NodeStatus } from "../../lib/types";
+import type { NodeAttack } from "./attack";
+import { AttackChip, DriftMark, ForcedRing, SetpointMark, SpoofBand } from "./AttackMarks";
 import { spinDuration, type Pt } from "./geometry";
 import { STATUS_COLOR } from "./status";
 
@@ -14,17 +16,44 @@ interface TankProps {
   /** Level as reported to SCADA, %; drawn as a tick so spoofing is visible. */
   reported: number;
   status: NodeStatus;
+  /** What is being done to this tank's level sensor, when anything is. */
+  attack?: NodeAttack;
+  /** Setpoint the tank's controller holds now, and the one it is authorized to hold. */
+  setpoint?: number | null;
+  nominalSetpoint?: number | null;
+  /** Physical level when the open incident was raised, for the drift arrow. */
+  levelAtDetection?: number | null;
 }
 
-export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) {
+export function Tank({
+  label,
+  x,
+  y,
+  w,
+  h,
+  level,
+  reported,
+  status,
+  attack,
+  setpoint,
+  nominalSetpoint,
+  levelAtDetection,
+}: TankProps) {
   const isT1 = label === "T1";
   const gradId = isT1 ? "tank-fluid-t1" : "tank-fluid-t2";
   const glowId = isT1 ? "tank-glow-t1" : "tank-glow-t2";
 
   const fillH = Math.max(4, (clamp01(level / 100) * (h - 16)) | 0);
   const extreme = level >= 90 || level <= 10;
-  const repY = y + h - 8 - clamp01(reported / 100) * (h - 16);
+  const atPct = (pct: number) => y + h - 8 - clamp01(pct / 100) * (h - 16);
+  const repY = atPct(reported);
   const fluidTopY = y + h - 8 - fillH;
+  const spoof = attack && (attack.kind === "freeze" || attack.kind === "offset" || attack.kind === "ramp")
+    ? attack.kind
+    : null;
+  const tampered = attack?.kind === "setpoint";
+  const sp = setpoint ?? null;
+  const nominalSp = nominalSetpoint ?? null;
 
   // Measurement graduation ticks at 0%, 25%, 50%, 75%, 100%
   const ticks = [
@@ -90,9 +119,25 @@ export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) 
         rx={12}
         fill="var(--surface)"
         fillOpacity={0.7}
-        stroke="var(--border)"
-        strokeWidth={1.5}
+        stroke={attack ? "var(--origin)" : extreme ? "var(--affected)" : "var(--border)"}
+        strokeWidth={attack ? 2.5 : 1.5}
+        style={{ transition: "stroke 300ms ease, stroke-width 300ms ease" }}
       />
+      {/* A tank at the top or bottom of its range is minutes from overflowing or running dry. */}
+      {extreme && (
+        <rect
+          x={x - 4}
+          y={y - 4}
+          width={w + 8}
+          height={h + 8}
+          rx={14}
+          fill="none"
+          stroke="var(--affected)"
+          strokeWidth={2}
+          className="hazard-halo"
+          style={{ transformOrigin: `${x + w / 2}px ${y + h / 2}px` }}
+        />
+      )}
 
       {/* Cylindrical Top Header Rim */}
       <rect
@@ -121,7 +166,7 @@ export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) 
           rx={4}
           clipPath={`url(#clip-${label})`}
           fill={extreme ? "url(#tank-fluid-hazard)" : `url(#${gradId})`}
-          style={{ transition: "y 400ms cubic-bezier(0.4, 0, 0.2, 1), height 400ms cubic-bezier(0.4, 0, 0.2, 1)" }}
+          style={{ transition: "y var(--telemetry-ms, 400ms) cubic-bezier(0.4, 0, 0.2, 1), height var(--telemetry-ms, 400ms) cubic-bezier(0.4, 0, 0.2, 1)" }}
         />
 
         {/* Dynamic Wave Crest Surface */}
@@ -131,7 +176,7 @@ export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) 
             fill={extreme ? "#ef4444" : isT1 ? "#22d3ee" : "#60a5fa"}
             fillOpacity={0.4}
             className="tank-wave-crest"
-            style={{ transition: "all 400ms ease" }}
+            style={{ transition: "all var(--telemetry-ms, 400ms) ease" }}
           />
         </g>
 
@@ -155,7 +200,7 @@ export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) 
           strokeWidth={2}
           strokeOpacity={0.9}
           filter={`url(#${glowId})`}
-          style={{ transition: "y 400ms cubic-bezier(0.4, 0, 0.2, 1)" }}
+          style={{ transition: "y var(--telemetry-ms, 400ms) cubic-bezier(0.4, 0, 0.2, 1)" }}
         />
       </g>
 
@@ -214,8 +259,45 @@ export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) 
         })}
       </g>
 
+      {/* The target the controller is chasing; red and displaced under a rogue setpoint. */}
+      {sp !== null && (
+        <SetpointMark
+          x={x + 2}
+          w={w - 4}
+          heldY={atPct(sp)}
+          nominalY={atPct(nominalSp ?? sp)}
+          delta={sp - (nominalSp ?? sp)}
+          tampered={tampered}
+        />
+      )}
+
+      {/* How far the water has actually moved since this incident was raised. */}
+      {levelAtDetection !== null && levelAtDetection !== undefined && (
+        <DriftMark
+          x={x + 2}
+          w={w - 4}
+          fromY={atPct(levelAtDetection)}
+          toY={fluidTopY}
+          delta={level - levelAtDetection}
+          unit="%"
+        />
+      )}
+
+      {/* The size of the lie: reported level against physical level, to scale. */}
+      {spoof && (
+        <SpoofBand
+          x={x + 2}
+          w={w - 4}
+          reportedY={repY}
+          physicalY={fluidTopY}
+          delta={reported - level}
+          unit="%"
+          kind={spoof}
+        />
+      )}
+
       {/* Reported level dashed indicator line (what PLC reads) */}
-      <g style={{ transition: "all 400ms linear" }}>
+      <g style={{ transition: "all var(--telemetry-ms, 400ms) linear" }}>
         <line
           x1={x - 6}
           x2={x + w + 6}
@@ -262,6 +344,8 @@ export function Tank({ label, x, y, w, h, level, reported, status }: TankProps) 
       >
         {label}
       </text>
+
+      {attack && <AttackChip attack={attack} x={x + w / 2} y={y - 12} w={Math.max(w + 40, 160)} />}
     </g>
   );
 }
@@ -271,15 +355,19 @@ interface PumpProps {
   /** Physical speed 0..1. */
   speed: number;
   status: NodeStatus;
+  /** Set when this pump's command is being overridden. */
+  attack?: NodeAttack;
 }
 
-export function Pump({ at, speed, status }: PumpProps) {
+export function Pump({ at, speed, status, attack }: PumpProps) {
   const dur = spinDuration(speed);
   const color = STATUS_COLOR[status];
   const isSpinning = dur !== null;
+  const forced = attack?.kind === "force";
 
   return (
     <g className="transition-all duration-300">
+      {forced && <ForcedRing x={at.x} y={at.y} r={33} />}
       {/* Outer Industrial Housing Ring */}
       <circle
         cx={at.x}
@@ -334,6 +422,7 @@ export function Pump({ at, speed, status }: PumpProps) {
         fill={color}
         className={status === "origin" ? "animate-pulse" : ""}
       />
+      {attack && <AttackChip attack={attack} x={at.x} y={at.y - 40} w={160} />}
     </g>
   );
 }
@@ -343,10 +432,13 @@ interface ValveProps {
   /** Physical opening 0..1. */
   open: number;
   status: NodeStatus;
+  /** Set when this valve's command is being overridden. */
+  attack?: NodeAttack;
 }
 
-export function Valve({ at, open, status }: ValveProps) {
+export function Valve({ at, open, status, attack }: ValveProps) {
   const { x, y } = at;
+  const forced = attack?.kind === "force";
   const color = STATUS_COLOR[status];
   const opening = clamp01(open);
   const strokeBarH = Math.round(opening * 12);
@@ -382,7 +474,7 @@ export function Valve({ at, open, status }: ValveProps) {
         points={`${x - 16},${y - 11} ${x + 16},${y + 11} ${x + 16},${y - 11} ${x - 16},${y + 11}`}
         fill="var(--accent)"
         fillOpacity={0.12 + 0.68 * opening}
-        style={{ transition: "fill-opacity 400ms ease" }}
+        style={{ transition: "fill-opacity var(--telemetry-ms, 400ms) ease" }}
       />
 
       {/* Rotating Butterfly Disc Indicator */}
@@ -395,7 +487,7 @@ export function Valve({ at, open, status }: ValveProps) {
         stroke={color}
         strokeWidth={1}
         transform={`rotate(${(1 - opening) * 65} ${x} ${y})`}
-        style={{ transition: "transform 400ms cubic-bezier(0.4, 0, 0.2, 1)" }}
+        style={{ transition: "transform var(--telemetry-ms, 400ms) cubic-bezier(0.4, 0, 0.2, 1)" }}
       />
       <circle cx={x} cy={y} r={3.5} fill="var(--surface)" stroke={color} strokeWidth={1.5} />
 
@@ -426,7 +518,7 @@ export function Valve({ at, open, status }: ValveProps) {
         height={strokeBarH}
         rx={0.5}
         fill={isOpen ? "var(--accent)" : "var(--muted)"}
-        style={{ transition: "height 400ms ease, y 400ms ease" }}
+        style={{ transition: "height var(--telemetry-ms, 400ms) ease, y var(--telemetry-ms, 400ms) ease" }}
       />
 
       {/* Actuator Motor Status LED */}
@@ -443,6 +535,8 @@ export function Valve({ at, open, status }: ValveProps) {
       <text x={x} y={y + 26} textAnchor="middle" fontSize={7.5} fill="var(--text)" className="font-mono font-bold">
         {(opening * 100).toFixed(0)}%
       </text>
+      {forced && <ForcedRing x={x} y={y} r={30} />}
+      {attack && <AttackChip attack={attack} x={x} y={y - 50} w={168} />}
     </g>
   );
 }
