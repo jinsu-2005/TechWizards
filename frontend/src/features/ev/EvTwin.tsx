@@ -75,6 +75,28 @@ export function EvTwin({ snapshot, frame }: { snapshot: Snapshot; frame: Frame }
               const active = frame.analysis.path.some((p) => p.source === e.source && p.target === e.target);
               return <path key={`${e.source}-${e.target}`} className={`evs-sch-edge${active ? " is-active" : ""}`} d={edgePath(a, b)} markerEnd={active ? "url(#ev-arrow)" : "url(#ev-arrow-dim)"} />;
             })}
+            {/* Particle flow: signals travel along every dependency; the inferred attack path runs red and fast. */}
+            <g className="evs-sch-flow" aria-hidden>
+              {snapshot.edges.map((e) => {
+                const a = positions[e.source];
+                const b = positions[e.target];
+                if (!a || !b) return null;
+                const active = frame.analysis.path.some((p) => p.source === e.source && p.target === e.target);
+                const d = edgePath(a, b);
+                const length = Math.hypot(b[0] - a[0], b[1] - a[1]) + 60;
+                const dur = Math.min(6, Math.max(1.4, length / 70)) / (active ? 2.5 : 1);
+                const count = active ? 4 : 2;
+                return <g key={`${e.source}-${e.target}-${active ? "a" : "n"}`} className={active ? "is-active" : undefined}>
+                  {Array.from({ length: count }, (_, i) => (
+                    <g key={i}>
+                      <circle className="evs-sch-glow" r={active ? 6 : 4.5} />
+                      <circle className="evs-sch-dot" r={active ? 2.6 : 2} />
+                      <animateMotion dur={`${dur.toFixed(2)}s`} begin={`${(-(dur * i) / count).toFixed(2)}s`} repeatCount="indefinite" path={d} calcMode="paced" />
+                    </g>
+                  ))}
+                </g>;
+              })}
+            </g>
             {snapshot.components.map((c) => {
               const pos = positions[c.id];
               if (!pos) return null;

@@ -494,3 +494,15 @@
   .evs-viewport { flex: none; height: clamp(460px, 68dvh, 700px); }
 }
 .ev-3d-viewport:not([data-ready])::after { content: "Preparing 3D twin…"; position: absolute; inset: 0; display: grid; place-items: center; font: 500 12px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #5f7486; animation: evs-blink 1.6s ease-in-out infinite; pointer-events: none; }
+/* Schematic particle flow */
+.evs-sch-flow { pointer-events: none; }
+.evs-sch-dot { fill: #7ff3ff; }
+.evs-sch-glow { fill: #38e1ff; opacity: .22; }
+.evs-sch-flow .is-active .evs-sch-dot { fill: #ffd2d6; }
+.evs-sch-flow .is-active .evs-sch-glow { fill: var(--origin); opacity: .45; }
+.evs-sch-edge:not(.is-active) { opacity: .5; }
+@media (prefers-reduced-motion: reduce) { .evs-sch-flow { display: none; } }
+/* In the 2D schematic the subtitle docks as a compact strip at the top, clear of the node rows */
+.evs-viewport:has(.evs-schematic) .evs-subtitle { top: 10px; bottom: auto; flex-direction: row; align-items: center; gap: 12px; padding: 7px 14px; width: min(760px, calc(100% - 32px)); }
+.evs-viewport:has(.evs-schematic) .evs-subtitle p { font-size: 13px; line-height: 1.35; }
+.evs-viewport:has(.evs-schematic) .evs-subtitle-who { flex: none; }
