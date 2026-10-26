@@ -3946,5 +3946,11 @@
     "seen": 1793019650.8083043,
     "ast_hash": "5592cc5e3f8dc02d5b36db9081fabd4e",
     "semantic_hash": ""
+  },
+  "backend/tests/test_sim_speed.py": {
+    "mtime": 1793019686.152281,
+    "seen": 1793019756.8792043,
+    "ast_hash": "577a7a81cfa833a5e19a6be8c9febbbc",
+    "semantic_hash": ""
   }
 }
