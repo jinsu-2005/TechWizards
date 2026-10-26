@@ -4,346 +4,127 @@ export type CameraPreset = "iso" | "front" | "side" | "rear" | "top" | "reset";
 
 export type SubsystemKind = "All" | "Energy" | "Powertrain" | "Thermal" | "Chassis" | "Network";
 
+export type SystemName = Exclude<SubsystemKind, "All">;
+
 export interface Component3DDef {
   id: string;
   name: string;
   kind: "Sensor" | "Actuator" | "Controller";
-  system: "Energy" | "Powertrain" | "Thermal" | "Chassis" | "Network";
+  system: SystemName;
   unit: string;
   tolerance: number;
-  position: [number, number, number]; // [x, y, z] in meters
-  explodedOffset: [number, number, number]; // translation vector in exploded view
+  position: [number, number, number]; // [x, y, z] metres; +z is the front of the vehicle
+  explodedOffset: [number, number, number]; // translation applied in the exploded view
   size: [number, number, number]; // bounding dimensions [width, height, depth]
   color: string;
   description: string;
 }
 
 export const SUBSYSTEM_COLORS: Record<string, string> = {
-  Energy: "#00e5ff", // electric cyan
-  Powertrain: "#ff9100", // electric amber / orange
-  Thermal: "#00b0ff", // coolant light blue
-  Chassis: "#76ff03", // dynamics lime green
-  Network: "#d500f9", // CAN magenta / purple
+  Energy: "#22d3ee",
+  Powertrain: "#ff9f1c",
+  Thermal: "#38a1ff",
+  Chassis: "#7CFF6B",
+  Network: "#c77dff",
 };
 
+/** Vehicle envelope shared by geometry, camera framing and floor decoration. */
+export const VEHICLE = {
+  length: 4.7,
+  width: 1.95,
+  wheelbaseHalf: 1.4,
+  wheelRadius: 0.36,
+  wheelX: 0.82,
+  floorY: 0.2,
+} as const;
+
 export type ComponentId =
-  | "PACK"
-  | "CELL"
-  | "BMS"
-  | "CURRENT"
-  | "SOC"
-  | "DCDC"
-  | "MOTOR"
-  | "INV"
-  | "VCU"
-  | "RPM"
-  | "PEDAL"
-  | "COOL"
-  | "FLOW"
-  | "CTEMP"
-  | "TEMP"
-  | "MTEMP"
-  | "WHEEL"
-  | "BRAKE"
-  | "PRESSURE"
-  | "EPS"
-  | "ANGLE"
+  | "PACK" | "CELL" | "BMS" | "CURRENT" | "SOC" | "DCDC"
+  | "MOTOR" | "INV" | "VCU" | "RPM" | "PEDAL"
+  | "COOL" | "FLOW" | "CTEMP" | "TEMP" | "MTEMP"
+  | "WHEEL" | "BRAKE" | "PRESSURE" | "EPS" | "ANGLE"
   | "CAN";
 
+// Exploded view: each subsystem separates into its own horizontal layer.
+const LAYER_Y: Record<SystemName, number> = {
+  Energy: -0.12,
+  Thermal: 0.55,
+  Powertrain: 1.0,
+  Chassis: 1.45,
+  Network: 1.9,
+};
+
+function def(
+  id: ComponentId,
+  name: string,
+  kind: Component3DDef["kind"],
+  system: SystemName,
+  unit: string,
+  tolerance: number,
+  position: [number, number, number],
+  size: [number, number, number],
+  description: string,
+): Component3DDef {
+  const [x, y, z] = position;
+  return {
+    id, name, kind, system, unit, tolerance, position, size, description,
+    color: SUBSYSTEM_COLORS[system] ?? "#22d3ee",
+    explodedOffset: [x * 0.85, LAYER_Y[system] - y + 0.3, z * 0.3],
+  };
+}
+
 export const COMPONENT_3D_DEFS: Record<ComponentId, Component3DDef> = {
-  // Energy subsystem (Chassis skateboard battery pack)
-  PACK: {
-    id: "PACK",
-    name: "High-Voltage Battery Pack",
-    kind: "Sensor",
-    system: "Energy",
-    unit: "V",
-    tolerance: 4.0,
-    position: [0, 0.22, -0.05],
-    explodedOffset: [0, -0.7, 0],
-    size: [1.25, 0.16, 2.1],
-    color: "#00e5ff",
-    description: "Main 400V structural traction battery pack with sealed aluminum enclosure and internal contactors.",
-  },
-  CELL: {
-    id: "CELL",
-    name: "Cell Voltage Monitor",
-    kind: "Sensor",
-    system: "Energy",
-    unit: "V",
-    tolerance: 0.06,
-    position: [0.28, 0.28, 0.25],
-    explodedOffset: [0.3, -0.7, 0.25],
-    size: [0.35, 0.1, 0.55],
-    color: "#00e5ff",
-    description: "Multi-channel cell supervisor tracking individual series module voltages and thermal balance.",
-  },
-  BMS: {
-    id: "BMS",
-    name: "Battery Management System",
-    kind: "Controller",
-    system: "Energy",
-    unit: "% limit",
-    tolerance: 5.0,
-    position: [-0.35, 0.33, 0.72],
-    explodedOffset: [-0.4, -0.5, 0.72],
-    size: [0.28, 0.12, 0.22],
-    color: "#00e5ff",
-    description: "Primary battery controller managing state estimation, thermal protection limits, and pre-charge relays.",
-  },
-  CURRENT: {
-    id: "CURRENT",
-    name: "Pack Current Sensor",
-    kind: "Sensor",
-    system: "Energy",
-    unit: "A",
-    tolerance: 3.0,
-    position: [0.32, 0.33, 0.75],
-    explodedOffset: [0.4, -0.5, 0.75],
-    size: [0.18, 0.1, 0.16],
-    color: "#00e5ff",
-    description: "Isolated Hall-effect current transducer measuring bidirectional traction and regenerative currents.",
-  },
-  SOC: {
-    id: "SOC",
-    name: "State of Charge Node",
-    kind: "Sensor",
-    system: "Energy",
-    unit: "%",
-    tolerance: 1.0,
-    position: [0, 0.82, 0.45],
-    explodedOffset: [0, 0.3, 0.45],
-    size: [0.3, 0.08, 0.08],
-    color: "#00e5ff",
-    description: "Extended Kalman Filter SoC state estimator broadcast to driver digital instrument cluster.",
-  },
-  DCDC: {
-    id: "DCDC",
-    name: "DC/DC Converter",
-    kind: "Actuator",
-    system: "Energy",
-    unit: "V",
-    tolerance: 0.3,
-    position: [-0.42, 0.42, 1.25],
-    explodedOffset: [-0.5, 0.1, 1.35],
-    size: [0.25, 0.14, 0.22],
-    color: "#00e5ff",
-    description: "High-efficiency buck converter stepping 400V down to 13.8V for auxiliary vehicle systems.",
-  },
+  // Energy: skateboard pack and its supervisors
+  PACK: def("PACK", "High-Voltage Battery Pack", "Sensor", "Energy", "V", 4.0, [0, 0.31, -0.05], [1.32, 0.14, 2.3],
+    "Main traction battery in a sealed aluminium skateboard enclosure with internal contactors."),
+  CELL: def("CELL", "Cell Voltage Monitor", "Sensor", "Energy", "V", 0.06, [0.4, 0.43, 0.5], [0.3, 0.08, 0.42],
+    "Multi-channel supervisor tracking per-module cell voltage and balance."),
+  BMS: def("BMS", "Battery Management System", "Controller", "Energy", "% limit", 5.0, [-0.4, 0.44, 0.8], [0.3, 0.1, 0.22],
+    "Battery controller managing state estimation, thermal limits and pre-charge relays."),
+  CURRENT: def("CURRENT", "Pack Current Sensor", "Sensor", "Energy", "A", 3.0, [0.4, 0.44, 0.95], [0.16, 0.09, 0.14],
+    "Isolated Hall-effect transducer measuring traction and regenerative current."),
+  SOC: def("SOC", "State of Charge Node", "Sensor", "Energy", "%", 1.0, [0, 0.84, 0.62], [0.36, 0.08, 0.06],
+    "Kalman-filter charge estimator feeding the driver instrument cluster."),
+  DCDC: def("DCDC", "DC/DC Converter", "Actuator", "Energy", "V", 0.3, [-0.46, 0.46, 1.68], [0.3, 0.14, 0.24],
+    "Buck converter stepping the traction bus down to 13.8 V for auxiliaries."),
 
-  // Powertrain subsystem
-  MOTOR: {
-    id: "MOTOR",
-    name: "Traction Motor",
-    kind: "Actuator",
-    system: "Powertrain",
-    unit: "Nm",
-    tolerance: 8.0,
-    position: [0, 0.32, -1.35],
-    explodedOffset: [0, 0, -0.85],
-    size: [0.42, 0.38, 0.45],
-    color: "#ff9100",
-    description: "High-torque permanent magnet synchronous rear traction drive unit.",
-  },
-  INV: {
-    id: "INV",
-    name: "Traction Inverter",
-    kind: "Actuator",
-    system: "Powertrain",
-    unit: "kW",
-    tolerance: 2.0,
-    position: [0, 0.58, -1.35],
-    explodedOffset: [0, 0.45, -0.85],
-    size: [0.38, 0.18, 0.34],
-    color: "#ff9100",
-    description: "Silicon-carbide (SiC) pulse-width modulated power inverter regulating 3-phase AC motor currents.",
-  },
-  VCU: {
-    id: "VCU",
-    name: "Vehicle Control Unit",
-    kind: "Controller",
-    system: "Powertrain",
-    unit: "Nm",
-    tolerance: 8.0,
-    position: [0.36, 0.65, 0.72],
-    explodedOffset: [0.55, 0.45, 0.72],
-    size: [0.24, 0.14, 0.2],
-    color: "#ff9100",
-    description: "Master supervisor translating driver pedal demand, cruise modes, and torque safety supervisory logic.",
-  },
-  RPM: {
-    id: "RPM",
-    name: "Motor Speed Sensor",
-    kind: "Sensor",
-    system: "Powertrain",
-    unit: "rpm",
-    tolerance: 120.0,
-    position: [0.26, 0.32, -1.35],
-    explodedOffset: [0.4, 0, -0.85],
-    size: [0.12, 0.12, 0.14],
-    color: "#ff9100",
-    description: "High-resolution electromagnetic motor shaft resolver providing instantaneous rotor velocity.",
-  },
-  PEDAL: {
-    id: "PEDAL",
-    name: "Accelerator Position Sensor",
-    kind: "Sensor",
-    system: "Powertrain",
-    unit: "%",
-    tolerance: 3.0,
-    position: [-0.35, 0.46, 0.76],
-    explodedOffset: [-0.45, 0.1, 0.76],
-    size: [0.12, 0.16, 0.14],
-    color: "#ff9100",
-    description: "Dual-redundant potentiometer accelerator pedal transducer detecting driver acceleration demand.",
-  },
+  // Powertrain: rear drive unit and supervisors
+  MOTOR: def("MOTOR", "Traction Motor", "Actuator", "Powertrain", "Nm", 8.0, [0, 0.37, -1.4], [0.62, 0.38, 0.4],
+    "Permanent-magnet synchronous rear traction drive unit."),
+  INV: def("INV", "Traction Inverter", "Actuator", "Powertrain", "kW", 2.0, [0, 0.64, -1.4], [0.44, 0.14, 0.34],
+    "Silicon-carbide inverter regulating three-phase motor current."),
+  VCU: def("VCU", "Vehicle Control Unit", "Controller", "Powertrain", "Nm", 8.0, [0.4, 0.56, 1.5], [0.26, 0.1, 0.2],
+    "Master supervisor translating pedal demand into safe torque requests."),
+  RPM: def("RPM", "Motor Speed Sensor", "Sensor", "Powertrain", "rpm", 120.0, [0.4, 0.37, -1.4], [0.1, 0.12, 0.12],
+    "Resolver on the rotor shaft measuring instantaneous speed."),
+  PEDAL: def("PEDAL", "Accelerator Position Sensor", "Sensor", "Powertrain", "%", 3.0, [-0.36, 0.46, 1.0], [0.1, 0.16, 0.12],
+    "Dual-redundant pedal transducer detecting driver demand."),
 
-  // Thermal subsystem
-  COOL: {
-    id: "COOL",
-    name: "Coolant Pump",
-    kind: "Actuator",
-    system: "Thermal",
-    unit: "%",
-    tolerance: 5.0,
-    position: [0.48, 0.3, 1.25],
-    explodedOffset: [0.75, 0, 1.35],
-    size: [0.24, 0.22, 0.24],
-    color: "#00b0ff",
-    description: "Brushless variable-speed centrifugal pump circulating coolant through battery chiller and motor loops.",
-  },
-  FLOW: {
-    id: "FLOW",
-    name: "Coolant Flow Sensor",
-    kind: "Sensor",
-    system: "Thermal",
-    unit: "L/min",
-    tolerance: 1.0,
-    position: [0.36, 0.3, 1.05],
-    explodedOffset: [0.65, 0, 1.05],
-    size: [0.14, 0.14, 0.16],
-    color: "#00b0ff",
-    description: "Turbine flowmeter measuring volumetric coolant circulation rate through high-voltage cooling loops.",
-  },
-  CTEMP: {
-    id: "CTEMP",
-    name: "Coolant Temperature Sensor",
-    kind: "Sensor",
-    system: "Thermal",
-    unit: "°C",
-    tolerance: 2.0,
-    position: [0.26, 0.3, 0.85],
-    explodedOffset: [0.55, 0, 0.85],
-    size: [0.12, 0.12, 0.14],
-    color: "#00b0ff",
-    description: "High-precision NTC thermistor measuring coolant loop return temperature from heat exchanger.",
-  },
-  TEMP: {
-    id: "TEMP",
-    name: "Pack Temperature Sensor",
-    kind: "Sensor",
-    system: "Thermal",
-    unit: "°C",
-    tolerance: 1.5,
-    position: [-0.22, 0.28, -0.25],
-    explodedOffset: [-0.35, -0.7, -0.25],
-    size: [0.16, 0.12, 0.18],
-    color: "#00b0ff",
-    description: "Distributed battery pack core temperature thermistor network monitoring thermal gradient.",
-  },
-  MTEMP: {
-    id: "MTEMP",
-    name: "Motor Temperature Sensor",
-    kind: "Sensor",
-    system: "Thermal",
-    unit: "°C",
-    tolerance: 2.0,
-    position: [-0.25, 0.32, -1.35],
-    explodedOffset: [-0.4, 0, -0.85],
-    size: [0.14, 0.12, 0.14],
-    color: "#00b0ff",
-    description: "Stator winding thermal sensor measuring drive unit temperature under sustained torque loads.",
-  },
+  // Thermal: coolant loop
+  COOL: def("COOL", "Coolant Pump", "Actuator", "Thermal", "%", 5.0, [0.5, 0.38, 1.5], [0.22, 0.2, 0.22],
+    "Variable-speed pump circulating coolant through the battery chiller and motor loops."),
+  FLOW: def("FLOW", "Coolant Flow Sensor", "Sensor", "Thermal", "L/min", 1.0, [0.36, 0.36, 1.12], [0.14, 0.12, 0.16],
+    "Turbine flow meter measuring coolant circulation."),
+  CTEMP: def("CTEMP", "Coolant Temperature Sensor", "Sensor", "Thermal", "°C", 2.0, [0.42, 0.36, 0.7], [0.1, 0.1, 0.12],
+    "NTC thermistor measuring coolant return temperature."),
+  TEMP: def("TEMP", "Pack Temperature Sensor", "Sensor", "Thermal", "°C", 1.5, [-0.34, 0.43, -0.4], [0.14, 0.08, 0.14],
+    "Distributed thermistor network monitoring pack thermal gradient."),
+  MTEMP: def("MTEMP", "Motor Temperature Sensor", "Sensor", "Thermal", "°C", 2.0, [-0.4, 0.37, -1.4], [0.1, 0.12, 0.12],
+    "Stator winding sensor measuring drive-unit temperature."),
 
-  // Chassis & Dynamics subsystem
-  WHEEL: {
-    id: "WHEEL",
-    name: "Wheel Speed Sensor",
-    kind: "Sensor",
-    system: "Chassis",
-    unit: "km/h",
-    tolerance: 3.0,
-    position: [0.82, 0.32, 1.35],
-    explodedOffset: [0.6, 0, 0.3],
-    size: [0.15, 0.15, 0.18],
-    color: "#76ff03",
-    description: "Magnetic wheel hub tone-ring sensor measuring front right wheel rotational speed.",
-  },
-  BRAKE: {
-    id: "BRAKE",
-    name: "Brake Control Unit",
-    kind: "Controller",
-    system: "Chassis",
-    unit: "bar",
-    tolerance: 3.0,
-    position: [-0.38, 0.65, 0.95],
-    explodedOffset: [-0.6, 0.45, 0.95],
-    size: [0.26, 0.22, 0.22],
-    color: "#76ff03",
-    description: "Electronic stability and regenerative brake blending actuator modulating hydraulic pressure.",
-  },
-  PRESSURE: {
-    id: "PRESSURE",
-    name: "Brake Pressure Sensor",
-    kind: "Sensor",
-    system: "Chassis",
-    unit: "bar",
-    tolerance: 3.0,
-    position: [-0.32, 0.54, 0.95],
-    explodedOffset: [-0.55, 0.35, 0.95],
-    size: [0.12, 0.14, 0.14],
-    color: "#76ff03",
-    description: "Piezoresistive pressure transducer on primary master hydraulic braking line.",
-  },
-  EPS: {
-    id: "EPS",
-    name: "Steering Assist Actuator",
-    kind: "Actuator",
-    system: "Chassis",
-    unit: "Nm",
-    tolerance: 1.0,
-    position: [0, 0.38, 1.15],
-    explodedOffset: [0, 0.2, 0.6],
-    size: [0.45, 0.16, 0.18],
-    color: "#76ff03",
-    description: "Rack-mounted electric power steering servo motor applying driver steering torque assist.",
-  },
-  ANGLE: {
-    id: "ANGLE",
-    name: "Steering Angle Sensor",
-    kind: "Sensor",
-    system: "Chassis",
-    unit: "°",
-    tolerance: 2.0,
-    position: [-0.35, 0.76, 0.52],
-    explodedOffset: [-0.45, 0.3, 0.52],
-    size: [0.14, 0.14, 0.12],
-    color: "#76ff03",
-    description: "Dual optical encoder on steering column measuring driver steering wheel orientation.",
-  },
+  // Chassis
+  WHEEL: def("WHEEL", "Wheel Speed Sensor", "Sensor", "Chassis", "km/h", 3.0, [0.7, 0.37, 1.4], [0.1, 0.14, 0.14],
+    "Magnetic tone-ring sensor on the front right hub."),
+  BRAKE: def("BRAKE", "Brake Control Unit", "Controller", "Chassis", "bar", 3.0, [-0.5, 0.52, 1.5], [0.28, 0.18, 0.2],
+    "Stability and regenerative brake-blending actuator modulating hydraulic pressure."),
+  PRESSURE: def("PRESSURE", "Brake Pressure Sensor", "Sensor", "Chassis", "bar", 3.0, [-0.28, 0.46, 1.28], [0.1, 0.12, 0.12],
+    "Piezoresistive transducer on the master brake line."),
+  EPS: def("EPS", "Steering Assist Actuator", "Actuator", "Chassis", "Nm", 1.0, [0, 0.36, 1.1], [0.95, 0.12, 0.12],
+    "Rack-mounted servo applying steering torque assist."),
+  ANGLE: def("ANGLE", "Steering Angle Sensor", "Sensor", "Chassis", "°", 2.0, [-0.36, 0.8, 0.52], [0.12, 0.12, 0.1],
+    "Optical encoder on the column measuring steering wheel angle."),
 
-  // Network & Communication
-  CAN: {
-    id: "CAN",
-    name: "CAN Gateway Controller",
-    kind: "Controller",
-    system: "Network",
-    unit: "ms",
-    tolerance: 10.0,
-    position: [0, 0.68, 0.58],
-    explodedOffset: [0, 0.5, 0.58],
-    size: [0.26, 0.14, 0.2],
-    color: "#d500f9",
-    description: "Central vehicle network gateway routing messages between Powertrain, Chassis, and Body CAN buses.",
-  },
+  // Network
+  CAN: def("CAN", "CAN Gateway Controller", "Controller", "Network", "ms", 10.0, [0, 0.6, 0.4], [0.28, 0.1, 0.2],
+    "Central gateway routing messages between powertrain, chassis and body buses."),
 };

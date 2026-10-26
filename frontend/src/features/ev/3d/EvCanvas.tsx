@@ -14,8 +14,8 @@ import {
   Zap,
 } from "lucide-react";
 import { Ev3dScene } from "./Ev3dScene";
-import { COMPONENT_3D_DEFS, SUBSYSTEM_COLORS, type CameraPreset, type EvViewMode, type SubsystemKind } from "./types";
-import type { Frame, Snapshot } from "../model";
+import { COMPONENT_3D_DEFS, SUBSYSTEM_COLORS, type CameraPreset, type ComponentId, type EvViewMode, type SubsystemKind } from "./types";
+import { formatReading, getReading, type Frame, type Snapshot } from "../model";
 import { useEv } from "../store";
 
 interface EvCanvasProps {
@@ -24,9 +24,28 @@ interface EvCanvasProps {
   className?: string;
 }
 
+const MODES: Array<{ id: EvViewMode; label: string; title: string; icon: typeof Eye }> = [
+  { id: "exterior", label: "Exterior", title: "Solid exterior, internals hidden", icon: Eye },
+  { id: "xray", label: "X-Ray", title: "Holographic shell with live internals", icon: Sparkles },
+  { id: "exploded", label: "Exploded", title: "Subsystems separated into layers", icon: Boxes },
+  { id: "system", label: "Subsystems", title: "Shell removed, focus on engineering layers", icon: Layers },
+  { id: "investigation", label: "Attack View", title: "Dim everything except affected signals and the origin", icon: ShieldAlert },
+];
+
+const CAMERAS: Array<{ id: CameraPreset; label: string; title: string }> = [
+  { id: "iso", label: "Iso", title: "Isometric perspective" },
+  { id: "front", label: "Front", title: "Front viewpoint" },
+  { id: "side", label: "Side", title: "Side profile" },
+  { id: "rear", label: "Rear", title: "Rear powertrain viewpoint" },
+  { id: "top", label: "Top", title: "Top-down skateboard view" },
+];
+
+const SYSTEMS: SubsystemKind[] = ["All", "Energy", "Powertrain", "Thermal", "Chassis", "Network"];
+
 export function EvCanvas({ snapshot, frame, className = "" }: EvCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<Ev3dScene | null>(null);
+  const prevSelected = useRef<string | null>(useEv.getState().selected);
 
   const selected = useEv((s) => s.selected);
   const select = useEv((s) => s.select);
@@ -35,76 +54,68 @@ export function EvCanvas({ snapshot, frame, className = "" }: EvCanvasProps) {
   const [subsystem, setSubsystem] = useState<SubsystemKind>("All");
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Initialize Three.js scene
   useEffect(() => {
     if (!containerRef.current) return;
-
     const scene = new Ev3dScene({
       container: containerRef.current,
-      onSelectComponent: (id) => {
-        select(id);
-      },
+      onSelectComponent: (id) => select(id),
     });
     sceneRef.current = scene;
-
+    if (prevSelected.current) scene.selectComponent(prevSelected.current, false);
     return () => {
       scene.dispose();
       sceneRef.current = null;
     };
   }, [select]);
 
-  // Sync viewMode changes
   useEffect(() => {
     sceneRef.current?.setViewMode(viewMode);
   }, [viewMode]);
 
-  // Sync subsystem filter
   useEffect(() => {
     sceneRef.current?.setSubsystem(subsystem);
   }, [subsystem]);
 
-  // Sync selected component
+  // Selection from anywhere (3D click, quick bar, ranked list) drives the camera.
+  // The persisted selection on first mount is highlighted without moving the camera.
   useEffect(() => {
-    if (selected) {
-      sceneRef.current?.selectComponent(selected);
-    }
+    if (!selected || prevSelected.current === selected) return;
+    prevSelected.current = selected;
+    sceneRef.current?.selectComponent(selected, true);
+    setViewMode((m) => (m === "exterior" ? "xray" : m));
   }, [selected]);
 
-  // Sync simulation telemetry, affected list, and propagation paths
   useEffect(() => {
-    if (!sceneRef.current) return;
+    const onChange = () => setIsFullscreen(document.fullscreenElement === containerRef.current);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
 
-    const paths = (frame.analysis.path || []).map((p) => ({
-      source: p.source,
-      target: p.target,
-      onset_s: p.onset_s,
-    }));
-
-    sceneRef.current.updateTelemetry({
+  useEffect(() => {
+    sceneRef.current?.updateTelemetry({
       speed: snapshot.actual_speed,
       affected: frame.analysis.affected,
       candidates: frame.analysis.candidates,
-      paths,
+      paths: (frame.analysis.path || []).map((p) => ({ source: p.source, target: p.target, onset_s: p.onset_s })),
       isAttackActive: snapshot.attack_active,
     });
   }, [frame, snapshot.attack_active, snapshot.actual_speed]);
 
-  const handleCameraPreset = (preset: CameraPreset) => {
-    sceneRef.current?.setCameraPreset(preset);
-  };
-
   const toggleFullscreen = () => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      void containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
-    } else {
-      void document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
-    }
+    const el = containerRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) void el.requestFullscreen().catch(() => {});
+    else void document.exitFullscreen().catch(() => {});
   };
 
-  const selectedDef = selected ? COMPONENT_3D_DEFS[selected as keyof typeof COMPONENT_3D_DEFS] : null;
+  const def = selected ? COMPONENT_3D_DEFS[selected as ComponentId] : undefined;
+  const backendComponent = snapshot.components.find((c) => c.id === selected);
+  const reading = selected ? getReading(frame, selected) : undefined;
   const leaderId = frame.analysis.candidates[0]?.id;
   const isAttack = snapshot.attack_active;
+  const anomalous = frame.analysis.affected.length;
+  const selectedAnomalous = !!selected && frame.analysis.affected.includes(selected);
+  const demandChanged = Math.abs(snapshot.speed - snapshot.actual_speed) > 0.5;
 
   return (
     <div
@@ -114,155 +125,106 @@ export function EvCanvas({ snapshot, frame, className = "" }: EvCanvasProps) {
       aria-label="Scrollable interactive EV diagram"
       tabIndex={0}
     >
-      {/* Top Floating HUD: View Modes & Camera Controls */}
       <div className="ev-3d-hud-top">
-        <div className="ev-3d-toolbar-row">
-          {/* Mode Selector */}
-          <div className="ev-3d-modes" role="group" aria-label="3D Visualization Modes">
+        <div className="ev-3d-modes" role="group" aria-label="3D Visualization Modes">
+          {MODES.map(({ id, label, title, icon: Icon }) => (
             <button
+              key={id}
               type="button"
-              className={viewMode === "exterior" ? "is-active" : ""}
-              onClick={() => setViewMode("exterior")}
-              title="Full exterior vehicle view"
+              className={`${viewMode === id ? "is-active" : ""} ${id === "investigation" ? "ev-mode-attack" : ""}`}
+              onClick={() => setViewMode(id)}
+              title={title}
+              aria-pressed={viewMode === id}
             >
-              <Eye size={14} aria-hidden />
-              <span>Exterior</span>
+              <Icon size={14} aria-hidden />
+              <span>{label}</span>
             </button>
-            <button
-              type="button"
-              className={viewMode === "xray" ? "is-active" : ""}
-              onClick={() => setViewMode("xray")}
-              title="Semi-transparent holographic X-Ray view"
-            >
-              <Sparkles size={14} aria-hidden />
-              <span>X-Ray</span>
-            </button>
-            <button
-              type="button"
-              className={viewMode === "exploded" ? "is-active" : ""}
-              onClick={() => setViewMode("exploded")}
-              title="Exploded subsystem isolation view"
-            >
-              <Boxes size={14} aria-hidden />
-              <span>Exploded</span>
-            </button>
-            <button
-              type="button"
-              className={viewMode === "system" ? "is-active" : ""}
-              onClick={() => setViewMode("system")}
-              title="Focus on vehicle engineering subsystems"
-            >
-              <Layers size={14} aria-hidden />
-              <span>Subsystems</span>
-            </button>
-            <button
-              type="button"
-              className={`ev-mode-attack ${viewMode === "investigation" ? "is-active" : ""}`}
-              onClick={() => setViewMode("investigation")}
-              title="Cyber-attack localization and propagation view"
-            >
-              <ShieldAlert size={14} aria-hidden />
-              <span>Attack View</span>
-            </button>
-          </div>
-
-          {/* Camera Presets */}
-          <div className="ev-3d-cameras" role="group" aria-label="Camera Presets">
-            <span className="ev-hud-label">
-              <Camera size={13} aria-hidden /> Camera
-            </span>
-            <button type="button" onClick={() => handleCameraPreset("iso")} title="Isometric perspective">
-              Iso
-            </button>
-            <button type="button" onClick={() => handleCameraPreset("front")} title="Front viewpoint">
-              Front
-            </button>
-            <button type="button" onClick={() => handleCameraPreset("side")} title="Side profile viewpoint">
-              Side
-            </button>
-            <button type="button" onClick={() => handleCameraPreset("rear")} title="Rear powertrain viewpoint">
-              Rear
-            </button>
-            <button type="button" onClick={() => handleCameraPreset("top")} title="Top-down skateboard viewpoint">
-              Top
-            </button>
-            <button
-              type="button"
-              className="ev-cam-reset"
-              onClick={() => handleCameraPreset("reset")}
-              title="Reset camera orientation"
-            >
-              <RotateCcw size={12} aria-hidden />
-            </button>
-            <button
-              type="button"
-              className="ev-fullscreen-toggle"
-              onClick={toggleFullscreen}
-              title={isFullscreen ? "Exit fullscreen" : "Fullscreen 3D twin"}
-            >
-              {isFullscreen ? <Minimize2 size={13} aria-hidden /> : <Maximize2 size={13} aria-hidden />}
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* Subsystem Layer Bar (Visible in Subsystems mode or general inspection) */}
-        <div className="ev-3d-subsystems" role="group" aria-label="Subsystem Filters">
-          {(["All", "Energy", "Powertrain", "Thermal", "Chassis", "Network"] as SubsystemKind[]).map((sys) => (
+        <div className="ev-3d-cameras" role="group" aria-label="Camera Presets">
+          <span className="ev-hud-label">
+            <Camera size={13} aria-hidden /> Camera
+          </span>
+          {CAMERAS.map(({ id, label, title }) => (
+            <button key={id} type="button" onClick={() => sceneRef.current?.setCameraPreset(id)} title={title}>
+              {label}
+            </button>
+          ))}
+          <button type="button" className="ev-cam-reset" onClick={() => sceneRef.current?.setCameraPreset("reset")} title="Reset camera orientation" aria-label="Reset camera orientation">
+            <RotateCcw size={12} aria-hidden />
+          </button>
+          <button
+            type="button"
+            className="ev-fullscreen-toggle"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Exit fullscreen" : "Fullscreen 3D twin"}
+            aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen 3D twin"}
+          >
+            {isFullscreen ? <Minimize2 size={13} aria-hidden /> : <Maximize2 size={13} aria-hidden />}
+          </button>
+        </div>
+      </div>
+
+      <div className="ev-3d-subsystems" role="group" aria-label="Subsystem Filters">
+        {SYSTEMS.map((sys) => {
+          const color = sys === "All" ? "var(--ev-accent)" : SUBSYSTEM_COLORS[sys];
+          return (
             <button
               key={sys}
               type="button"
               className={`ev-subsys-pill ${subsystem === sys ? "is-active" : ""}`}
-              style={{
-                borderColor: sys !== "All" ? SUBSYSTEM_COLORS[sys] : undefined,
-                color: subsystem === sys && sys !== "All" ? SUBSYSTEM_COLORS[sys] : undefined,
-              }}
+              style={{ ["--pill" as string]: color }}
               onClick={() => setSubsystem(sys)}
+              aria-pressed={subsystem === sys}
             >
-              <span
-                className="ev-subsys-dot"
-                style={{ backgroundColor: sys !== "All" ? SUBSYSTEM_COLORS[sys] : "var(--ev-accent)" }}
-              />
+              <span className="ev-subsys-dot" />
               {sys}
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      {/* Bottom Floating Telemetry Strip & Status */}
       <div className="ev-3d-hud-bottom">
-        {/* Speed & Drive Status */}
-        <div className="ev-3d-status-pill">
-          <Zap size={14} className="ev-pulse-icon" aria-hidden />
-          <span>
-            <strong>{snapshot.actual_speed.toFixed(0)}</strong> km/h
-          </span>
-          <span className="ev-status-sep">·</span>
-          <span>{snapshot.speed !== snapshot.actual_speed ? `Target ${snapshot.speed.toFixed(0)}` : "Cruising"}</span>
-          <span className="ev-status-sep">·</span>
-          <span className={isAttack ? "ev-attack-badge" : "ev-nominal-badge"}>
-            {isAttack ? "CYBER ATTACK ACTIVE" : "NOMINAL TELEMETRY"}
-          </span>
+        <div className={`ev-3d-telemetry ${isAttack ? "is-attack" : ""}`}>
+          <div className="ev-3d-speed">
+            <Zap size={14} aria-hidden />
+            <strong>{Math.round(snapshot.actual_speed)}</strong>
+            <small>km/h</small>
+          </div>
+          <div className="ev-3d-telemetry-meta">
+            <span>{demandChanged ? `Target ${snapshot.speed.toFixed(0)} km/h` : "Cruising"}</span>
+            <span className={isAttack ? "ev-attack-badge" : "ev-nominal-badge"}>
+              {isAttack ? "CYBER ATTACK ACTIVE" : anomalous ? `${anomalous} ANOMALOUS` : "NOMINAL TELEMETRY"}
+            </span>
+          </div>
         </div>
 
-        {/* Selected Component Floating Card */}
-        {selectedDef && (
-          <div className="ev-3d-inspect-card">
-            <Cpu size={16} aria-hidden />
-            <div>
-              <strong>{selectedDef.name}</strong>
-              <small>
-                {selectedDef.id} · {selectedDef.system} · {selectedDef.kind}
-              </small>
-            </div>
-            {leaderId === selectedDef.id && <span className="ev-origin-badge">#1 Attack Origin</span>}
-          </div>
-        )}
-
-        {/* Interactive Gesture Guide */}
         <div className="ev-3d-hint">
           <Compass size={13} aria-hidden />
-          <span>Click component to inspect · Drag to orbit · Scroll to zoom</span>
+          <span>Click a part · Drag to orbit · Scroll to zoom</span>
         </div>
+
+        {def && (
+          <div className={`ev-3d-inspect-card ${selectedAnomalous ? "is-anomalous" : ""}`} style={{ ["--sys" as string]: def.color }}>
+            <Cpu size={16} aria-hidden />
+            <div className="ev-3d-inspect-body">
+              <strong>{backendComponent?.name ?? def.name}</strong>
+              <small>
+                {def.id} · {def.system} · {def.kind}
+              </small>
+              {reading && (
+                <span className="ev-3d-reading">
+                  {formatReading(reading)}
+                  <em>
+                    ref {reading.expected.toFixed(1)} · residual {reading.residual.toFixed(2)}
+                  </em>
+                </span>
+              )}
+            </div>
+            {leaderId === def.id && <span className="ev-origin-badge">#1 Origin</span>}
+          </div>
+        )}
       </div>
     </div>
   );

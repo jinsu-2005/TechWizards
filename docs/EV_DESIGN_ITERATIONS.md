@@ -56,3 +56,9 @@ This document records the continuous, iterative **Generate → Review → Improv
 - Full Vitest suite passing (237 of 237 tests).
 - Backend pytest passing (13 of 13 tests).
 - Production build verified with zero TypeScript errors and zero impact on the Water Plant bundle chunk.
+
+## Iteration 3 - 3D twin redesign
+**Critique:** car rendered as a black blob (metallic paint, no environment map), box-built body, oversized toy-cube components, camera zoomed inside the car on load, cluttered HUD.
+**Redesign:** lofted superellipse body with wheel arches, lathe wheels, IBL (RoomEnvironment), bloom, fresnel ghost shell for X-Ray/Exploded, bespoke per-component models, CSS2D labels, leader lines, compact HUD with live telemetry and selected-component card.
+**Verification:** tsc, eslint, 237 vitest, build, Playwright 4/4 all pass.
+

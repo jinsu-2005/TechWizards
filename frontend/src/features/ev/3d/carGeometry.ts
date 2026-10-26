@@ -1,265 +1,312 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed math on fixed-size tables */
 import * as THREE from "three";
 import type { EvMaterialBank } from "./materials";
+import { VEHICLE } from "./types";
 
 export interface CarBodyMeshes {
   root: THREE.Group;
   exteriorGroup: THREE.Group;
+  lightsGroup: THREE.Group;
   chassisGroup: THREE.Group;
-  wheels: {
-    fl: THREE.Group;
-    fr: THREE.Group;
-    rl: THREE.Group;
-    rr: THREE.Group;
-  };
+  /** Spinning parts of each wheel (tyre, rim, rotor). Rotate on X. */
+  wheelSpin: THREE.Group[];
   paintMeshes: THREE.Mesh[];
   glassMeshes: THREE.Mesh[];
+}
+
+/** One lofted cross-section: z, bottom y, top y, half width. Sorted rear to front. */
+type Station = readonly [number, number, number, number];
+
+const LOWER_BODY: readonly Station[] = [
+  [-2.37, 0.44, 0.58, 0.2],
+  [-2.3, 0.34, 0.78, 0.6],
+  [-2.1, 0.26, 0.9, 0.82],
+  [-1.7, 0.22, 0.93, 0.93],
+  [-1.0, 0.2, 0.91, 0.96],
+  [0.0, 0.2, 0.88, 0.97],
+  [0.9, 0.2, 0.86, 0.97],
+  [1.4, 0.2, 0.82, 0.96],
+  [1.9, 0.22, 0.7, 0.9],
+  [2.15, 0.27, 0.6, 0.78],
+  [2.32, 0.34, 0.51, 0.55],
+  [2.37, 0.4, 0.46, 0.2],
+];
+
+const GREENHOUSE: readonly Station[] = [
+  [-1.95, 0.91, 0.95, 0.18],
+  [-1.85, 0.91, 0.99, 0.42],
+  [-1.55, 0.9, 1.12, 0.6],
+  [-1.1, 0.89, 1.28, 0.68],
+  [-0.5, 0.88, 1.39, 0.72],
+  [0.1, 0.87, 1.41, 0.74],
+  [0.55, 0.86, 1.32, 0.76],
+  [0.95, 0.85, 1.1, 0.8],
+  [1.18, 0.84, 0.93, 0.84],
+  [1.3, 0.83, 0.86, 0.3],
+];
+
+/** Smooth interpolation (cardinal spline) of one column of the station table. */
+function sampleStations(stations: readonly Station[], z: number, col: 1 | 2 | 3): number {
+  const n = stations.length;
+  let i = 0;
+  while (i < n - 2 && stations[i + 1]![0] < z) i++;
+  const p1 = stations[i]!;
+  const p2 = stations[i + 1]!;
+  const p0 = stations[Math.max(0, i - 1)]!;
+  const p3 = stations[Math.min(n - 1, i + 2)]!;
+  const span = p2[0] - p1[0] || 1;
+  const t = THREE.MathUtils.clamp((z - p1[0]) / span, 0, 1);
+  const m1 = ((p2[col] - p0[col]) / (p2[0] - p0[0] || 1)) * span * 0.5;
+  const m2 = ((p3[col] - p1[col]) / (p3[0] - p1[0] || 1)) * span * 0.5;
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return (2 * t3 - 3 * t2 + 1) * p1[col] + (t3 - 2 * t2 + t) * m1 + (-2 * t3 + 3 * t2) * p2[col] + (t3 - t2) * m2;
+}
+
+const sgnPow = (v: number, e: number) => Math.sign(v) * Math.pow(Math.abs(v), e);
+
+interface LoftOptions {
+  stations: readonly Station[];
+  rings: number;
+  ringPoints: number;
+  exponent: number;
+  /** Stations are resampled finely; extra density near the wheel arches helps the cut-out stay crisp. */
+  arches?: boolean;
+}
+
+function loftBody({ stations, rings, ringPoints, exponent, arches }: LoftOptions): THREE.BufferGeometry {
+  const zMin = stations[0]![0];
+  const zMax = stations[stations.length - 1]![0];
+  const positions: number[] = [];
+  const indices: number[] = [];
+  const e = 2 / exponent;
+  const R = 0.42;
+  const yc = VEHICLE.wheelRadius;
+
+  for (let r = 0; r < rings; r++) {
+    const z = zMin + ((zMax - zMin) * r) / (rings - 1);
+    const yb = sampleStations(stations, z, 1);
+    const yt = sampleStations(stations, z, 2);
+    const hw = Math.max(0.02, sampleStations(stations, z, 3));
+    const cy = (yb + yt) / 2;
+    const ry = Math.max(0.01, (yt - yb) / 2);
+    for (let k = 0; k < ringPoints; k++) {
+      const a = (k / ringPoints) * Math.PI * 2;
+      const x = hw * sgnPow(Math.cos(a), e);
+      let y = cy + ry * sgnPow(Math.sin(a), e);
+      if (arches) {
+        const ax = Math.abs(x);
+        const w = THREE.MathUtils.smoothstep(ax, 0.3, 0.62);
+        if (w > 0) {
+          for (const zc of [-VEHICLE.wheelbaseHalf, VEHICLE.wheelbaseHalf]) {
+            const dz = Math.abs(z - zc);
+            if (dz < R) {
+              const archY = yc + Math.sqrt(R * R - dz * dz);
+              if (y < archY) y += w * (archY - y);
+            }
+          }
+        }
+      }
+      positions.push(x, y, z);
+    }
+  }
+
+  for (let r = 0; r < rings - 1; r++) {
+    for (let k = 0; k < ringPoints; k++) {
+      const k2 = (k + 1) % ringPoints;
+      const A = r * ringPoints + k;
+      const B = r * ringPoints + k2;
+      const C = (r + 1) * ringPoints + k;
+      const D = (r + 1) * ringPoints + k2;
+      indices.push(A, B, C, B, D, C);
+    }
+  }
+
+  // End caps
+  for (const [ringIdx, flip] of [[0, true], [rings - 1, false]] as const) {
+    let cx = 0, cy = 0, cz = 0;
+    for (let k = 0; k < ringPoints; k++) {
+      const i = (ringIdx * ringPoints + k) * 3;
+      cx += positions[i]!; cy += positions[i + 1]!; cz += positions[i + 2]!;
+    }
+    const ci = positions.length / 3;
+    positions.push(cx / ringPoints, cy / ringPoints, cz / ringPoints);
+    for (let k = 0; k < ringPoints; k++) {
+      const a = ringIdx * ringPoints + k;
+      const b = ringIdx * ringPoints + ((k + 1) % ringPoints);
+      if (flip) indices.push(ci, b, a);
+      else indices.push(ci, a, b);
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+/** Trace a light strip that hugs the body by casting rays at the shell. */
+function traceStrip(
+  body: THREE.Mesh,
+  from: "front" | "rear",
+  y: number,
+  xs: number[],
+  radius: number,
+  material: THREE.Material,
+): THREE.Mesh | null {
+  const caster = new THREE.Raycaster();
+  const dir = new THREE.Vector3(0, 0, from === "front" ? -1 : 1);
+  const pts: THREE.Vector3[] = [];
+  for (const x of xs) {
+    caster.set(new THREE.Vector3(x, y, from === "front" ? 4 : -4), dir);
+    const hit = caster.intersectObject(body, false)[0];
+    if (!hit || !hit.face) continue;
+    const n = hit.face.normal.clone().normalize();
+    pts.push(hit.point.clone().addScaledVector(n, radius * 0.4));
+  }
+  if (pts.length < 3) return null;
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, radius, 8, false), material);
+  return mesh;
+}
+
+function lathe(points: Array<[number, number]>, segments = 40): THREE.LatheGeometry {
+  return new THREE.LatheGeometry(points.map(([r, y]) => new THREE.Vector2(r, y)), segments);
 }
 
 export function buildCarGeometry(m: EvMaterialBank): CarBodyMeshes {
   const root = new THREE.Group();
   root.name = "EV_Car_Root";
-
   const exteriorGroup = new THREE.Group();
   exteriorGroup.name = "EV_Exterior";
-  root.add(exteriorGroup);
-
+  const lightsGroup = new THREE.Group();
+  lightsGroup.name = "EV_Lights";
   const chassisGroup = new THREE.Group();
   chassisGroup.name = "EV_Chassis";
-  root.add(chassisGroup);
+  root.add(exteriorGroup, lightsGroup, chassisGroup);
 
   const paintMeshes: THREE.Mesh[] = [];
   const glassMeshes: THREE.Mesh[] = [];
 
-  // Helper to add paint mesh
-  const addPaint = (geo: THREE.BufferGeometry, pos: [number, number, number] = [0, 0, 0], rot: [number, number, number] = [0, 0, 0]) => {
-    const mesh = new THREE.Mesh(geo, m.carBodyPaint);
-    mesh.position.set(...pos);
-    mesh.rotation.set(...rot);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    exteriorGroup.add(mesh);
-    paintMeshes.push(mesh);
-    return mesh;
-  };
+  // 1. Lofted lower body with wheel arches
+  const bodyGeo = loftBody({ stations: LOWER_BODY, rings: 150, ringPoints: 56, exponent: 3.1, arches: true });
+  const body = new THREE.Mesh(bodyGeo, m.paint);
+  exteriorGroup.add(body);
+  paintMeshes.push(body);
 
-  // Helper to add glass mesh
-  const addGlass = (geo: THREE.BufferGeometry, pos: [number, number, number] = [0, 0, 0], rot: [number, number, number] = [0, 0, 0]) => {
-    const mesh = new THREE.Mesh(geo, m.carBodyGlass);
-    mesh.position.set(...pos);
-    mesh.rotation.set(...rot);
-    exteriorGroup.add(mesh);
-    glassMeshes.push(mesh);
-    return mesh;
-  };
+  // 2. Glass greenhouse
+  const glassGeo = loftBody({ stations: GREENHOUSE, rings: 90, ringPoints: 48, exponent: 2.35 });
+  const greenhouse = new THREE.Mesh(glassGeo, m.glass);
+  exteriorGroup.add(greenhouse);
+  glassMeshes.push(greenhouse);
 
-  // 1. Lower Body / Skateboard Floor
-  const lowerBodyGeo = new THREE.BoxGeometry(1.68, 0.28, 4.1);
-  addPaint(lowerBodyGeo, [0, 0.28, 0]);
+  body.updateMatrixWorld(true);
 
-  // 2. Front Hood / Frunk Slope
-  const hoodShape = new THREE.Shape();
-  hoodShape.moveTo(-0.78, 0);
-  hoodShape.lineTo(0.78, 0);
-  hoodShape.lineTo(0.72, 1.35);
-  hoodShape.lineTo(-0.72, 1.35);
-  hoodShape.closePath();
+  // 3. Light strips traced onto the shell
+  const frontXs = Array.from({ length: 21 }, (_, i) => -0.72 + (i / 20) * 1.44);
+  const front = traceStrip(body, "front", 0.55, frontXs, 0.016, m.headlight);
+  if (front) lightsGroup.add(front);
+  const rearXs = Array.from({ length: 21 }, (_, i) => -0.7 + (i / 20) * 1.4);
+  const rear = traceStrip(body, "rear", 0.72, rearXs, 0.018, m.taillight);
+  if (rear) lightsGroup.add(rear);
 
-  const hoodExtrudeSettings = { depth: 0.12, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.04, bevelThickness: 0.04 };
-  const hoodGeo = new THREE.ExtrudeGeometry(hoodShape, hoodExtrudeSettings);
-  hoodGeo.rotateX(Math.PI / 2);
-  hoodGeo.rotateX(-0.1); // slight forward aerodynamic rake
-  addPaint(hoodGeo, [0, 0.44, 0.75]);
+  // 4. Mirrors
+  for (const side of [-1, 1]) {
+    const pod = new THREE.Mesh(new THREE.SphereGeometry(0.1, 20, 14), m.paint);
+    pod.scale.set(1.35, 0.8, 1.0);
+    pod.position.set(side * 1.0, 0.98, 0.86);
+    exteriorGroup.add(pod);
+    paintMeshes.push(pod);
+    const stalk = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.03, 0.04), m.trim);
+    stalk.position.set(side * 0.9, 0.95, 0.86);
+    exteriorGroup.add(stalk);
+  }
 
-  // 3. Front Nose Cone & Aerodynamic Bumper
-  const frontBumperGeo = new THREE.CylinderGeometry(0.82, 0.86, 0.32, 16, 1, false, -Math.PI / 2, Math.PI);
-  frontBumperGeo.rotateZ(Math.PI / 2);
-  frontBumperGeo.scale(1.0, 0.55, 1.0);
-  addPaint(frontBumperGeo, [0, 0.32, 2.05]);
+  // 5. Under-tray and splitters (dark trim)
+  const tray = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.03, 3.0), m.trim);
+  tray.position.set(0, 0.185, 0);
+  // tray removed: it protruded past the rounded nose and tail
+  const splitter = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.02, 0.14), m.trim);
+  splitter.position.set(0, 0.28, 2.26);
+  void splitter;
 
-  // 4. Rear Bumper & Diffuser
-  const rearBumperGeo = new THREE.BoxGeometry(1.68, 0.34, 0.42);
-  addPaint(rearBumperGeo, [0, 0.36, -2.05]);
+  // 6. Wheels
+  const tireProfile: Array<[number, number]> = [
+    [0.235, -0.12], [0.3, -0.125], [0.345, -0.1], [0.36, -0.06], [0.362, 0],
+    [0.36, 0.06], [0.345, 0.1], [0.3, 0.125], [0.235, 0.12],
+  ];
+  const wheelSpin: THREE.Group[] = [];
 
-  const rearDiffuserGeo = new THREE.BoxGeometry(1.5, 0.12, 0.38);
-  const diffuserMesh = new THREE.Mesh(rearDiffuserGeo, m.carBodyTrim);
-  diffuserMesh.position.set(0, 0.18, -2.08);
-  exteriorGroup.add(diffuserMesh);
+  const makeWheel = (zSign: number, xSign: number) => {
+    const wheel = new THREE.Group();
+    wheel.position.set(xSign * VEHICLE.wheelX, VEHICLE.wheelRadius, zSign * VEHICLE.wheelbaseHalf);
 
-  // 5. Glass Cabin Greenhouse
-  // Windshield
-  const windshieldGeo = new THREE.PlaneGeometry(1.42, 0.95);
-  windshieldGeo.rotateX(-Math.PI / 3.4);
-  addGlass(windshieldGeo, [0, 0.76, 0.82]);
-
-  // Panoramic Glass Roof
-  const roofGeo = new THREE.BoxGeometry(1.3, 0.04, 1.45);
-  addGlass(roofGeo, [0, 1.08, -0.05]);
-
-  // Rear Windshield / Fastback slope
-  const rearGlassGeo = new THREE.PlaneGeometry(1.36, 1.05);
-  rearGlassGeo.rotateX(Math.PI / 3.2);
-  addGlass(rearGlassGeo, [0, 0.82, -0.98]);
-
-  // Side Windows (Left & Right)
-  const sideWindowShape = new THREE.Shape();
-  sideWindowShape.moveTo(-1.0, 0);
-  sideWindowShape.lineTo(0.7, 0);
-  sideWindowShape.lineTo(0.3, 0.38);
-  sideWindowShape.lineTo(-0.6, 0.38);
-  sideWindowShape.closePath();
-  const sideWindowGeo = new THREE.ShapeGeometry(sideWindowShape);
-
-  // Left side windows
-  const leftWindow = new THREE.Mesh(sideWindowGeo, m.carBodyGlass);
-  leftWindow.position.set(-0.78, 0.65, 0);
-  leftWindow.rotation.y = -Math.PI / 2;
-  exteriorGroup.add(leftWindow);
-  glassMeshes.push(leftWindow);
-
-  // Right side windows
-  const rightWindow = new THREE.Mesh(sideWindowGeo, m.carBodyGlass);
-  rightWindow.position.set(0.78, 0.65, 0);
-  rightWindow.rotation.y = Math.PI / 2;
-  exteriorGroup.add(rightWindow);
-  glassMeshes.push(rightWindow);
-
-  // 6. Roof Pillars (A, B, C pillars)
-  const pillarGeo = new THREE.BoxGeometry(0.08, 0.55, 0.08);
-  // A pillars
-  addPaint(pillarGeo, [-0.7, 0.8, 0.75], [0.4, 0, -0.2]);
-  addPaint(pillarGeo, [0.7, 0.8, 0.75], [0.4, 0, 0.2]);
-  // B pillars
-  addPaint(pillarGeo, [-0.74, 0.82, 0], [0, 0, 0]);
-  addPaint(pillarGeo, [0.74, 0.82, 0], [0, 0, 0]);
-  // C pillars
-  addPaint(pillarGeo, [-0.68, 0.78, -0.95], [-0.4, 0, -0.2]);
-  addPaint(pillarGeo, [0.68, 0.78, -0.95], [-0.4, 0, 0.2]);
-
-  // 7. Headlight & Taillight Bars
-  // Full-width front lightbar
-  const frontLightbarGeo = new THREE.BoxGeometry(1.48, 0.04, 0.06);
-  const frontLightbar = new THREE.Mesh(frontLightbarGeo, m.carHeadlight);
-  frontLightbar.position.set(0, 0.46, 2.12);
-  exteriorGroup.add(frontLightbar);
-
-  // Left & Right Headlamp Clusters
-  const headlampGeo = new THREE.BoxGeometry(0.24, 0.1, 0.15);
-  const leftHeadlamp = new THREE.Mesh(headlampGeo, m.carHeadlight);
-  leftHeadlamp.position.set(-0.62, 0.44, 2.06);
-  leftHeadlamp.rotation.y = -0.2;
-  exteriorGroup.add(leftHeadlamp);
-
-  const rightHeadlamp = new THREE.Mesh(headlampGeo, m.carHeadlight);
-  rightHeadlamp.position.set(0.62, 0.44, 2.06);
-  rightHeadlamp.rotation.y = 0.2;
-  exteriorGroup.add(rightHeadlamp);
-
-  // Full-width aerodynamic rear taillight bar
-  const taillightBarGeo = new THREE.BoxGeometry(1.52, 0.05, 0.06);
-  const taillightBar = new THREE.Mesh(taillightBarGeo, m.carTaillight);
-  taillightBar.position.set(0, 0.52, -2.12);
-  exteriorGroup.add(taillightBar);
-
-  // 8. Aerodynamic Side Mirrors
-  const mirrorStemGeo = new THREE.BoxGeometry(0.12, 0.04, 0.05);
-  const mirrorHousingGeo = new THREE.BoxGeometry(0.22, 0.12, 0.12);
-
-  const leftMirror = new THREE.Group();
-  leftMirror.position.set(-0.84, 0.68, 0.68);
-  const lmStem = new THREE.Mesh(mirrorStemGeo, m.carBodyTrim);
-  const lmHouse = new THREE.Mesh(mirrorHousingGeo, m.carBodyPaint);
-  lmHouse.position.x = -0.12;
-  leftMirror.add(lmStem, lmHouse);
-  exteriorGroup.add(leftMirror);
-
-  const rightMirror = new THREE.Group();
-  rightMirror.position.set(0.84, 0.68, 0.68);
-  const rmStem = new THREE.Mesh(mirrorStemGeo, m.carBodyTrim);
-  const rmHouse = new THREE.Mesh(mirrorHousingGeo, m.carBodyPaint);
-  rmHouse.position.x = 0.12;
-  rightMirror.add(rmStem, rmHouse);
-  exteriorGroup.add(rightMirror);
-
-  // 9. Wheels, Rims, Tires, and Brake Calipers
-  const createWheel = (isFront: boolean, isRight: boolean) => {
-    const wheelGroup = new THREE.Group();
-    wheelGroup.name = `Wheel_${isFront ? "Front" : "Rear"}_${isRight ? "Right" : "Left"}`;
-
-    // Tire
-    const tireGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.24, 24);
+    const spin = new THREE.Group();
+    const tireGeo = lathe(tireProfile, 48);
     tireGeo.rotateZ(Math.PI / 2);
-    const tire = new THREE.Mesh(tireGeo, m.tireRubber);
-    tire.castShadow = true;
-    wheelGroup.add(tire);
+    spin.add(new THREE.Mesh(tireGeo, m.tire));
 
-    // Rim
-    const rimGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.245, 16);
-    rimGeo.rotateZ(Math.PI / 2);
-    const rim = new THREE.Mesh(rimGeo, m.wheelRim);
-    wheelGroup.add(rim);
+    const faceX = xSign * 0.105;
+    const lipGeo = new THREE.TorusGeometry(0.232, 0.014, 10, 48);
+    lipGeo.rotateY(Math.PI / 2);
+    const lip = new THREE.Mesh(lipGeo, m.rim);
+    lip.position.x = faceX;
+    spin.add(lip);
 
-    // Aero Spoke Blades
-    for (let i = 0; i < 5; i++) {
-      const spokeGeo = new THREE.BoxGeometry(0.04, 0.2, 0.25);
-      const spoke = new THREE.Mesh(spokeGeo, m.wheelRim);
-      spoke.rotation.x = (i * Math.PI * 2) / 5;
-      wheelGroup.add(spoke);
+    const diskGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.018, 36);
+    diskGeo.rotateZ(Math.PI / 2);
+    const disk = new THREE.Mesh(diskGeo, m.trim);
+    disk.position.x = xSign * 0.09;
+    spin.add(disk);
+
+    for (let i = 0; i < 10; i++) {
+      const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.2, 0.036), m.rim);
+      spoke.position.set(faceX, 0, 0);
+      const holder = new THREE.Group();
+      holder.rotation.x = (i / 10) * Math.PI * 2;
+      spoke.position.y = 0.12;
+      holder.add(spoke);
+      holder.position.x = faceX;
+      spoke.position.x = 0;
+      spin.add(holder);
     }
+    const capGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.03, 20);
+    capGeo.rotateZ(Math.PI / 2);
+    const cap = new THREE.Mesh(capGeo, m.rim);
+    cap.position.x = xSign * 0.11;
+    spin.add(cap);
 
-    // Brake Rotor
-    const rotorGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.03, 16);
+    const rotorGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.022, 36);
     rotorGeo.rotateZ(Math.PI / 2);
-    const rotor = new THREE.Mesh(rotorGeo, m.brakeRotor);
-    rotor.position.x = isRight ? -0.06 : 0.06;
-    wheelGroup.add(rotor);
+    const rotor = new THREE.Mesh(rotorGeo, m.rotor);
+    rotor.position.x = xSign * 0.045;
+    spin.add(rotor);
 
-    // Brake Caliper
-    const caliperGeo = new THREE.BoxGeometry(0.06, 0.1, 0.08);
-    const caliper = new THREE.Mesh(caliperGeo, m.brakeCaliper);
-    caliper.position.set(isRight ? -0.07 : 0.07, 0.12, 0);
-    wheelGroup.add(caliper);
+    wheel.add(spin);
 
-    return wheelGroup;
+    // Caliper does not spin
+    const caliper = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.1, 0.13), m.caliper);
+    caliper.position.set(xSign * 0.045, 0.14, zSign * 0.0 + 0.0);
+    wheel.add(caliper);
+
+    chassisGroup.add(wheel);
+    wheelSpin.push(spin);
   };
 
-  const wheelFL = createWheel(true, false);
-  wheelFL.position.set(-0.84, 0.34, 1.35);
-  chassisGroup.add(wheelFL);
+  makeWheel(1, -1);
+  makeWheel(1, 1);
+  makeWheel(-1, -1);
+  makeWheel(-1, 1);
 
-  const wheelFR = createWheel(true, true);
-  wheelFR.position.set(0.84, 0.34, 1.35);
-  chassisGroup.add(wheelFR);
-
-  const wheelRL = createWheel(false, false);
-  wheelRL.position.set(-0.84, 0.34, -1.35);
-  chassisGroup.add(wheelRL);
-
-  const wheelRR = createWheel(false, true);
-  wheelRR.position.set(0.84, 0.34, -1.35);
-  chassisGroup.add(wheelRR);
-
-  // 10. Front and Rear Suspension Axles
-  const axleGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.6, 12);
+  // 7. Axles
+  const axleGeo = new THREE.CylinderGeometry(0.025, 0.025, VEHICLE.wheelX * 2, 12);
   axleGeo.rotateZ(Math.PI / 2);
-  const frontAxle = new THREE.Mesh(axleGeo, m.carBodyTrim);
-  frontAxle.position.set(0, 0.34, 1.35);
-  chassisGroup.add(frontAxle);
+  for (const z of [-VEHICLE.wheelbaseHalf, VEHICLE.wheelbaseHalf]) {
+    const axle = new THREE.Mesh(axleGeo, m.trim);
+    axle.position.set(0, VEHICLE.wheelRadius, z);
+    chassisGroup.add(axle);
+  }
 
-  const rearAxle = new THREE.Mesh(axleGeo, m.carBodyTrim);
-  rearAxle.position.set(0, 0.34, -1.35);
-  chassisGroup.add(rearAxle);
-
-  return {
-    root,
-    exteriorGroup,
-    chassisGroup,
-    wheels: {
-      fl: wheelFL,
-      fr: wheelFR,
-      rl: wheelRL,
-      rr: wheelRR,
-    },
-    paintMeshes,
-    glassMeshes,
-  };
+  return { root, exteriorGroup, lightsGroup, chassisGroup, wheelSpin, paintMeshes, glassMeshes };
 }
