@@ -13,12 +13,13 @@ describe("AboutPage rendering", () => {
     expect(html).toContain("AttackTrace");
   });
 
-  it("renders all four team members accurately", () => {
+  it("renders the four team members by name only", () => {
     const html = renderToStaticMarkup(createElement(AboutPage));
     expect(html).toContain("Jinsu");
     expect(html).toContain("Jerico Gris");
     expect(html).toContain("Dishon Sam");
     expect(html).toContain("Mohamed Baasil");
+    expect(html).not.toContain("AI Architecture");
   });
 
   it("explains the core attack-localization problem and 5 failure vectors", () => {
@@ -33,13 +34,12 @@ describe("AboutPage rendering", () => {
 
   it("describes prototype capabilities and engineering boundaries honestly", () => {
     const html = renderToStaticMarkup(createElement(AboutPage));
-    expect(html).toContain("What AttackTrace Does (Current Prototype)");
-    expect(html).toContain("water-plant process simulation");
-    expect(html).toContain("Multi-Variate Anomaly Detection");
-    expect(html).toContain("Directional Origin Ranking");
-    expect(html).toContain("Propagation Path Tracing");
-    expect(html).toContain("Prototype Scope &amp; Pragmatic Boundaries");
-    expect(html).toContain("Broader Localization Challenges");
+    expect(html).toContain("What AttackTrace does");
+    expect(html).toContain("Anomaly detection");
+    expect(html).toContain("Origin ranking");
+    expect(html).toContain("Propagation path");
+    expect(html).toContain("Demonstrated");
+    expect(html).toContain("Not claimed");
   });
 
   it("contains navigation actions to monitoring, lab, and metrics", () => {

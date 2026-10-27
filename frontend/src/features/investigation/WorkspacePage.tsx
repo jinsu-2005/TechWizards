@@ -106,8 +106,8 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
               </span>
               <span>
                 {page === "sources"
-                  ? "Active telemetry tiers, Modbus pipeline & verification matrix"
-                  : "Verified evidence, timeline telemetry & causal DAG"}
+                  ? "Where the telemetry comes from"
+                  : "Evidence, timeline and propagation for each incident"}
               </span>
             </p>
           </div>
@@ -140,11 +140,10 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
                   title: "SIM · Simulation",
                   badge: "Built in",
                   active: mode === "sim",
-                  desc: "Euler physics simulation for synthetic attack injection & dynamic self-healing.",
+                  desc: "Physics simulation of the three-stage water plant for controlled attack tests.",
                   specs: [
-                    { label: "Loop Rate", val: "10 Hz" },
-                    { label: "Target", val: "Twin Tank Plant" },
-                    { label: "Triggers", val: "Fault Injection & Isolate" },
+                    { label: "Plant", val: "3 stages · 9 tags" },
+                    { label: "Attacks", val: "5 scenarios" },
                   ],
                 },
                 {
@@ -152,23 +151,21 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
                   title: "HAI · Testbed Replay",
                   badge: status?.hai_available ? "Dataset Available" : "Dataset Missing",
                   active: mode === "hai",
-                  desc: "Deterministic telemetry replay from real-world HIL augmented industrial testbed.",
+                  desc: "Replay of recorded data from the HAI industrial control testbed.",
                   specs: [
-                    { label: "Attacks", val: "28 Real Cases" },
-                    { label: "Scope", val: "4 Sub-Processes" },
-                    { label: "Mode", val: "Offline Evaluation" },
+                    { label: "Attacks", val: "28 recorded" },
+                    { label: "Mode", val: "Offline replay" },
                   ],
                 },
                 {
                   id: "live",
                   title: "LIVE · Connected Modbus",
-                  badge: status?.live_available ? "Port :5020 Online" : status?.live_reason ?? "Port Offline",
+                  badge: status?.live_available ? "Online" : "Offline",
                   active: mode === "live",
-                  desc: "Real-time register polling and data quality tracking from software PLC emulator.",
+                  desc: "Reads registers from the Modbus plant emulator in real time.",
                   specs: [
                     { label: "Protocol", val: "Modbus TCP" },
-                    { label: "Latency", val: "< 2.0 ms" },
-                    { label: "Registers", val: "Coils & Holding" },
+                    { label: "Access", val: "Read-only" },
                   ],
                 },
               ].map((s) => (
@@ -190,7 +187,6 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
                         </div>
                         <div>
                           <h2 className="text-sm font-bold text-text leading-tight">{s.title}</h2>
-                          <span className="text-[11px] font-mono text-muted">Source Tier</span>
                         </div>
                       </div>
                       <span className={`rounded-full px-2 py-0.5 font-mono text-[10.5px] font-medium border ${
@@ -220,7 +216,7 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
                       s.active ? "text-accent" : "text-muted"
                     }`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${s.active ? "bg-accent animate-pulse" : "bg-muted/50"}`} />
-                      {s.active ? "Active Stream" : "Standby"}
+                      {s.active ? "Active" : "Standby"}
                     </span>
                   </div>
                 </section>
@@ -232,9 +228,9 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
               <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-muted flex items-center justify-between hover:text-text">
                 <span className="flex items-center gap-2">
                   <Activity size={14} className="text-accent" />
-                  Model Provenance &amp; Pre-Trained Weights
+                  Model details
                 </span>
-                <span className="text-[11px] font-mono text-muted font-normal">Toggle details</span>
+                
               </summary>
               <div className="mt-3">
                 <ModelProvenanceCard />
@@ -246,9 +242,9 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
               <div className="flex items-center justify-between mb-3 border-b border-border/60 pb-2.5">
                 <div className="flex items-center gap-2">
                   <Activity size={15} className="text-accent" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-text">Modbus Ingestion &amp; Processing Pipeline</h2>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-text">Data pipeline</h2>
                 </div>
-                <span className="font-mono text-[11px] text-muted">Port 5020 TCP · 250ms Polling</span>
+                
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3">
@@ -259,7 +255,7 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
                   </div>
                   <h3 className="text-xs font-bold text-text">PLC Holding &amp; Coils</h3>
                   <p className="text-xs text-muted leading-relaxed">
-                    Sensors (40001+), valves (00001+) and pump coil states published to Modbus address map.
+                    Sensor, valve and pump values exposed as Modbus registers.
                   </p>
                 </div>
 
@@ -270,66 +266,23 @@ export function WorkspacePage({ page }: { page: "sources" | "investigations" }) 
                   </div>
                   <h3 className="text-xs font-bold text-text">Connector &amp; Quality</h3>
                   <p className="text-xs text-muted leading-relaxed">
-                    Batched non-blocking reads with timestamp alignment, stale detection and frozen-value traps.
+                    Read-only polling with stale and frozen-value checks.
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-1.5 rounded-lg border border-border/70 bg-bg/60 p-3">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-[11px] font-bold text-accent">03 · DETECTION</span>
-                    <span className="rounded bg-surface px-1.5 py-0.5 text-[10px] font-mono text-muted border border-border">GDN + Tri-Signal</span>
+                    <span className="rounded bg-surface px-1.5 py-0.5 text-[10px] font-mono text-muted border border-border">GDN</span>
                   </div>
-                  <h3 className="text-xs font-bold text-text">Graph Attention &amp; Origin</h3>
+                  <h3 className="text-xs font-bold text-text">Detection &amp; origin</h3>
                   <p className="text-xs text-muted leading-relaxed">
-                    PyTorch GDN computes forecast residuals; tri-signal locator ranks compromised root causes.
+                    Forecast errors flag anomalies; origins ranked by deviation, onset and process flow.
                   </p>
                 </div>
               </div>
             </section>
 
-            {/* ── 4. Telemetry & Verification Matrix ── */}
-            <section className="rounded-xl border border-border bg-surface p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-3 border-b border-border/60 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-accent" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-text">Telemetry &amp; Evidence Verification Matrix</h2>
-                </div>
-                <span className="font-mono text-[11px] text-muted">5 Layers Mapped</span>
-              </div>
-
-              <div tabIndex={0} role="region" aria-label="Source coverage table" className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="border-b border-border text-muted">
-                    <tr>
-                      <th className="pb-2 font-medium">Layer</th>
-                      <th className="pb-2 font-medium">Status</th>
-                      <th className="pb-2 font-medium">Data Scope</th>
-                      <th className="pb-2 font-medium">Validation Method</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {[
-                      { layer: "Process Telemetry", status: "VERIFIED", cls: "text-normal border-normal/30 bg-normal/10", scope: "Tanks, pumps, valves, flow rates", method: "SIM ODE physics + Modbus register reads" },
-                      { layer: "Data Quality", status: "ACTIVE", cls: "text-normal border-normal/30 bg-normal/10", scope: "Freshness, stale & out-of-range tags", method: "EWMA jitter filter + last-value age check" },
-                      { layer: "Network Origin", status: "SUPPORTED", cls: "text-accent border-accent/30 bg-accent/10", scope: "Modbus TCP client transactions", method: "Proxy paired-transaction delta check" },
-                      { layer: "Controller Integrity", status: "EMULATED", cls: "text-suspect border-suspect/30 bg-suspect/10", scope: "PLC1 logic configuration", method: "SHA-256 manifest baseline comparison" },
-                      { layer: "Causal Propagation", status: "ACTIVE", cls: "text-normal border-normal/30 bg-normal/10", scope: "Plant directed dependency graph", method: "GDN attention residual topological traversal" },
-                    ].map((row) => (
-                      <tr key={row.layer} className="hover:bg-bg/40">
-                        <td className="py-2.5 font-semibold text-text">{row.layer}</td>
-                        <td className="py-2.5">
-                          <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold border ${row.cls}`}>
-                            {row.status}
-                          </span>
-                        </td>
-                        <td className="py-2.5 text-muted">{row.scope}</td>
-                        <td className="py-2.5 font-mono text-muted text-[11px]">{row.method}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
           </>
         ) : (
           /* ══════════════════════════════════════════════════════════════════

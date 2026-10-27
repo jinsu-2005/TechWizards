@@ -74,38 +74,41 @@ export function PulseEdgeView(props: EdgeProps<PulseEdgeT>) {
           strokeDasharray: data?.uncertain ? "8 5" : data?.learned ? "4 4" : undefined,
         }}
       />
-      {/* Ambient process telemetry data flow */}
+      {/* Ambient flow along healthy wires; a negative delay starts each pulse mid-flight. */}
       {isHealthyActive && (
         <path
           d={d}
           pathLength={1}
           className="graph-ambient-particle"
           stroke="var(--accent)"
-          strokeWidth={data?.learned ? 1.6 : 2}
+          strokeWidth={data?.learned ? 2 : 2.75}
           strokeLinecap="round"
           fill="none"
           style={{
             // A learned link is an inference, so its flow reads fainter than a configured one.
-            opacity: data?.learned ? 0.5 : 1,
-            animationDelay: `${((sourceX + sourceY) % 300) / 100}s`,
+            opacity: data?.learned ? 0.45 : 0.9,
+            animationDelay: `${-(((sourceX * 7 + sourceY * 13) % 100) / 100) * 3.85}s`,
           }}
         />
       )}
-      {/* Dynamic threat propagation wave */}
+      {/* Propagation wave: a static glow under the wire plus a pulse timed by hop order. */}
       {onPath && !data?.uncertain && (
-        <path
-          d={d}
-          pathLength={1}
-          className="graph-trace"
-          stroke="var(--origin)"
-          strokeWidth={3.5}
-          strokeLinecap="round"
-          fill="none"
-          style={{
-            animationDuration: `${Math.min(data.cycle ?? 7, 3.2)}s`,
-            animationDelay: `${(data.phase ?? 0) * (data.cycle ?? 7)}s`,
-          }}
-        />
+        <>
+          <path d={d} className="graph-trace-glow" stroke="var(--origin)" strokeOpacity={0.14} strokeWidth={8} strokeLinecap="round" fill="none" />
+          <path
+            d={d}
+            pathLength={1}
+            className="graph-trace"
+            stroke="var(--origin)"
+            strokeWidth={4}
+            strokeLinecap="round"
+            fill="none"
+            style={{
+              ["--trace-cycle" as string]: `${(data.cycle ?? 7) / 2}s`,
+              animationDelay: `${(data.phase ?? 0) * ((data.cycle ?? 7) / 2)}s`,
+            }}
+          />
+        </>
       )}
     </g>
   );

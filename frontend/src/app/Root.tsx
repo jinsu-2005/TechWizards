@@ -18,13 +18,14 @@ const AboutPage = lazy(() => import("../features/about/AboutPage").then((m) => (
 const EvWorkspace = lazy(() => import("../features/ev/EvWorkspace").then((m) => ({ default: m.EvWorkspace })));
 
 // Warm every lazy page once the first screen is idle, so later switches render without a fetch.
+// The EV workspace (three.js, the largest chunk) goes last so it never competes with the plant.
 const PAGE_CHUNKS = [
-  () => import("../features/ev/EvWorkspace"),
   () => import("../features/investigation/SocPage"),
   () => import("../features/investigation/WorkspacePage"),
   () => import("../features/metrics/MetricsPage"),
   () => import("../features/voice/VoiceSettingsPage"),
   () => import("../features/about/AboutPage"),
+  () => import("../features/ev/EvWorkspace"),
 ];
 function prefetchPages() {
   const idle = (cb: () => void) => { if (typeof requestIdleCallback === "function") requestIdleCallback(cb, { timeout: 3000 }); else setTimeout(cb, 1200); };

@@ -78,6 +78,26 @@ AttackTrace is deployed and operational across three coordinated cloud tiers:
       <img src="docs/screenshots/11-local-lab-simulation.png" alt="Local Lab Simulation" width="100%"/>
     </td>
   </tr>
+  <tr>
+    <td width="50%" align="center">
+      <b>Interactive 3D EV Digital Twin (Three.js &amp; PBR Subsystems)</b><br/>
+      <img src="docs/screenshots/12-ev-3d-digital-twin.png" alt="Interactive 3D EV Digital Twin" width="100%"/>
+    </td>
+    <td width="50%" align="center">
+      <b>EV Cyber-Physical Attack Simulation &amp; Injection Lab</b><br/>
+      <img src="docs/screenshots/13-ev-attack-simulation.png" alt="EV Attack Simulation Lab" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <b>EV AI Investigation Pilot &amp; Subsystem Telemetry</b><br/>
+      <img src="docs/screenshots/14-ev-ai-pilot.png" alt="EV AI Investigation Pilot" width="100%"/>
+    </td>
+    <td width="50%" align="center">
+      <b>Responsive Cross-Platform &amp; Mobile Workspace</b><br/>
+      <img src="docs/screenshots/15-ev-mobile-responsive.png" alt="EV Mobile Responsive Workspace" width="100%"/>
+    </td>
+  </tr>
 </table>
 
 ---
@@ -87,6 +107,7 @@ AttackTrace is deployed and operational across three coordinated cloud tiers:
 | Domain | Technologies & Libraries | Key Application & Role |
 | :--- | :--- | :--- |
 | **Frontend Framework** | **React 18 / 19**, **TypeScript 5.9**, **Vite 8** | High-performance reactive UI, strict typing, sub-second HMR builds |
+| **3D Graphics & Twin** | **Three.js 0.186**, **WebGL** | Interactive 3D EV Digital Twin with procedural PBR materials, 22 physical subsystems, raycasting & spline attack propagation |
 | **State & Flow** | **Zustand 5**, **@xyflow/react 12** | Centralized telemetry buffer, dynamic 2D directed causal graph with ambient particle flows |
 | **Visuals & Charts** | **Apache ECharts 6**, **Framer Motion 14**, **Tailwind CSS 4** | Streaming multi-sensor timeline sparklines, live range gauges, fluid liquid physics |
 | **Audio Synthesis** | **Web Audio API** (Browser-Native) | Zero-dependency 800/600 Hz warble sirens and major-chord containment chimes |

@@ -191,7 +191,7 @@ function Details({ incident }: { incident: Incident }) {
         {incident.virtual_active && (
           <div className="mt-2 flex items-center gap-1.5 rounded bg-cyan-950/40 border border-cyan-800/60 px-2 py-1 text-xs text-cyan-400">
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            <span className="font-mono text-[11px] font-medium">Virtual Sensor Self-Healing Active</span>
+            <span className="font-mono text-[11px] font-medium">Virtual sensor active</span>
           </div>
         )}
         <div className="mt-2 flex items-center gap-2">

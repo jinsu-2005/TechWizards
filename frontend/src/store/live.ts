@@ -26,6 +26,8 @@ interface LiveState {
   playing: boolean;
   setConn: (c: ConnState) => void;
   push: (m: LiveMessage, nowMs?: number) => void;
+  /** Same as calling `push` for each message, with one store update (one render) for the batch. */
+  pushMany: (ms: readonly LiveMessage[], nowMs?: number) => void;
   setStatus: (s: Status) => void;
   setTopology: (t: Topology) => void;
   setLiveHealth: (h: TagHealth[]) => void;
@@ -55,6 +57,17 @@ export const useLive = create<LiveState>((set) => ({
       // When the ring drops its oldest sample every index shifts down by one.
       const cursor = s.cursor === null ? null : full ? Math.max(0, s.cursor - 1) : s.cursor;
       return { buffer: pushRing(s.buffer, m), latest: m, receivedAt: nowMs, cursor };
+    }),
+  pushMany: (ms, nowMs = Date.now()) =>
+    set((s) => {
+      if (!ms.length) return s;
+      let buffer = s.buffer;
+      let cursor = s.cursor;
+      for (const m of ms) {
+        if (cursor !== null && buffer.length >= RING_CAPACITY) cursor = Math.max(0, cursor - 1);
+        buffer = pushRing(buffer, m);
+      }
+      return { buffer, latest: ms[ms.length - 1], receivedAt: nowMs, cursor };
     }),
   setStatus: (status) => set({ status }),
   setTopology: (topology) => set({ topology }),

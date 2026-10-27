@@ -2542,6 +2542,9 @@ body.aip-docked .dashboard-resize-handle {
 
 /* Team Grid */
 .about-team-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
   gap: .75rem;

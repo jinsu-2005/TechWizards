@@ -18,18 +18,7 @@ import {
 } from "lucide-react";
 import { WorkspaceHeader } from "../../components/ui/WorkspaceHeader";
 
-interface TeamMember {
-  name: string;
-  role: string;
-  initials: string;
-}
-
-const TEAM_MEMBERS: TeamMember[] = [
-  { name: "Jinsu", role: "AI Architecture & Plant Emulation", initials: "JS" },
-  { name: "Jerico Gris", role: "Digital Twin & Visual Engineering", initials: "JG" },
-  { name: "Dishon Sam", role: "Graph Inference & Backend API", initials: "DS" },
-  { name: "Mohamed Baasil", role: "Security Analysis & Benchmarking", initials: "MB" },
-];
+const TEAM_MEMBERS = ["Jinsu", "Jerico Gris", "Dishon Sam", "Mohamed Baasil"];
 
 const ORIGIN_LAYERS = [
   {
@@ -67,23 +56,23 @@ const ORIGIN_LAYERS = [
 const PROTOTYPE_CAPABILITIES = [
   {
     icon: Radar,
-    title: "Multi-Variate Anomaly Detection",
-    detail: "Graph Deviation Networks (GDN) learn structural sensor correlations from normal plant operations to flag physical deviations.",
+    title: "Anomaly detection",
+    detail: "A graph forecaster (GDN) learns normal plant behaviour and flags readings it cannot predict.",
   },
   {
     icon: Waypoints,
-    title: "Directional Origin Ranking",
-    detail: "Combines residual forecast error, temporal onset sequencing, and physical flow topology to rank the most likely origin candidates.",
+    title: "Origin ranking",
+    detail: "Scores each tag by deviation size, how early it deviated, and its position in the process flow.",
   },
   {
     icon: Layers,
-    title: "Propagation Path Tracing",
-    detail: "Traces how an anomaly at a single component (e.g. LIT101) cascades downstream into dependent pumps, valves, and downstream tanks.",
+    title: "Propagation path",
+    detail: "Shows how a fault at one tag (e.g. LIT101) reaches the pumps, valves and tanks downstream.",
   },
   {
     icon: Shield,
-    title: "Containment Recommendations",
-    detail: "Suggests immediate isolation actions (e.g., fallback setpoints, pump trip, network isolation) before equipment suffers physical damage.",
+    title: "Containment",
+    detail: "Isolates the suspected origin and substitutes a virtual sensor so the plant keeps running safely.",
   },
 ];
 
@@ -109,10 +98,6 @@ export function AboutPage() {
               <span className="about-badge-accent">
                 TEAM TECHWIZARDS
               </span>
-              <span className="about-badge-status">
-                <span className="about-pulse-dot" />
-                CYBER-PHYSICAL SECURITY PROTOTYPE
-              </span>
             </div>
 
             {/* Main Headline (Turquoise Glow) */}
@@ -122,31 +107,10 @@ export function AboutPage() {
 
             <p className="about-hero-lead">
               In cyber-physical critical infrastructure, detecting an anomaly is only the first step.
-              The critical engineering dilemma is knowing <em>where</em> the attack originated,
+              The critical engineering dilemma is knowing <em>where</em> the attack originated,{" "}
               <em>which</em> component is compromised, and <em>how</em> the fault cascades across physical processes.
             </p>
 
-            <div className="about-hero-meta">
-              <div className="about-meta-item">
-                <span className="about-meta-label">Project</span>
-                <span className="about-meta-val">AttackTrace</span>
-              </div>
-              <div className="about-meta-divider" />
-              <div className="about-meta-item">
-                <span className="about-meta-label">Hackathon</span>
-                <span className="about-meta-val">Sustainathon 2026</span>
-              </div>
-              <div className="about-meta-divider" />
-              <div className="about-meta-item">
-                <span className="about-meta-label">Problem Title</span>
-                <span className="about-meta-val">The Attack-Localization Problem (AI-07)</span>
-              </div>
-              <div className="about-meta-divider" />
-              <div className="about-meta-item">
-                <span className="about-meta-label">Team</span>
-                <span className="about-meta-val text-purple-300 font-semibold">TechWizards</span>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -160,10 +124,10 @@ export function AboutPage() {
             </div>
             <div>
               <h2 id="problem-heading" className="about-heading-teal">
-                The Core Challenge: Localization Beyond Detection
+                Localization, not just detection
               </h2>
               <p className="about-section-sub">
-                Why standard intrusion detection systems leave industrial operators blind during active attacks.
+                An alarm says something is wrong, not where it started.
               </p>
             </div>
           </div>
@@ -183,7 +147,7 @@ export function AboutPage() {
           {/* 5-Layer Origin Ambiguity Grid */}
           <div className="mt-4">
             <h3 className="text-xs font-mono uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
-              <span>5 Possible Failure Vectors in Critical Systems</span>
+              <span>Where an attack can start</span>
               <span className="h-px flex-1 bg-border/60" />
             </h3>
 
@@ -219,19 +183,19 @@ export function AboutPage() {
             </div>
             <div>
               <h2 id="solution-heading" className="about-heading-teal">
-                What AttackTrace Does (Current Prototype)
+                What AttackTrace does
               </h2>
               <p className="about-section-sub">
-                How our prototype addresses the localization problem using a simulated municipal water treatment testbed.
+                Demonstrated on a simulated three-stage water treatment plant.
               </p>
             </div>
           </div>
 
           <div className="about-overview-card">
             <p className="text-sm text-text leading-relaxed">
-              The current <strong>AttackTrace prototype</strong> uses an industrial <strong>water-plant process simulation</strong> (and
-              real-time Modbus telemetry) to actively <strong>detect physical anomalies</strong>, <strong>rank likely attack origins</strong>,
-              and <strong>visualize how adversarial effects spread</strong> across cyber-physical equipment.
+              AttackTrace watches water-plant telemetry (simulated, recorded HAI data, or a Modbus emulator),
+              <strong> detects anomalies</strong>, <strong>ranks the likely origin</strong> and
+              <strong> shows how the effect spread</strong> through the plant.
             </p>
           </div>
 
@@ -263,10 +227,10 @@ export function AboutPage() {
             </div>
             <div>
               <h2 id="scope-heading" className="about-heading-purple">
-                Prototype Scope &amp; Pragmatic Boundaries
+                Scope
               </h2>
               <p className="about-section-sub">
-                Honest engineering boundaries: what this prototype proves vs. broader industry challenges.
+                What this prototype shows, and what it does not claim.
               </p>
             </div>
           </div>
@@ -275,26 +239,23 @@ export function AboutPage() {
             <div className="about-boundary-card verified">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle2 size={16} className="text-normal shrink-0" aria-hidden />
-                <h3 className="text-sm font-semibold text-text">What This Prototype Demonstrates</h3>
+                <h3 className="text-sm font-semibold text-text">Demonstrated</h3>
               </div>
               <ul className="about-list">
-                <li>Demonstrated on a calibrated 6-stage municipal water treatment simulation and live Modbus TCP testbed.</li>
-                <li>Ranks root origin candidates when sensors (e.g. LIT101) or actuators (e.g. MV101, P101) are manipulated.</li>
-                <li>Traces causal propagation graph paths in real-time, preventing alarms on downstream symptoms from misdirecting operators.</li>
-                <li>Evaluated against the empirical HAI 20.07 dataset and synthetic multi-stage industrial cyber attacks.</li>
+                <li>A three-stage water plant simulation and a Modbus TCP emulator.</li>
+                <li>Origin ranking when sensors (LIT101) or actuators (MV101, P101) are manipulated.</li>
+                <li>Evaluated on simulated attacks and the public HAI 20.07 dataset (see Metrics).</li>
               </ul>
             </div>
 
             <div className="about-boundary-card scope">
               <div className="flex items-center gap-2 mb-2">
                 <AlertOctagon size={16} className="text-purple-300 shrink-0" aria-hidden />
-                <h3 className="text-sm font-semibold text-text">Broader Localization Challenges</h3>
+                <h3 className="text-sm font-semibold text-text">Not claimed</h3>
               </div>
               <ul className="about-list">
-                <li>Does not claim out-of-the-box operation across all industrial verticals without facility-specific P&amp;ID calibration.</li>
-                <li>Distinguishing deep firmware rootkits from physical sensor failure requires specialized bus monitors and attestation hardware.</li>
-                <li>Actuator mechanical wear can occasionally mirror slow cyber ramp attacks without dedicated mechanical telemetry.</li>
-                <li>The water plant model proves the mathematical and causal localization pipeline, serving as a blueprint for wider industrial adoption.</li>
+                <li>Other plants need their own process graph and a clean baseline to train on.</li>
+                <li>Firmware-level attacks are outside what process telemetry alone can see.</li>
               </ul>
             </div>
           </div>
@@ -312,25 +273,16 @@ export function AboutPage() {
               <h2 id="team-heading" className="about-heading-teal">
                 Team TechWizards
               </h2>
-              <p className="about-section-sub">
-                Built for Sustainathon 2026 under Problem Statement AI-07.
-              </p>
             </div>
           </div>
 
-          <div className="about-team-grid">
-            {TEAM_MEMBERS.map((member) => (
-              <div key={member.name} className="about-member-card">
-                <div className="about-member-avatar" aria-hidden>
-                  {member.initials}
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-text">{member.name}</h3>
-                  <p className="text-xs text-muted mt-0.5">{member.role}</p>
-                </div>
-              </div>
+          <ul className="about-team-grid">
+            {TEAM_MEMBERS.map((name) => (
+              <li key={name} className="about-member-card">
+                <h3 className="text-sm font-bold text-text">{name}</h3>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
         {/* ══════════════════════════════════════════════════════════════════
@@ -339,15 +291,12 @@ export function AboutPage() {
         <section className="about-actions-card">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-sm font-bold text-text">Explore AttackTrace in Action</h2>
-              <p className="text-xs text-muted mt-1">
-                Interact with the live digital twin, launch simulated attacks, or inspect the causal process graph.
-              </p>
+              <h2 className="text-sm font-bold text-text">Try it</h2>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
               <a href="/" className="about-cta-primary">
-                <span>Process Monitoring</span>
+                <span>Monitoring</span>
                 <ArrowRight size={14} aria-hidden />
               </a>
               <a href="/lab" className="about-cta-secondary">
@@ -356,7 +305,7 @@ export function AboutPage() {
               </a>
               <a href="/metrics" className="about-cta-secondary">
                 <Boxes size={14} aria-hidden />
-                <span>Threat Metrics</span>
+                <span>Metrics</span>
               </a>
             </div>
           </div>

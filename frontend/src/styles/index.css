@@ -230,32 +230,31 @@ body {
   }
 }
 
-/* Process graph: enhanced dynamic particle flow and threat propagation waves */
+/* Process graph wires. One dash per path (gap > path length), so a pulse enters and leaves the
+   wire cleanly instead of blinking in place. No CSS filters: an animated drop-shadow repaints the
+   whole edge layer every frame. */
+.graph-trace, .graph-ambient-particle { pointer-events: none; will-change: stroke-dashoffset; }
 .graph-trace {
-  stroke-dasharray: .18 1;
-  opacity: 0;
-  pointer-events: none;
-  animation: graph-travel 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  filter: drop-shadow(0 0 5px var(--origin));
+  stroke-dasharray: .16 2;
+  stroke-dashoffset: .16;
+  animation: graph-travel var(--trace-cycle, 3.5s) cubic-bezier(.45, 0, .25, 1) infinite both;
 }
+.graph-trace-glow { pointer-events: none; }
 .graph-ambient-particle {
-  stroke-dasharray: .08 .92;
-  opacity: 0;
-  pointer-events: none;
-  animation: graph-ambient-travel 3.8s linear infinite;
-  filter: drop-shadow(0 0 3px rgb(var(--accent-rgb) / .6));
+  stroke-dasharray: .06 2;
+  stroke-dashoffset: .06;
+  animation: graph-ambient-travel calc(var(--graph-cycle, 7s) * .55) linear infinite;
 }
+/* The wave crosses its wire in the first 40% of the cycle; later hops start later (phase ≤ .6),
+   so the whole path lights up in propagation order and every hop restarts together. */
 @keyframes graph-travel {
-  0% { stroke-dashoffset: .1; opacity: 0; }
-  8% { opacity: .95; }
-  60% { stroke-dashoffset: -.9; opacity: .95; }
-  75%, 100% { stroke-dashoffset: -1; opacity: 0; }
+  0% { stroke-dashoffset: .16; opacity: 1; }
+  40% { stroke-dashoffset: -1; opacity: 1; }
+  40.01%, 100% { stroke-dashoffset: -1; opacity: 0; }
 }
 @keyframes graph-ambient-travel {
-  0% { stroke-dashoffset: 0; opacity: 0; }
-  12% { opacity: .75; }
-  80% { opacity: .75; }
-  100% { stroke-dashoffset: -1; opacity: 0; }
+  from { stroke-dashoffset: .06; }
+  to { stroke-dashoffset: -1; }
 }
 .graph-origin { animation: graph-halo var(--graph-cycle, 7s) ease-out infinite; }
 @keyframes graph-halo { 0%, 38%, 100% { box-shadow: 0 0 0 3px rgb(var(--origin-rgb) / .12); } 15% { box-shadow: 0 0 0 8px rgb(var(--origin-rgb) / .28); } }

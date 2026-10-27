@@ -1,4 +1,4 @@
-import pilotIcon from "../../assets/ai-pilot-emblem.png";
+import pilotIcon from "../../assets/ai-pilot-emblem.webp";
 import { useEv } from "./store";
 
 /** On-stage subtitles for whatever the AI Pilot is saying (spoken alert or live call). */

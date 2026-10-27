@@ -67,7 +67,7 @@ export function NodeBadge({ node, at, topo, h = 46, ageMs }: Props) {
       <StatusGlyph status={node.status} cx={x + w - 12} cy={y + 13} />
       {node.is_virtual && (
         <g>
-          <title>Virtual Sensor Active (Self-Healing Fallback)</title>
+          <title>Virtual sensor active</title>
           <rect x={x + (w - 46) / 2} y={y - 8} width={46} height={12} rx={3} fill="#083344" stroke="#06b6d4" strokeWidth={1} />
           <text x={x + w / 2} y={y} textAnchor="middle" fontSize={7.5} fill="#22d3ee" className="font-mono font-bold tracking-wider">VIRTUAL</text>
         </g>

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { navigate } from "../../lib/navigation";
 import { useUi } from "../../store/ui";
 import { ThemeSwitcher } from "./ThemeSwitcher";
-import pilotIcon from "../../assets/ai-pilot-emblem.png";
+import pilotIcon from "../../assets/ai-pilot-emblem.webp";
 
 import { useLive } from "../../store/live";
 

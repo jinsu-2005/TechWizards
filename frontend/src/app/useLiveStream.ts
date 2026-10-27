@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { getStatus, getTopology } from "../lib/api";
-import type { Topology, TopologyNode } from "../lib/types";
+import type { LiveMessage, Topology, TopologyNode } from "../lib/types";
 import { createLiveClient, liveUrl } from "../lib/ws";
 import { nodeMap, useLive } from "../store/live";
 import { useAttackRun } from "../store/attackRun";
@@ -11,6 +11,11 @@ import { incidentBrief, isLiveConversationActive, speak, useVoice } from "../lib
 
 const narrated = new Set<string>();
 let lastBriefAt = 0;
+
+/** At fast-demo pace samples arrive every ~30 ms; rendering each one re-draws the twin, graph and
+ *  timeline for frames nobody sees. Samples are still processed one by one, but the store (and
+ *  React) take them at most this often. */
+const RENDER_INTERVAL_MS = 66;
 
 // The topology changes once per session; rebuilding its index on every sample would be waste.
 let topoSource: Topology | null = null;
@@ -26,7 +31,24 @@ function topologyIndex(topology: Topology | null): Map<string, TopologyNode> {
 /** Connects the WebSocket once, feeds the store, and refreshes REST state on (re)connect. */
 export function useLiveStream(): void {
   useEffect(() => {
-    const { push, setConn, setStatus, setTopology } = useLive.getState();
+    const { pushMany, setConn, setStatus, setTopology } = useLive.getState();
+    let pending: LiveMessage[] = [];
+    let lastFlush = 0;
+    let flushTimer: ReturnType<typeof setTimeout> | undefined;
+    const flush = () => {
+      flushTimer = undefined;
+      lastFlush = performance.now();
+      const batch = pending;
+      pending = [];
+      pushMany(batch);
+    };
+    const enqueue = (m: LiveMessage) => {
+      pending.push(m);
+      if (flushTimer !== undefined) return;
+      const wait = RENDER_INTERVAL_MS - (performance.now() - lastFlush);
+      if (wait <= 0) flush();
+      else flushTimer = setTimeout(flush, wait);
+    };
     let prevStatus: string | null = null;
     let previousMode = useLive.getState().latest?.mode;
 
@@ -34,13 +56,16 @@ export function useLiveStream(): void {
       url: liveUrl(window.location),
       onMessage: (m) => {
         if (previousMode && previousMode !== m.mode) {
+          pending = [];
+          clearTimeout(flushTimer);
+          flushTimer = undefined;
           useLive.getState().clear();
           useUi.getState().selectAsset(null);
           void getStatus().then(setStatus, () => undefined);
           void getTopology().then(setTopology, () => undefined);
         }
         previousMode = m.mode;
-        push(m);
+        enqueue(m);
         // Advance the launched test's phase from telemetry, so "detected" only ever comes
         // from the detector actually raising an incident.
         useAttackRun.getState().observe(m, topologyIndex(useLive.getState().topology));
@@ -71,6 +96,6 @@ export function useLiveStream(): void {
         getTopology().then(setTopology, () => undefined);
       },
     });
-    return close;
+    return () => { clearTimeout(flushTimer); close(); };
   }, []);
 }

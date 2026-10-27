@@ -142,6 +142,8 @@ export function LocalLab() {
     status?.integrity.observed_hash &&
     status?.integrity.factory_hash &&
     status.integrity.observed_hash !== status.integrity.factory_hash;
+  const integrityKnown = !!(status?.integrity.observed_hash && status?.integrity.factory_hash && !status.integrity.reason);
+  const integrityLabel = isHashTampered ? "Mismatch" : integrityKnown ? "Verified" : "Unavailable";
 
   return (
     <div className="flex flex-col gap-4">
@@ -269,8 +271,8 @@ export function LocalLab() {
 
           {/* Digital Twin Footer */}
           <div className="px-4 py-2 border-t border-border/50 bg-surface/40 text-[10px] font-mono tracking-wider text-muted flex items-center justify-between shrink-0">
-            <span>EQUIPMENT AND PROCESS FLOW • HOVER A TAG FOR DETAIL</span>
-            <span className="text-[10px] text-muted/70 hidden sm:inline">REAL-TIME TWIN TELEMETRY</span>
+            <span>HOVER A TAG FOR DETAIL</span>
+            
           </div>
         </section>
 
@@ -279,9 +281,9 @@ export function LocalLab() {
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
               <Zap size={13} className="text-accent" />
-              <span>Attack Scenarios · One-Click Injection</span>
+              <span>Attack scenarios</span>
             </h3>
-            <span className="text-[11px] text-muted font-mono">Modbus TCP / RTU</span>
+            
           </div>
 
           <div className="flex flex-col gap-3">
@@ -359,7 +361,7 @@ export function LocalLab() {
                     <Activity size={16} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-text">Sensor Drift &amp; Offset</h4>
+                    <h4 className="text-sm font-bold text-text">Sensor Offset</h4>
                     <p className="text-[11px] text-muted">Analog Transmitter</p>
                   </div>
                 </div>
@@ -367,7 +369,7 @@ export function LocalLab() {
               </div>
 
               <p className="text-xs text-muted leading-relaxed">
-                Injects static bias into sensor register, inducing controller overcompensation.
+                Adds a fixed bias to a sensor reading so the controller over-corrects.
               </p>
 
               {/* Target & Presets */}
@@ -377,8 +379,8 @@ export function LocalLab() {
                   value={sensorTarget}
                   onChange={(e) => setSensorTarget(e.target.value)}
                 >
-                  <option value="LIT101">LIT101 (Level Sensor)</option>
-                  <option value="LIT301">LIT301 (Level Sensor 3)</option>
+                  <option value="LIT101">LIT101 (Tank 1 Level)</option>
+                  <option value="LIT301">LIT301 (Tank 2 Level)</option>
                   <option value="FIT201">FIT201 (Flow Sensor)</option>
                   <option value="PIT301">PIT301 (Pressure Sensor)</option>
                 </select>
@@ -386,9 +388,9 @@ export function LocalLab() {
 
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {[
-                  { label: "-25 mm Offset", val: -25 },
-                  { label: "+35 mm Offset", val: 35 },
-                  { label: "-50 mm Drift", val: -50 },
+                  { label: "−25%", val: -25 },
+                  { label: "+35%", val: 35 },
+                  { label: "−50%", val: -50 },
                 ].map((p) => (
                   <button
                     key={p.label}
@@ -450,7 +452,7 @@ export function LocalLab() {
               </div>
 
               <p className="text-xs text-muted leading-relaxed">
-                Forces discrete coil state, locking inflow valves or disabling pumps.
+                Forces a valve or pump to a fixed state.
               </p>
 
               {/* Target Select */}
@@ -460,9 +462,8 @@ export function LocalLab() {
                   value={actuatorTarget}
                   onChange={(e) => setActuatorTarget(e.target.value)}
                 >
-                  <option value="MV101">MV101 (Motor Inflow Valve)</option>
-                  <option value="MV201">MV201 (Transfer Valve)</option>
-                  <option value="P101">P101 (Raw Water Pump)</option>
+                  <option value="MV101">MV101 (Inlet Valve)</option>
+                  <option value="P101">P101 (Transfer Pump)</option>
                 </select>
               </div>
 
@@ -520,7 +521,7 @@ export function LocalLab() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Terminal size={16} className="text-accent" />
-              <h3 className="text-sm font-bold text-text">Modbus Protocol Proxy &amp; Delay Evidence</h3>
+              <h3 className="text-sm font-bold text-text">Modbus proxy</h3>
             </div>
             <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
               status?.enabled ? "text-normal border-normal/30 bg-normal/10" : "text-muted border-border bg-bg"
@@ -530,7 +531,7 @@ export function LocalLab() {
           </div>
 
           <p className="text-xs text-muted">
-            Intercept and delay telemetry packets to evaluate network tampering vs sensor fault.
+            Alters packets in transit to tell network tampering apart from a sensor fault.
           </p>
 
           <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
@@ -548,7 +549,7 @@ export function LocalLab() {
             </label>
 
             <label className="flex flex-col gap-1 text-xs text-muted">
-              Offset Units
+              Offset
               <input
                 className="lab-input-field"
                 type="number"
@@ -579,7 +580,7 @@ export function LocalLab() {
               onChange={(e) => setProxyDrop(e.target.checked)}
               className="accent-accent"
             />
-            <span>Drop test transactions (Denial of Service)</span>
+            <span>Drop packets</span>
           </label>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -593,21 +594,21 @@ export function LocalLab() {
                 )
               }
             >
-              Apply &amp; Route Proxy
+              Apply proxy
             </button>
             <button
               disabled={busy || !status?.enabled}
               className="lab-secondary-btn"
               onClick={() => void action(() => probeLab(), "Probe Transaction")}
             >
-              Read Test Transaction
+              Read once
             </button>
             <button
               disabled={busy || !status?.enabled}
               className="lab-secondary-btn"
               onClick={() => void action(() => configureLab({ enabled: false }), "Stop Proxy")}
             >
-              Restore Direct Reads
+              Restore direct reads
             </button>
           </div>
 
@@ -641,41 +642,43 @@ export function LocalLab() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Hash size={16} className="text-accent" />
-              <h3 className="text-sm font-bold text-text">Emulated Controller Integrity</h3>
+              <h3 className="text-sm font-bold text-text">Controller integrity</h3>
             </div>
             <span
               className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                 isHashTampered
                   ? "text-origin border-origin/30 bg-origin/10"
-                  : "text-normal border-normal/30 bg-normal/10"
+                  : integrityKnown
+                  ? "text-normal border-normal/30 bg-normal/10"
+                  : "text-muted border-border bg-bg"
               }`}
             >
-              {isHashTampered ? "Tampered / Mismatch" : "Manifest Verified"}
+              {integrityLabel}
             </span>
           </div>
 
           <p className="text-xs text-muted">
-            Validates PLC runtime configuration SHA-256 against factory baseline manifest.
+            Compares a hash of the PLC configuration with its known-good baseline.
           </p>
 
           {/* Hash Display */}
           <div className="mt-4 space-y-2 rounded-lg border border-border/80 bg-bg/80 p-3 font-mono text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-muted">Observed Hash:</span>
+              <span className="text-muted">Observed:</span>
               <span className="text-text font-bold truncate max-w-[200px]" title={status?.integrity.observed_hash}>
                 {status?.integrity.observed_hash ?? "Checking…"}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted">Factory Baseline:</span>
+              <span className="text-muted">Baseline:</span>
               <span className="text-muted truncate max-w-[200px]" title={status?.integrity.factory_hash}>
                 {status?.integrity.factory_hash ?? "Unavailable"}
               </span>
             </div>
             <div className="flex items-center justify-between border-t border-border/50 pt-1.5">
-              <span className="text-muted">Integrity State:</span>
-              <span className={isHashTampered ? "text-origin font-bold" : "text-normal"}>
-                {isHashTampered ? "Tampered (+20% delta unapproved)" : "Reference Match ✓"}
+              <span className="text-muted">State:</span>
+              <span className={isHashTampered ? "text-origin font-bold" : integrityKnown ? "text-normal" : "text-muted"}>
+                {isHashTampered ? "Mismatch" : integrityKnown ? "Match" : "Unavailable"}
               </span>
             </div>
           </div>
@@ -687,21 +690,21 @@ export function LocalLab() {
               className="lab-secondary-btn"
               onClick={() => void action(() => changeIntegrity({ action: "approved_update", delta: 10 }), "Approved Update")}
             >
-              Test Approved (+10%)
+              Approved change
             </button>
             <button
               disabled={busy || !!status?.integrity.reason}
               className="lab-secondary-btn"
               onClick={() => void action(() => changeIntegrity({ action: "unapproved_change", delta: 20 }), "Unapproved Change")}
             >
-              Test Unapproved (+20%)
+              Unapproved change
             </button>
             <button
               disabled={busy || !!status?.integrity.reason}
               className="lab-secondary-btn"
               onClick={() => void action(() => changeIntegrity({ action: "restore" }), "Restore Baseline")}
             >
-              Restore Factory Config
+              Restore baseline
             </button>
           </div>
         </section>
@@ -713,9 +716,9 @@ export function LocalLab() {
           <summary className="cursor-pointer font-medium text-text flex items-center justify-between">
             <span className="flex items-center gap-1.5 font-mono">
               <Terminal size={13} className="text-accent" />
-              Latest Experiment Response Payload
+              Last response
             </span>
-            <span className="text-muted text-[11px]">Click to toggle JSON</span>
+            
           </summary>
           <pre className="mt-3 max-h-60 overflow-auto rounded bg-bg p-3 font-mono text-muted text-[11px] whitespace-pre-wrap">
             {result}

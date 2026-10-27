@@ -12,7 +12,6 @@ import {
 } from "../../lib/metrics";
 import { MetricsChart } from "./MetricsChart";
 import { RobustnessPanel } from "./RobustnessPanel";
-import { BaselineComparison } from "./BaselineComparison";
 
 type Load = { state: "loading" } | { state: "missing" } | { state: "ready"; metrics: Metrics };
 
@@ -156,7 +155,7 @@ export function MetricsPage() {
             {load.metrics.hai && <HaiCards h={load.metrics.hai} />}
             {load.metrics.live && <LiveCards l={load.metrics.live} />}
 
-            <div className="grid gap-3.5 lg:grid-cols-2">
+            <div className="grid gap-3.5">
               <section
                 aria-label="F1 by scenario"
                 className="flex min-h-[360px] flex-col rounded-xl border border-border bg-surface p-4 shadow-sm"
@@ -168,14 +167,13 @@ export function MetricsPage() {
                       Detection F1 vs Baseline by Scenario
                     </span>
                   </div>
-                  <span className="font-mono text-xs text-muted">Max 1.00</span>
+                  
                 </div>
                 <div className="min-h-[300px] flex-1">
                   <MetricsChart rows={rows} />
                 </div>
               </section>
 
-              <BaselineComparison />
             </div>
 
             <RobustnessPanel />

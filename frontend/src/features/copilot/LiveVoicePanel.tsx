@@ -1,7 +1,7 @@
 import { Mic, MicOff, Radio, Square, Volume2, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { setLiveConversationActive, stopSpeech, useVoice } from "../../lib/voice";
-import pilotIcon from "../../assets/ai-pilot-emblem.png";
+import pilotIcon from "../../assets/ai-pilot-emblem.webp";
 import { pcm16, playPcm } from "../../lib/pcmAudio";
 
 type Line = { id: number; speaker: "user" | "assistant"; text: string; language?: string };

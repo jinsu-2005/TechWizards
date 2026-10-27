@@ -160,7 +160,7 @@ export function WorkflowPanel({ incidentId, mode, incident }: WorkflowPanelProps
                   Compare origin hypotheses
                 </h3>
                 <p className="mt-0.5 text-xs text-muted">
-                  Topological Bayesian ranking across deviation, onset timing, and causal propagation.
+                  Ranked by deviation size, onset timing and position in the process flow.
                 </p>
               </div>
               {incident.ambiguous && (

@@ -206,19 +206,19 @@ export function SocPage({ page }: { page: "alerts" | "assets" | "lab" }) {
               </span>
             </div>
             <h1 className="soc-hero-title">
-              {page === "alerts" ? "Security Alerts & Triage" : page === "assets" ? "Asset Inventory & Modbus Registers" : "Local Attack Lab"}
+              {page === "alerts" ? "Alerts" : page === "assets" ? "Assets" : "Local Attack Lab"}
             </h1>
             <p className="soc-hero-sub">
               {page === "alerts"
-                ? "High-density incident triage queue, causal hypotheses verification, and fast containment triggers."
+                ? "Detected incidents, their ranked origin and containment status."
                 : page === "assets"
-                ? "Physical process tags, PLC controllers, field actuators, and Modbus RTU/TCP register mappings."
-                : "Controlled fault injection, packet proxying & controller integrity testing"}
+                ? "Plant sensors, actuators and controllers with their Modbus registers."
+                : "Inject controlled faults into the plant and watch them get localized."}
             </p>
           </div>
           <div className="soc-hero-actions">
             <a href={page === "lab" ? "/sources" : "/investigations"} className="soc-action-link">
-              {page === "lab" ? "Data sources" : "Investigations console"}
+              {page === "lab" ? "Data sources" : "Investigations"}
               <ArrowUpRight size={14} />
             </a>
             <button
@@ -777,7 +777,7 @@ export function SocPage({ page }: { page: "alerts" | "assets" | "lab" }) {
             </div>
 
             <div className="p-3 border-t border-border/70 flex items-center justify-between text-xs text-muted flex-wrap gap-2">
-              <span className="font-mono text-[11px] text-muted">Physics-informed Bayesian scoring · Live telemetry</span>
+              <span />
               <a href="/investigations" className="text-accent hover:underline inline-flex items-center gap-1 font-medium">
                 Full investigation journal <ArrowUpRight size={12} />
               </a>

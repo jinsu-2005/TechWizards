@@ -18,7 +18,7 @@ import { navigate } from "../../lib/navigation";
 import { LiveVoicePanel } from "./LiveVoicePanel";
 import { SCENARIO_LABEL } from "../../lib/scenarios";
 import { parsePilotAction } from "../../lib/pilotActions";
-import pilotIcon from "../../assets/ai-pilot-emblem.png";
+import pilotIcon from "../../assets/ai-pilot-emblem.webp";
 
 interface Message {
   id: string;
@@ -166,15 +166,15 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
   const starting = messages.length === 1 && messages[0]?.id === "initial";
 
   const prompts = incident ? [
-    { icon: FileSearch, title: "Explain the suspected origin", detail: "See what supports the leading candidate", question: "Explain the suspected origin and its supporting evidence" },
-    { icon: GitBranch, title: "Compare alternative explanations", detail: "Separate competing origins and benign faults", question: "Compare the origin candidates and alternative explanations" },
-    { icon: BookOpen, title: "Find the evidence gaps", detail: "Understand what this case cannot establish", question: "What evidence is missing and what should I check next?" },
-    { icon: ListChecks, title: "Recommend next checks", detail: "Prioritize safe investigative steps", question: "What should I check next to distinguish the leading origins?" },
+    { icon: FileSearch, title: "Explain the suspected origin", question: "Explain the suspected origin and its supporting evidence" },
+    { icon: GitBranch, title: "Compare alternative explanations", question: "Compare the origin candidates and alternative explanations" },
+    { icon: BookOpen, title: "Find the evidence gaps", question: "What evidence is missing and what should I check next?" },
+    { icon: ListChecks, title: "Recommend next checks", question: "What should I check next to distinguish the leading origins?" },
   ] : [
-    { icon: Activity, title: "Summarize anomalies", detail: "What looks unusual right now?", question: "Summarize the current anomalies and cite the available evidence" },
-    { icon: FileSearch, title: "Explain signal deviation", detail: "Compare readings with the baseline", question: "Which current signals deviate from their baseline, and what supports that?" },
-    { icon: GitBranch, title: "Trace likely cause", detail: "Compare candidate origins", question: "Trace the likely cause and compare alternative explanations" },
-    { icon: ListChecks, title: "Recommend next checks", detail: "What should I investigate?", question: "What should I check next, and what evidence is still missing?" },
+    { icon: Activity, title: "Summarize anomalies", question: "Summarize the current anomalies and cite the available evidence" },
+    { icon: FileSearch, title: "Explain signal deviation", question: "Which current signals deviate from their baseline, and what supports that?" },
+    { icon: GitBranch, title: "Trace likely cause", question: "Trace the likely cause and compare alternative explanations" },
+    { icon: ListChecks, title: "Recommend next checks", question: "What should I check next, and what evidence is still missing?" },
   ];
 
   const handleSend = async (textToSend?: string, retry = false) => {
@@ -445,7 +445,7 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
         </div>
 
         {activeTab === "voice" && voiceCommand && <div role="status" className="mx-3 mt-2 flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-text">
-          <span className="min-w-0 flex-1">Voice command heard: <strong>{voiceCommand}</strong>. Review before it runs.</span>
+          <span className="min-w-0 flex-1">Heard: <strong>{voiceCommand}</strong></span>
           <button type="button" className="shrink-0 rounded bg-accent px-2 py-1 font-semibold text-on-accent" onClick={() => { setInput(voiceCommand); setVoiceCommand(""); setActiveTab("conversation"); }}>Review</button>
           <button type="button" aria-label="Dismiss voice command" onClick={() => setVoiceCommand("")}><X size={15} /></button>
         </div>}
@@ -529,29 +529,17 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
               {/* Starting state */}
               {starting && (
                 <div className="aip-start copilot-start">
-                  <p className="aip-kicker">AI PILOT · INVESTIGATION</p>
-                  <h2>{incident ? "Trace the signal" : "Investigate with evidence"}</h2>
-                  <p className="copilot-start-description">
-                    {incident
-                      ? "Inspect evidence, test hypotheses, and verify next steps."
-                      : "Ask anything about process telemetry, anomalies, or checks."}
-                  </p>
-                  <div className="aip-start-divider"><span>SUGGESTED QUESTIONS</span></div>
+                  <h2>{incident ? "Trace the signal" : "Ask AI Pilot"}</h2>
                   <div className="copilot-start-tasks">
-                    {prompts.map(({ icon: Icon, title, detail, question }) => (
+                    {prompts.map(({ icon: Icon, title, question }) => (
                       <button key={title} onClick={() => { void handleSend(question); }}>
                         <span className="aip-task-icon"><Icon size={17} aria-hidden /></span>
-                        <span><strong>{title}</strong><small>{detail}</small></span>
+                        <span><strong>{title}</strong></span>
                         <ArrowUpRight size={15} aria-hidden />
                       </button>
                     ))}
                   </div>
-                  <p className="mt-3 text-xs leading-relaxed text-muted">App commands: “switch data source to HAI”, “launch sensor offset on LIT101 at -25”, “pause timeline”, “go live”, or “reset simulation”. AI Pilot previews each change before it runs.</p>
-                  <a className="copilot-checklist" href="/api/runbooks/local" target="_blank" rel="noreferrer">
-                    <BookOpen size={14} aria-hidden />
-                    Open the local investigation checklist
-                    <ArrowUpRight size={13} aria-hidden />
-                  </a>
+                  <p className="mt-3 text-xs leading-relaxed text-muted">You can also give commands, e.g. “launch sensor offset on LIT101 at -25”.</p>
                 </div>
               )}
 
@@ -569,10 +557,6 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
                       <>
                         <img src={pilotIcon} alt="" className="aip-message-emblem" />
                         <span className="text-accent/80">AI Pilot</span>
-                        {m.model && m.model !== "evidence-summary" && m.model !== "system" && (
-                          <span className="aip-model-tag" title={m.model}>GEMINI · {m.model.replace("gemini-", "")}</span>
-                        )}
-                        {m.model === "evidence-summary" && <span className="aip-model-tag aip-model-local">LOCAL EVIDENCE</span>}
                         {m.model === "system" && (
                           <span className="rounded bg-surface px-1 text-[10px]">system</span>
                         )}
@@ -608,7 +592,7 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
                           className="flex w-full items-center justify-center gap-2 rounded-lg bg-origin/20 hover:bg-origin/30 border border-origin/60 py-2 text-xs font-bold text-origin transition-all shadow-sm active:scale-[0.98]"
                         >
                           <Wrench size={13} />
-                          <span>{isolating ? "Requesting..." : pendingIsolation ? "Awaiting verification" : `Request simulation isolation: ${m.actionNode}`}</span>
+                          <span>{isolating ? "Requesting..." : pendingIsolation ? "Awaiting verification" : `Isolate ${m.actionNode}`}</span>
                         </button>
                       </div>
                     )}
@@ -665,7 +649,7 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
                     <span className="aip-dot" style={{ animationDelay: "160ms" }} />
                     <span className="aip-dot" style={{ animationDelay: "320ms" }} />
                   </span>
-                  <span>AI Pilot is analyzing the evidence…</span>
+                  <span>Thinking…</span>
                   <button
                     className="ml-auto text-xs underline hover:text-accent"
                     onClick={() => requestRef.current?.abort()}
@@ -709,13 +693,13 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
                 <div role="group" aria-label="Review AI Pilot action" className="mb-2 rounded-xl border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-text">
                   <strong className="block">Review action</strong>
                   <span className="mt-1 block">{pilotAction.label}</span>
-                  <span className="mt-1 block text-muted">{pilotAction.kind === "attack" ? "Local SIM test only. The backend will return a test ID; effects are verified from telemetry." : pilotAction.kind === "reset" ? "Clears the current simulation state; saved incidents remain." : pilotAction.kind === "haiReplay" ? "Controls the recorded dataset replay; no physical equipment is affected." : pilotAction.kind === "timeline" ? "Changes only your local view of the telemetry timeline." : "Changes the data source for this workspace."}</span>
+                  <span className="mt-1 block text-muted">{pilotAction.kind === "attack" ? "Simulation only." : pilotAction.kind === "reset" ? "Saved incidents are kept." : pilotAction.kind === "haiReplay" ? "Recorded data only." : pilotAction.kind === "timeline" ? "Changes only your view." : "Switches the data source."}</span>
                   <div className="mt-2 flex gap-2">
                     <button type="button" disabled={acting || conn !== "live" || (pilotAction.kind !== "timeline" && (!canAdmin || stale || replaying)) || ((pilotAction.kind === "attack" || pilotAction.kind === "reset") && latest?.mode !== "sim") || (pilotAction.kind === "haiReplay" && latest?.mode !== "hai") || (pilotAction.kind === "source" && pilotAction.mode === "hai" && !useLive.getState().status?.hai_available) || (pilotAction.kind === "source" && pilotAction.mode === "live" && !useLive.getState().status?.live_available)} onClick={() => void executeCommand()} className="rounded-md bg-accent px-3 py-1.5 font-semibold text-on-accent disabled:opacity-50">{acting ? "Working…" : "Confirm action"}</button>
                     <button type="button" onClick={() => setInput("")} className="rounded-md border border-border px-3 py-1.5">Cancel</button>
                   </div>
-                  {!canAdmin && pilotAction.kind !== "timeline" && <p className="mt-1 text-muted">An administrator session is required for this action.</p>}
-                  {(stale || replaying || conn !== "live") && pilotAction.kind !== "timeline" && <p className="mt-1 text-muted">Return to current live readings before running actions.</p>}
+                  {!canAdmin && pilotAction.kind !== "timeline" && <p className="mt-1 text-muted">Requires an administrator.</p>}
+                  {(stale || replaying || conn !== "live") && pilotAction.kind !== "timeline" && <p className="mt-1 text-muted">Return to live readings first.</p>}
                 </div>
               )}
               {!pilotAction && parsedCommand && parsedCommand.kind !== "ask" && (
@@ -751,7 +735,7 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
                           if (parsedCommand?.kind === "ask") void handleSend(); else void executeCommand();
                         }
                       }}
-                      placeholder="Ask about evidence, candidates, or next checks..."
+                      placeholder="Ask AI Pilot…"
                       className="w-full resize-none border-0 bg-transparent p-0 text-[13.5px] leading-relaxed text-text placeholder:text-muted/60 focus:outline-none focus:ring-0"
                       style={{ minHeight: "22px", maxHeight: "140px" }}
                     />
@@ -788,17 +772,8 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
                   </div>
                 </div>
 
-                {/* Bottom row: Keyboard shortcut badges */}
+                {listening && (
                 <div className="flex items-center gap-2 mt-2 pt-0.5">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-surface border border-border/70 px-2.5 py-0.5 text-[11px] font-mono text-muted select-none">
-                    <span className="font-sans font-bold text-[12px] leading-none">↵</span>
-                    <span className="leading-none">send</span>
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-surface border border-border/70 px-2.5 py-0.5 text-[11px] font-mono text-muted select-none">
-                    <span className="leading-none">Shift+↵</span>
-                    <span className="leading-none">line</span>
-                  </div>
-                  {listening && (
                     <div className="ml-auto flex items-center gap-1.5 rounded-full bg-suspect/10 border border-suspect/25 px-2 py-0.5 text-[11px] font-medium text-suspect">
                       <span className="relative flex h-2 w-2">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-suspect opacity-75" />
@@ -806,8 +781,8 @@ export function CopilotDrawer({ selectedIncident: propIncident }: { selectedInci
                       </span>
                       <span>Listening…</span>
                     </div>
-                  )}
                 </div>
+                )}
               </form>
             </div>
         </div>

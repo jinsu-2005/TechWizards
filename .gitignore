@@ -46,5 +46,12 @@ graphify-out/.graphify_uncached.txt
 graphify-out/cost.json
 graphify-out/2026-*/
 reports/*.log
+*.log
 output/
 tmp/
+*.tsbuildinfo
+graphify-out/.rebuild.lock
+.agents/skills/
+agent/
+data/skills/
+skills-lock.json
